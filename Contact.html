@@ -1,0 +1,209 @@
+<!DOCTYPE HTML PUBLIC>
+<html>
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>WTC Hoppeland</title>
+  
+<style>  
+  {
+   background-color: #B6E7F8;
+   color: #000000;
+   font-family: Arial;
+   font-weight: normal;
+   font-size: 16px;
+   line-height: 1.1875;
+   margin: 0;
+   padding: 0;
+}
+
+</style>
+
+<input type="submit" id="Button1" class="wtc-button" onclick="window.location.href='/index.html';return false;" name="ind " value="🏡 Home" style="position:absolute;left:15px;top:15px;width:92px;height:25px;box-shadow:0 6px 20px rgba(0,0,0,.50);z-index:6;">
+
+
+<style>
+  /* Laat de pagina wel scrollen, maar verberg de scrollbars */
+  html, body { height: 100%; }
+
+  /* Root scroller (Firefox + IE/Edge legacy) */
+  html {
+    overflow-y: auto;
+    -ms-overflow-style: none;   /* IE/Edge legacy */
+    scrollbar-width: none;      /* Firefox */
+  }
+
+  /* Body: horizontaal verbergen, verticaal scrollen zonder balk */
+  body {
+    
+    overflow-x: hidden;         /* geen horizontale balk */
+    overflow-y: auto;           /* wl verticaal kunnen scrollen */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Chrome / Safari / nieuwe Edge */
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    background: transparent;
+  }
+</style>
+
+</head>
+
+<body>
+
+ <!-- Contactformulier (centraal)-->
+
+<style>
+  .contact-wrap{max-width:480px;margin:5px auto 60px; padding:20px; background:#ffffffcc; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.50);}
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr; gap:12px;}
+  .contact-grid .full{grid-column:1 / -1;}
+  .contact-wrap h2{margin:0 0 10px 0; font: 100 22px/1.2 Arial, sans-serif; color:#1f2937}
+  .contact-wrap label{font: 600 13px/1.4 Arial, sans-serif; color:#111827; display:block; margin-bottom:4px}
+  .contact-wrap input, .contact-wrap textarea{width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; font: 12px Arial, sans-serif}
+  .contact-wrap textarea{min-height:120px; resize:vertical}
+  .contact-wrap button{padding:10px 14px; border:0; border-radius:10px; font:600 14px Arial; background:#0D6EFD; color:#fff; cursor:pointer}
+  .contact-wrap button:hover{filter:brightness(1.1)}
+  @media (max-width:640px){ .contact-grid{grid-template-columns:1fr} .contact-wrap{margin:420px 10px 40px} }
+</style>
+
+
+<div class="contact-wrap" >
+
+	<div class="spacer">
+		<h2>Contactformulier</h2>
+		<img src="images/Logo.png" id="hoplogo" alt="" width="50" height="50">
+	</div>
+	
+  <form id="contactForm" action="#" method="POST" accept-charset="ISO-8859-1">
+    <div class="contact-grid">
+      <div>
+        <label for="name">Naam</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div>
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email">
+      </div>
+      <div class="full">
+        <label for="street">Adres</label>
+        <input type="text" id="street" name="street" placeholder="Straat + nr">
+      </div>
+      <div>
+        <label for="zip">Postcode</label>
+        <input type="text" id="zip" name="zip">
+      </div>
+      <div>
+        <label for="city">Gemeente</label>
+        <input type="text" id="city" name="city">
+      </div>
+      <div>
+        <label for="phone">Telefoon</label>
+        <input type="text" id="phone" name="phone">
+      </div>
+      <div class="full">
+        <label for="message">Je vraag</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+      <div class="full" style="display:flex; align-items:center">
+		<button type="submit" style="max-height:25px; padding-top:4px ;border-radius:8px ">Versturen</button>
+        <input type="checkbox" id="consent" required>
+        <label for="consent" style="margin:0">Ik ga akkoord met het bewaren van deze gegevens om mijn vraag te beantwoorden.</label>
+      </div>
+    </div>
+  
+  </form>
+</div>
+  
+<!-- minimal submit-to-forms.json patch -->
+
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+  const form = document.querySelector('.contact-wrap form') || document.querySelector('form');
+  if (!form) return;
+
+  function v(fd){ var names = Array.prototype.slice.call(arguments,1);
+    for (const n of names){
+      if (fd.has(n) && String(fd.get(n)).trim()) return String(fd.get(n)).trim();
+    }
+    return '';
+  }
+
+  async function onSubmit(e){
+    e.preventDefault();
+
+    const fd = new FormData(form);
+    const consent = document.getElementById('consent');
+    if (consent && !consent.checked){
+      showMsg("Lid succesvol bijgewerkt ✔️");
+
+      return;
+    }
+
+    const payload = {
+      action: 'submitForm',
+      name:  v(fd,'name','naam','fullname'),
+      email: v(fd,'email','e-mail'),
+      phone: v(fd,'phone','tel','telefoon','gsm'),
+      street:v(fd,'street','straat'),
+      zip:   v(fd,'zip','postcode','pc'),
+      city:  v(fd,'city','gemeente','stad'),
+      message: v(fd,'message','msg','bericht')
+    };
+
+    if (!payload.name || !payload.message){
+		showMsg("Naam en bericht zijn verplicht. ✔️");
+      return;
+    }
+
+    try{
+      const res = await fetch('contact.php?action=submitForm', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json'},
+        credentials:'same-origin',
+        body: JSON.stringify(payload)
+      });
+
+      const j = await res.json().catch(()=>null);
+
+      if (!res.ok || !j || j.ok !== true){
+        const msg = (j && (j.error || j.message)) || ('HTTP '+res.status);
+        throw new Error(msg);
+      }
+
+      // Automatische download van Forms.txt naar de pc van de gebruiker
+      if (j.txt) {
+        const blob = new Blob([j.txt], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'Forms.txt'; // bestandsnaam in de download
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      showMsg("Uw boodschap werd verzonden !. ✔️");
+      form.reset();
+    }catch(err){
+   	  showMsg("Verzenden mislukt: ' + err.message. ✔️");
+    }
+  }
+
+  form.addEventListener('submit', onSubmit);
+});
+</script>
+
+<link href="WTC.css" rel="stylesheet">
+<link href="contact.css" rel="stylesheet">
+<script src="/WTC/messages.js"></script>
+
+
+</body>
+</html>
