@@ -1,0 +1,197 @@
+
+a {
+    text-decoration: none;
+}
+
+
+h1, .h1
+{
+   font-family: Arial;
+   font-weight: bold;
+   font-size: 32px;
+   text-decoration: none;
+   color: #000000;
+   --color: #000000;
+   background-color: transparent;
+   margin: 0 0 0 0;
+   padding: 0 0 0 0;
+   display: inline-block;
+}
+h2, .h2
+{
+   font-family: Arial;
+   font-weight: bold;
+   font-size: 27px;
+   text-decoration: none;
+   color: #000000;
+   --color: #000000;
+   background-color: transparent;
+   margin: 0 0 0 0;
+   padding: 0 0 0 0;
+   display: inline-block;
+}
+h3, .h3
+{
+   font-family: Arial;
+   font-weight: bold;
+   font-size: 24px;
+   text-decoration: none;
+   color: #000000;
+   --color: #000000;
+   background-color: transparent;
+   margin: 0 0 0 0;
+   padding: 0 0 0 0;
+   display: inline-block;
+}
+h4, .h4
+{
+   font-family: Arial;
+   font-weight: bold;
+   font-size: 21px;
+   font-style: italic;
+   text-decoration: none;
+   color: #000000;
+   --color: #000000;
+   background-color: transparent;
+   margin: 0 0 0 0;
+   padding: 0 0 0 0;
+   display: inline-block;
+}
+h5, .h5
+{
+   font-family: Arial;
+   font-weight: bold;
+   font-size: 19px;
+   text-decoration: none;
+   color: #000000;
+   --color: #000000;
+   background-color: transparent;
+   margin: 0 0 0 0;
+   padding: 0 0 0 0;
+   display: inline-block;
+}
+h6, .h6
+{
+   font-family: Arial;
+   font-weight: bold;
+   font-size: 16px;
+   text-decoration: none;
+   color: #000000;
+   --color: #000000;
+   background-color: transparent;
+   margin: 0 0 0 0;
+   padding: 0 0 0 0;
+   display: inline-block;
+}
+h7, .h7
+{
+   font-family: Arial;
+   font-weight: normal;
+   font-style: italic;
+   font-size: 6px;
+   text-decoration: none;
+   color: #000000;
+   --color: #000000;
+   background-color: transparent;
+   margin: 0 0 0 0;
+   padding: 0 0 0 0;
+   display: inline-block;
+}
+
+
+.spacer{ 
+  display:flex;
+  justify-content:space-between;
+  padding: 1px;
+}
+	
+.CustomStyle
+{
+   font-family: "Courier New";
+   font-weight: bold;
+   font-size: 16px;
+   text-decoration: none;
+   color: #2E74B5;
+   --color: #2E74B5;
+   background-color: transparent;
+}
+body
+
+/* Algemene knopstijl voor de hele site */
+.wtc-button {	
+    border-radius: 6px;
+    background-color: #404EC0;
+    background-image: none;
+	max-height: 22px;
+	min-width: 20px;
+    color: #FFFFFF;
+	font-family: Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 12px;
+    padding:2px 3px 2 px 3px;
+    text-align: center;
+	-webkit-appearance: none;
+    margin: 3px;
+    cursor: pointer;           /* handje bij hover */
+	box-shadow:0 6px 20px rgba(0,0,0,.50);
+}
+
+/* Hover-effect */
+.wtc-button:hover {
+    background-color: #A5D8FF; /* iets donkerder blauw */
+	color: #000000;
+    border-color: #A5D8FF;
+}
+
+/* Focus (met toetsenbord) – toegankelijkheid */
+.wtc-button:focus-visible {
+    outline: 2px solid #0B5ED7;
+    outline-offset: 2px;
+}
+
+.wtc-input {
+	border: 1px solid #3599E4;
+    border-radius: 8px;
+
+	min-width: 50px;
+    background-image: none;
+    color: #000;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 14px;
+    padding: 4px;
+    text-align: left;
+    -webkit-appearance: none;
+    margin: 2px;
+    cursor: pointer;           /* handje bij hover */
+}
+
+/* Algemene statusmeldingen */
+/* basis */
+/* Algemene statusmeldingen */
+.wtc-status {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.wtc-status.ok {
+  color: green;           /* groen */
+}
+
+.wtc-status.error {
+  color: #c62828;           /* rood */
+}
+
+.wtc-status.info {
+  color: #555;              /* neutraal */
+}
+.fade-out {
+    opacity: 1;
+    transition: opacity 0.6s ease;
+}
+.fade-out.hide {
+    opacity: 0;
+}
