@@ -3,6 +3,7 @@ const app = express();
 
 app.use(express.static('public'));
 
-app.listen(4000, () => {
-  console.log('Website draait op http://localhost:4000');
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server draait op poort ${PORT}`);
 });
