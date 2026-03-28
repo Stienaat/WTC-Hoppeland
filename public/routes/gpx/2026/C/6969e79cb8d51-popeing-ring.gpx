@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1"
+     creator="Clubroutes"
+     xmlns="http://www.topografix.com/GPX/1/1">
+
+<trk>
+  <name>Nieuwe route</name>
+  <trkseg>
+    <trkpt lat="50.864547" lon="2.718044"></trkpt>
+    <trkpt lat="50.865062" lon="2.720404"></trkpt>
+    <trkpt lat="50.865143" lon="2.722078"></trkpt>
+    <trkpt lat="50.864547" lon="2.727915"></trkpt>
+    <trkpt lat="50.863328" lon="2.73388"></trkpt>
+    <trkpt lat="50.862488" lon="2.735983"></trkpt>
+    <trkpt lat="50.855039" lon="2.745338"></trkpt>
+    <trkpt lat="50.854199" lon="2.74551"></trkpt>
+    <trkpt lat="50.853305" lon="2.74521"></trkpt>
+    <trkpt lat="50.852031" lon="2.744137"></trkpt>
+    <trkpt lat="50.846233" lon="2.735167"></trkpt>
+    <trkpt lat="50.845122" lon="2.732678"></trkpt>
+    <trkpt lat="50.844797" lon="2.730747"></trkpt>
+    <trkpt lat="50.844526" lon="2.72843"></trkpt>
+    <trkpt lat="50.844417" lon="2.722808"></trkpt>
+    <trkpt lat="50.844824" lon="2.717615"></trkpt>
+    <trkpt lat="50.845772" lon="2.71504"></trkpt>
+    <trkpt lat="50.848548" lon="2.709889"></trkpt>
+    <trkpt lat="50.849849" lon="2.708731"></trkpt>
+    <trkpt lat="50.851014" lon="2.708044"></trkpt>
+    <trkpt lat="50.853601" lon="2.707937"></trkpt>
+    <trkpt lat="50.856676" lon="2.708044"></trkpt>
+  </trkseg>
+</trk>
+</gpx>

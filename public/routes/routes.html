@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clubroutes</title>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Leaflet GPX -->
+<script src="https://unpkg.com/leaflet-gpx@1.7.0/gpx.js"></script>
+
+<!-- Leaflet Draw -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+
+<link rel="stylesheet" href="../WTC.css">
+
+<style>
+body {
+  font-family: system-ui, Arial, sans-serif;
+  margin: 0;
+}
+
+.controls {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin:0px;
+}
+
+.container {
+  display:flex;
+  gap:12px;
+  padding:10px;
+}
+
+#map {
+  width:900px;
+  height:540px;
+  border-radius:15px;
+}
+
+#list {
+  flex:1;
+  height:500px;
+  overflow:auto;
+  border:1px solid #ddd;
+  padding:10px;
+  border-radius:15px;
+  background-color:#E4DEE6;
+}
+
+.row {
+  margin-bottom:12px;
+}
+
+a.dl {
+  padding:8px 10px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  text-decoration:none;
+}
+</style>
+
+ <link rel="stylesheet" href="../WTC.css">
+ 
+</head>
+
+<body>
+
+<div class="controls">
+
+  <h2 style="margin:10px;">Fietsroutes</h2>
+  <label>Groep:
+	<select id="groepSelect" class="wtc-select">
+      <option value="ALL">Alle</option>
+	</select>
+  </label>
+
+  <label>Zoek:
+    <input id="zoekInput" type="search" placeholder="bv. Poperinge, Kemmel..." class="wtc-select">
+  </label>	
+	<button type="button" id="wisBtn" class="wtc-button" onclick="wisRoute()">Wis route</button>
+
+	<a href="/WTC/leden.html?overlay=1" class="wtc-button" style="padding: 4px 5px 4px 5px">&larr; Terug</a>
+</div>
+
+<div class="container">
+  <div id="map"></div>
+  <div id="list">routes</div>
+</div>
+
+${canOverwrite ? `
+  <button type="button"
+          class="wtc-button"
+          onclick="overwriteRoute(${i})">
+    Opslaan
+  </button>
+` : ''}
+
+<script>
+
+/* =====================================================
+   A. CONFIG + HELPERS
+===================================================== */
+console.log('script start');
+
+// Basispad waar routes.html staat (bv. /WTWouter/routes)
+const BASE_URL = new URL('.', window.location.href).pathname.replace(/\/$/, '');
+
+// Icons-map: ../icons t.o.v. routes.html (bv. /WTWouter/icons)
+const ICON_BASE = new URL('../icons/', window.location.href).pathname;
+
+// DOM
+const listEl = document.getElementById('list');
+const groepSelect = document.getElementById('groepSelect');
+const zoekInput = document.getElementById('zoekInput');
+
+// helpers
+function joinUrl(base, file) {
+  if (!base.endsWith('/')) base += '/';
+  if (file.startsWith('/')) file = file.slice(1);
+  return base + file;
+}
+function escapeXml(str) {
+  return String(str).replace(/[<>&'"]/g, c => ({
+    '<': '&lt;',
+    '>': '&gt;',
+    '&': '&amp;',
+    "'": '&apos;',
+    '"': '&quot;'
+  }[c]));
+}
+function getGpxBaseUrl(meta) {
+  // meta uit routes.json (GPX catalogus)
+  return `${BASE_URL}/gpx/${meta.jaar}/${meta.groep}/`;
+}
+
+function buildWaypointPopup(wp) {
+  return `
+    <div>
+      <strong>${wp.name}</strong><br/><br/>
+
+      <button onclick="renameWaypoint('${wp.id}')">Naam wijzigen</button><br/><br/>
+
+      <button onclick="setWaypointType('${wp.id}','rest')">Rust</button>
+      <button onclick="setWaypointType('${wp.id}','food')">Horeca</button>
+      <button onclick="setWaypointType('${wp.id}','water')">Water</button><br/>
+
+      <button onclick="setWaypointType('${wp.id}','danger')">Gevaar</button>
+      <button onclick="setWaypointType('${wp.id}','climb')">Klim</button>
+      <button onclick="setWaypointType('${wp.id}','sprint')">Sprint</button>
+
+      <br/><br/>
+      <button onclick="deleteWaypoint('${wp.id}')">Verwijder</button>
+    </div>
+  `;
+}
+
+/* =====================================================
+   B. MAP SETUP
+===================================================== */
+let isDrawing = false;
+
+const map = L.map('map').setView([50.85, 2.73], 11);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+const drawnItems = new L.FeatureGroup().addTo(map);
+
+/* =====================================================
+   C. STATE
+===================================================== */
+let routes = [];              // bevat catalog + actieve routes
+let activeRouteIndex = null;  // index in routes[] naar actieve route (niet-catalog)
+
+const ROUTE_STYLE_NORMAL = { color:'#3388ff', weight:4, opacity:0.8 };
+const ROUTE_STYLE_ACTIVE = { color:'#e74c3c', weight:6, opacity:1 };
+
+/* =====================================================
+   D. WAYPOINT ICONS
+===================================================== */
+function makeIcon(file) {
+  return L.icon({
+    iconUrl: joinUrl(ICON_BASE, file),
+    iconSize: [28, 28],
+    iconAnchor: [14, 28],
+    popupAnchor: [0, -28]
+  });
+}
+
+const waypointIcons = {
+  rest:   makeIcon('rest.png'),
+  food:   makeIcon('food.png'),
+  water:  makeIcon('water.png'),
+  danger: makeIcon('danger.png'),
+  climb:  makeIcon('climb.png'),
+  sprint: makeIcon('sprint.png')
+};
+
+/* =====================================================
+   E. DRAW CONTROLS
+===================================================== */
+map.addControl(new L.Control.Draw({
+  draw: {
+    polyline: true,
+    polygon: false,
+    rectangle: false,
+    circle: false,
+    circlemarker: false,
+    marker: false
+  },
+  edit: { featureGroup: drawnItems }
+}));
+
+map.on('draw:drawstart', () => { isDrawing = true; });
+map.on('draw:drawstop',  () => { isDrawing = false; });
+
+map.on(L.Draw.Event.CREATED, e => {
+  drawnItems.addLayer(e.layer);
+
+  // naam vragen
+  let naam = prompt('Naam van de route:', 'Nieuwe route');
+  if (naam) {
+    naam = naam.trim();
+  }
+  if (!naam) {
+    naam = 'Nieuwe route';
+  }
+
+  // route object
+  const r = {
+    type: 'drawn',
+    naam: naam,
+    layer: e.layer,
+    waypoints: []
+  };
+
+  // klik op de lijn maakt hem actief
+  e.layer.on('click', () => {
+    const idx = routes.indexOf(r);
+    if (idx >= 0) setRouteActive(idx);
+    renderList();
+  });
+
+  routes.push(r);
+  activeRouteIndex = routes.length - 1;
+  setRouteActive(activeRouteIndex);
+  renderList();
+});
+
+// waypoint via rechtsklik (NIET tijdens tekenen)
+map.on('contextmenu', e => {
+  if (isDrawing) return;
+  if (activeRouteIndex === null) return;
+
+  const route = routes[activeRouteIndex];
+  if (!route || !route.layer) return;
+
+  const wp = {
+    id: crypto.randomUUID(),
+    lat: e.latlng.lat,
+    lon: e.latlng.lng,
+    name: 'Waypoint',
+    type: 'rest'
+  };
+
+  wp.marker = L.marker(e.latlng, {
+    icon: waypointIcons[wp.type] || waypointIcons.rest
+  }).addTo(map);
+
+  wp.marker.bindPopup(buildWaypointPopup(wp));
+
+  route.waypoints ??= [];
+  route.waypoints.push(wp);
+});
+
+/* =====================================================
+   F. ACTIVE ROUTE HELPERS
+===================================================== */
+function setRouteActive(index) {
+  // reset vorige
+  if (activeRouteIndex !== null) {
+    const prev = routes[activeRouteIndex];
+    if (prev?.layer?.setStyle) prev.layer.setStyle(ROUTE_STYLE_NORMAL);
+  }
+
+  activeRouteIndex = index;
+  const curr = routes[index];
+  if (curr?.layer?.setStyle) curr.layer.setStyle(ROUTE_STYLE_ACTIVE);
+}
+
+function clearActiveRoute() {
+  // verwijder alle actieve (niet-catalog) routes + markers
+  routes.filter(r => r.type !== 'catalog').forEach(r => {
+    if (r.layer) drawnItems.removeLayer(r.layer);
+    if (Array.isArray(r.waypoints)) {
+      r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+    }
+  });
+
+  routes = routes.filter(r => r.type === 'catalog');
+  activeRouteIndex = null;
+}
+
+window.wisRoute = function () {
+  clearActiveRoute();
+  renderList();
+};
+
+function zoomToLayer(layer) {
+  try { map.fitBounds(layer.getBounds()); } catch(e) {}
+}
+
+/* =====================================================
+   G. GPX IMPORT (catalog route)
+===================================================== */
+function parseGpxToActiveRoute(gpxText, metaNaam) {
+  const xml = new DOMParser().parseFromString(gpxText, 'application/xml');
+
+  const trk = xml.querySelector('trk');
+  if (!trk) return null;
+
+  const latlngs = [];
+  trk.querySelectorAll('trkpt').forEach(pt => {
+    const lat = parseFloat(pt.getAttribute('lat'));
+    const lon = parseFloat(pt.getAttribute('lon'));
+    if (!isNaN(lat) && !isNaN(lon)) latlngs.push([lat, lon]);
+  });
+  if (latlngs.length < 2) return null;
+
+  const layer = L.polyline(latlngs, ROUTE_STYLE_NORMAL);
+  drawnItems.addLayer(layer);
+
+  // waypoints
+  const waypoints = [];
+  xml.querySelectorAll('wpt').forEach(wpt => {
+    const lat = parseFloat(wpt.getAttribute('lat'));
+    const lon = parseFloat(wpt.getAttribute('lon'));
+    if (isNaN(lat) || isNaN(lon)) return;
+
+    const type = wpt.querySelector('type')?.textContent || 'rest';
+    const wp = {
+      id: crypto.randomUUID(),
+      lat, lon,
+      name: wpt.querySelector('name')?.textContent || 'Waypoint',
+      type
+    };
+
+    wp.marker = L.marker([lat, lon], {
+      icon: waypointIcons[type] || waypointIcons.rest
+    }).addTo(map);
+
+    wp.marker.bindPopup(buildWaypointPopup(wp));
+    waypoints.push(wp);
+  });
+
+  const r = {
+    type: 'gpx',       // actief geladen GPX
+    naam: metaNaam || (trk.querySelector('name')?.textContent ?? 'GPX route'),
+    layer,
+    waypoints
+  };
+
+  layer.on('click', () => {
+    const idx = routes.indexOf(r);
+    if (idx >= 0) setRouteActive(idx);
+    renderList();
+  });
+
+  return r;
+}
+
+window.loadCatalogRouteById = function(id) {
+  const meta = routes.find(r => r.type === 'catalog' && String(r.id) === String(id));
+  if (!meta) return alert('Route niet gevonden');
+
+  clearActiveRoute();
+
+  // 1) catalog item met coords (opgeslagen getekende route)
+  if (Array.isArray(meta.coords) && meta.coords.length >= 2) {
+    const layer = L.polyline(meta.coords, ROUTE_STYLE_NORMAL);
+    drawnItems.addLayer(layer);
+
+    const r = {
+      type: 'drawn',
+      naam: meta.naam,
+      layer,
+      waypoints: Array.isArray(meta.waypoints) ? meta.waypoints.map(w => ({...w, id: w.id || crypto.randomUUID()})) : [],
+      catalogId: meta.id  // markeer: komt uit catalogus
+    };
+
+    // markers maken
+    r.waypoints.forEach(wp => {
+      wp.marker = L.marker([wp.lat, wp.lon], {
+        icon: waypointIcons[wp.type] || waypointIcons.rest
+      }).addTo(map);
+      wp.marker.bindPopup(buildWaypointPopup(wp));
+    });
+
+    layer.on('click', () => {
+      const idx = routes.indexOf(r);
+      if (idx >= 0) setRouteActive(idx);
+      renderList();
+    });
+
+    routes.push(r);
+    activeRouteIndex = routes.length - 1;
+    setRouteActive(activeRouteIndex);
+    zoomToLayer(layer);
+    renderList();
+    return;
+  }
+
+  // 2) catalog item met GPX bestand
+  if (meta.bestand) {
+    if (String(meta.bestand).includes('/')) {
+      return alert('routes.json fout: bestand mag geen pad bevatten');
+    }
+
+    const url = joinUrl(getGpxBaseUrl(meta), meta.bestand);
+    console.log('GPX URL:', url);
+
+    fetch(url)
+      .then(res => {
+        console.log('HTTP status:', res.status);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(txt => {
+        const active = parseGpxToActiveRoute(txt, meta.naam);
+        if (!active) return alert('GPX bevat geen track');
+
+        active.catalogId = meta.id; // voor delete-route.php (als je dat wil)
+        routes.push(active);
+        activeRouteIndex = routes.length - 1;
+        setRouteActive(activeRouteIndex);
+        zoomToLayer(active.layer);
+        renderList();
+      })
+      .catch(err => {
+        console.error('GPX laden mislukt:', err);
+        alert(err.message);
+      });
+
+    return;
+  }
+
+  alert('Deze catalogusroute heeft geen coords en geen bestand.');
+};
+
+/* =====================================================
+   H. EXPORT GPX (Garmin compatibel)
+===================================================== */
+function exportRouteToGPX(route) {
+  if (!route || !route.layer) return;
+
+  const geo = route.layer.toGeoJSON();
+  const coords = geo.geometry.coordinates || [];
+  if (coords.length < 2) return alert('Route bevat te weinig punten');
+
+  const wpMap = {
+    rest:   { sym: 'Restroom',        type: 'rest' },
+    food:   { sym: 'Food & Drink',    type: 'food' },
+    water:  { sym: 'Drinking Water',  type: 'water' },
+    danger: { sym: 'Danger Area',     type: 'danger' },
+    climb:  { sym: 'Summit',          type: 'climb' },
+    sprint: { sym: 'Flag',            type: 'sprint' }
+  };
+
+  let gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1"
+     creator="Clubroutes"
+     xmlns="http://www.topografix.com/GPX/1/1">
+<trk>
+  <name>${escapeXml(route.naam)}</name>
+  <trkseg>
+`;
+
+  coords.forEach(c => {
+    gpx += `    <trkpt lat="${c[1]}" lon="${c[0]}"></trkpt>\n`;
+  });
+
+  gpx += `  </trkseg>
+</trk>
+`;
+
+  if (Array.isArray(route.waypoints)) {
+    route.waypoints.forEach(wp => {
+      const map = wpMap[wp.type] || {};
+      gpx += `
+<wpt lat="${wp.lat}" lon="${wp.lon}">
+  <name>${escapeXml(wp.name)}</name>
+  <desc>${escapeXml(wp.type)}</desc>
+  ${map.sym  ? `<sym>${map.sym}</sym>`   : ''}
+  ${map.type ? `<type>${map.type}</type>`: ''}
+</wpt>
+`;
+    });
+  }
+
+  gpx += `</gpx>`;
+
+  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (route.naam || 'route') + '.gpx';
+  a.click();
+}
+
+window.exportDrawnRouteToGPX = function(route) {
+  exportRouteToGPX(route);
+};
+
+/* =====================================================
+   I. SAVE DRAWN ROUTE -> upload_do.php (JSON)
+===================================================== */
+window.saveDrawnRoute = function(i) {
+  const r = routes[i];
+  // Naam afdwingen vóór opslaan
+	let name = (r.naam || '').trim();
+	if (!name || name.toLowerCase() === 'nieuwe route') {
+	  name = prompt('Geef een naam voor deze route:', r.naam || 'Zondagrit')?.trim();
+	  if (!name) return; // gebruiker annuleert
+	  r.naam = name;
+	  renderList();
+}
+
+  if (!r || r.type !== 'drawn') return;
+
+  // als hij uit catalogus komt, wil je meestal geen "opslaan als nieuw"
+  // (anders krijg je duplicaten). Als je wél duplicaten wil: haal deze check weg.
+  if (r.catalogId) {
+    alert('Deze route komt al uit de catalogus. Opslaan als nieuw staat nu uit (voorkomt duplicaten).');
+    return;
+  }
+
+  const geo = r.layer.toGeoJSON();
+  const payload = {
+    naam: r.naam,
+    groep: 'TEKEN',
+    coords: geo.geometry.coordinates.map(c => [c[1], c[0]]),
+    waypoints: (r.waypoints || []).map(wp => ({
+      lat: wp.lat,
+      lon: wp.lon,
+      name: wp.name,
+      type: wp.type
+    }))
+  };
+
+  fetch('upload_do.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (!res.ok) return alert(res.error || 'Opslaan mislukt');
+    alert('Route opgeslagen');
+    return reloadCatalog();
+  })
+  .catch(() => alert('Serverfout bij opslaan'));
+};
+
+/* =====================================================
+   J. WAYPOINT ACTIONS (popup)
+===================================================== */
+function findWaypointById(id) {
+  const r = routes[activeRouteIndex];
+  if (!r || !Array.isArray(r.waypoints)) return null;
+  return r.waypoints.find(w => w.id === id);
+}
+
+window.renameWaypoint = function(id) {
+  const wp = findWaypointById(id);
+  if (!wp) return;
+  const name = prompt('Nieuwe naam', wp.name);
+  if (!name) return;
+  wp.name = name;
+  wp.marker.setPopupContent(buildWaypointPopup(wp));
+};
+
+window.setWaypointType = function(id, type) {
+  const wp = findWaypointById(id);
+  if (!wp) return;
+  wp.type = type;
+  wp.marker.setIcon(waypointIcons[type] || waypointIcons.rest);
+  wp.marker.setPopupContent(buildWaypointPopup(wp));
+};
+
+window.deleteWaypoint = function(id) {
+  const r = routes[activeRouteIndex];
+  if (!r || !Array.isArray(r.waypoints)) return;
+  const wp = findWaypointById(id);
+  if (!wp) return;
+  map.removeLayer(wp.marker);
+  r.waypoints = r.waypoints.filter(w => w.id !== id);
+};
+
+	/*******************************************************/
+	
+	window.overwriteRoute = function(i){
+  const r = routes[i];
+  if (!r || !r.catalogId || !r.layer) return;
+
+  if (!confirm('Deze route overschrijven in de catalogus?')) return;
+
+  const geo = r.layer.toGeoJSON();
+
+  const payload = {
+    id: r.catalogId,
+    naam: r.naam,
+    coords: geo.geometry.coordinates.map(c => [c[1], c[0]]),
+    waypoints: (r.waypoints || []).map(wp => ({
+      lat: wp.lat,
+      lon: wp.lon,
+      name: wp.name,
+      type: wp.type
+    }))
+  };
+
+  fetch('update-route.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (!res.ok) {
+      alert(res.error || 'Opslaan mislukt');
+      return;
+    }
+    alert('Route bijgewerkt');
+    reloadCatalog();
+  })
+  .catch(() => alert('Serverfout bij opslaan'));
+};
+
+
+/* =====================================================
+   K. DELETE ACTIVE ROUTE
+===================================================== */
+window.deleteActiveRoute = function(i) {
+  const r = routes[i];
+  if (!r) {
+    alert('Interne fout: route niet gevonden');
+    return;
+  }
+
+  // ============================
+  // 1️⃣ ROUTE KOMT UIT CATALOGUS
+  // ============================
+  // (geldt voor GPX én opgeslagen getekende routes)
+  if (r.catalogId) {
+    if (!confirm('Deze route definitief verwijderen uit de catalogus?')) return;
+
+    fetch('delete-route.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: r.catalogId })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        alert(res.error || 'Verwijderen mislukt');
+        return;
+      }
+
+      // van kaart verwijderen
+      if (r.layer) drawnItems.removeLayer(r.layer);
+      if (Array.isArray(r.waypoints)) {
+        r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+      }
+
+      activeRouteIndex = null;
+
+      // catalogus opnieuw laden
+      return reloadCatalog();
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Serverfout bij verwijderen');
+    });
+
+    return;
+  }
+
+  // ============================
+  // 2️⃣ ALLEEN LOKAAL (niet opgeslagen)
+  // ============================
+  if (r.layer) drawnItems.removeLayer(r.layer);
+  if (Array.isArray(r.waypoints)) {
+    r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+  }
+
+  routes.splice(i, 1);
+  activeRouteIndex = null;
+  renderList();
+};
+
+
+/* =====================================================
+   L. UI RENDER
+===================================================== */
+function renderList() {
+  let html = '';
+
+  // ACTIEF
+  html += '<div class="row"><em>Actief</em></div>';
+
+routes.filter(r => r.type !== 'catalog').forEach(r => {
+  const i = routes.indexOf(r);
+
+  const canDownload  = !!r.layer;
+  const canOverwrite = !!r.catalogId;
+
+  html += `
+    <div class="row">
+      <strong>${r.naam}</strong><br/>
+
+      ${canOverwrite ? `
+        <button type="button"
+                class="wtc-button"
+                onclick="overwriteRoute(${i})">
+          Opslaan
+        </button>
+      ` : ''}
+
+      ${canDownload ? `
+        <button type="button"
+                class="wtc-button"
+				style="padding: 4px 5px 4px 5px"
+                onclick="exportDrawnRouteToGPX(routes[${i}])">
+          Download GPX
+        </button>
+      ` : ''}
+
+      <button type="button"
+              class="wtc-button"
+              onclick="deleteActiveRoute(${i})">
+        Verwijder
+      </button>
+    </div>
+  `;
+});
+
+
+  // CATALOGUS
+  html += '<hr/><div class="row"><em>Catalogus</em></div>';
+
+  const groep = groepSelect ? groepSelect.value : 'ALL';
+  const zoek  = zoekInput ? zoekInput.value.toLowerCase() : '';
+
+  routes
+    .filter(r => r.type === 'catalog')
+    .filter(r => groep === 'ALL' || r.groep === groep)
+    .filter(r => !zoek || (r.naam || '').toLowerCase().includes(zoek))
+    .forEach(r => {
+
+      const hasGpx = !!r.bestand;
+      const hasCoords = Array.isArray(r.coords) && r.coords.length > 1;
+
+      html += `
+        <div class="row">
+          <strong>${r.naam}</strong><br/>
+          <small>
+            ${r.start ?? ''}${r.start && r.afstand_km ? ' – ' : ''}
+            ${r.afstand_km ? r.afstand_km + ' km' : ''}
+            ${(!r.start && !r.afstand_km && hasCoords) ? '(getekend)' : ''}
+          </small><br/>
+
+          <button type="button" class="wtc-button" onclick="loadCatalogRouteById('${r.id}')">Toon</button>
+
+          ${hasGpx ? `
+            <a class="wtc-button" style="padding: 4px 5px 4px 5px" &href="${joinUrl(getGpxBaseUrl(r), r.bestand)}" download>Download GPX</a>
+          ` : ''}
+        </div>
+      `;
+    });
+ 
+  listEl.innerHTML = html;
+}
+
+/* =====================================================
+   M. LOAD CATALOG
+===================================================== */
+function populateGroepen() {
+  const groepen = [...new Set(routes
+    .filter(r => r.type === 'catalog')
+    .map(r => r.groep)
+    .filter(Boolean)
+  )].sort();
+
+  groepSelect.innerHTML =
+    '<option value="ALL">Alle</option>' +
+    groepen.map(g => `<option value="${g}">${g}</option>`).join('');
+}
+
+function reloadCatalog() {
+  return fetch('routes.json')
+    .then(r => r.json())
+    .then(data => {
+      // behoud actieve routes in de array, vervang catalog
+      const active = routes.filter(r => r.type !== 'catalog');
+      const catalog = (data || []).map(x => ({ ...x, type: 'catalog' }));
+      routes = [...active, ...catalog];
+
+      populateGroepen();
+      renderList();
+    });
+}
+
+/* =====================================================
+   N. INIT
+===================================================== */
+groepSelect?.addEventListener('change', renderList);
+zoekInput?.addEventListener('input', renderList);
+
+reloadCatalog();
+</script>
+
+
+
+
+</body>
+</html>
