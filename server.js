@@ -8,10 +8,6 @@ import bcrypt from "bcryptjs";
 import multer from "multer";
 const upload = multer();
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
 
 app.post("/leden", upload.none(), async (req, res) => {
   try {
@@ -139,6 +135,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // Body parsing
 app.use(express.json());
