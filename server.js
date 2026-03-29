@@ -1,12 +1,20 @@
 const express = require('express');
+const { createClient } = require('@supabase/supabase-js');
+
 const app = express();
 
+// Body parsing
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Static files
 app.use(express.static('public'));
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server draait op poort ${PORT}`);
-});
+// Supabase client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 app.post('/api/contact', async (req, res) => {
   try {
@@ -21,12 +29,10 @@ app.post('/api/contact', async (req, res) => {
       consent
     } = req.body;
 
-    // Validatie zoals in je PHP
     if (!name || !message) {
       return res.json({ ok: false, error: 'name/message required' });
     }
 
-    // Opslaan in Supabase forms-tabel
     const { data, error } = await supabase
       .from('forms')
       .insert([
@@ -48,7 +54,6 @@ app.post('/api/contact', async (req, res) => {
       return res.json({ ok: false, error: 'Database insert failed' });
     }
 
-    // Response zoals jouw PHP doet
     return res.json({
       ok: true,
       txt: `
@@ -67,4 +72,9 @@ ${new Date().toISOString().slice(0, 16).replace('T', ' ')}
     console.error(err);
     return res.json({ ok: false, error: 'Server error' });
   }
+});
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server draait op poort ${PORT}`);
 });
