@@ -78,3 +78,17 @@ const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server draait op poort ${PORT}`);
 });
+
+import fs from "fs";
+import path from "path";
+
+app.get("/notice", (req, res) => {
+  const filePath = path.join(process.cwd(), "data", "notice.md");
+
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).send("Kon mededelingen niet laden.");
+    }
+    res.send(data);
+  });
+});
