@@ -5,8 +5,9 @@ import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 
-import multer from "multer";
-const upload = multer(); // nodig om FormData te lezen
+import * as multer from "multer";
+const upload = multer.default();
+
 
 app.post("/leden", upload.none(), async (req, res) => {
   try {
