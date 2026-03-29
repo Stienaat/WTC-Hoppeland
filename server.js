@@ -5,8 +5,9 @@ import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 
-import * as multer from "multer";
-const upload = multer.default();
+import multer from "multer";
+const upload = multer.default ? multer.default() : multer();
+
 
 
 app.post("/leden", upload.none(), async (req, res) => {
