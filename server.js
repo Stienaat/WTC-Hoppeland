@@ -8,6 +8,9 @@ import bcrypt from "bcryptjs";
 import multer from "multer";
 const upload = multer();
 
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 
 app.post("/leden", upload.none(), async (req, res) => {
