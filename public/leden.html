@@ -293,7 +293,7 @@
 <!-- ========================= -->
 <div id="Form1" style="position:absolute;left:400px;top:50px;width:420px;height:480px;border-radius:20px;box-shadow:0 6px 20px rgba(0,0,0,.5);z-index:0;">
 
-	<form id="LoginForm" method="post" action="leden.php" target="_self">
+	<form id="loginForm">
 		<input type="hidden" name="formid" value="form1">
 			<label id="Label8" style="position:absolute;left:20px;top:15px;width:200px;height:38px;line-height:38px;z-index:6;">
 				<h3>Login </h3></br>
@@ -1143,6 +1143,28 @@ fetch("/notice")
     document.getElementById("noticeBox").innerText =
       "Mededelingen konden niet geladen worden.";
   });
+</script>
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (data.ok) {
+    window.location.href = "/leden-zone.html";
+  } else {
+    alert("Login mislukt");
+  }
+});
 </script>
 
 
