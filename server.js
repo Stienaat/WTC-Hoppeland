@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 
 import multer from "multer";
-const upload = multer.default ? multer.default() : multer();
+const upload = multer();
 
 
 
