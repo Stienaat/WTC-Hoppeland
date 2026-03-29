@@ -1180,17 +1180,19 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 });
 </script>
 <script>
+// LOGIN / REGISTRATIE HANDLER
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const actie = document.activeElement.value; // login of registreer
-  const status = document.getElementById("loginStatus");
+  // Welke knop werd ingedrukt?
+  const actie = document.activeElement.value; // "login" of "registreer"
 
+  // Velden ophalen
   const email = document.getElementById("Editbox4").value;
   const password = document.getElementById("Editbox6").value;
 
+  // LOGIN
   if (actie === "login") {
-    // LOGIN
     const res = await fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1205,17 +1207,19 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     if (data.ok) {
       alert("Welkom " + data.naam);
       // later redirect naar ledenzone
+      // window.location.href = "/leden-zone.html";
     } else {
       alert(data.error);
     }
   }
 
+  // REGISTRATIE (nog niet actief)
   if (actie === "registreer") {
-    alert("Registratie nog niet geactiveerd");
-    // later: POST naar /register
+    alert("Registratie is nog niet geactiveerd.");
   }
 });
 </script>
+
 
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
 
