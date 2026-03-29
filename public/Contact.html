@@ -162,7 +162,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     try{
-      const res = await fetch('contact.php?action=submitForm', {
+      const res = await fetch('/api/contact', {
         method:'POST',
         headers:{'Content-Type':'application/json','Accept':'application/json'},
         credentials:'same-origin',
