@@ -982,8 +982,6 @@ async function handlePinUnlock(){
   }
 }
 
-
-
   btnOk && btnOk.addEventListener('click', handlePinUnlock);
 
   logo && logo.addEventListener('dblclick', e => {
@@ -1157,28 +1155,46 @@ fetch("/notice")
       "Mededelingen konden niet geladen worden.";
   });
 </script>
+
 <script>
+// LOGIN / REGISTRATIE HANDLER
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const actie = document.activeElement.value;
 
-  const res = await fetch("/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
+  const email = document.getElementById("Editbox4").value.trim();
+  const password = document.getElementById("Editbox6").value.trim();
 
-  const data = await res.json();
+  if (!email || !password) {
+    alert("Gelieve e-mail en paswoord in te vullen.");
+    return;
+  }
 
-  if (data.ok) {
-    window.location.href = "/leden-zone.html";
-  } else {
-    alert("Login mislukt");
+  if (actie === "login") {
+    const res = await fetch("/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      alert("Welkom " + data.naam);
+    } else {
+      alert(data.error || "Login mislukt.");
+    }
+  }
+
+  if (actie === "registreer") {
+    alert("Registratie nog niet actief.");
   }
 });
 </script>
+
+
+<p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
 
 
 </body>
