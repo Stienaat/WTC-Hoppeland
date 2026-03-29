@@ -1,0 +1,40 @@
+[
+    {
+        "id": "lid_6974aa7748bef4.48602561",
+        "naam": "Koffie Koek",
+        "adres": "Geelsebaan 97",
+        "gemeente": "Kasterlee",
+        "telefoon": "0475 000000",
+        "email": "KK@gmail.com",
+        "wachtwoord": "$2y$10$5TN7Wd8zkrpWiQOMynLlnOolnpOWvyd5wb1zKedhGnaqexjSzrcTS",
+        "reset_hash": "acc9383f2e888737dbc1db2648d0f79bde888e429eb57d475fecda906cb4e990",
+        "reset_expires": 1769349753
+    },
+    {
+        "id": "lid_6976a1cd042b17.64501576",
+        "naam": "Peter Pan",
+        "adres": "Disneystraat 19",
+        "gemeente": "44   Ronse",
+        "telefoon": "0488 111111",
+        "email": "PP@gmail.com",
+        "wachtwoord": "$2y$10$d\/xpVVQ6axj4G35BMXoH.uNpbcXon8rPJVBl\/tJzN.O6e38SgWrBm"
+    },
+    {
+        "id": "lid_6978894ce59ac9.61293372",
+        "naam": "Loe Bas",
+        "adres": "Williestraat 92",
+        "gemeente": "1000 Kobbegem",
+        "telefoon": "0486 328482",
+        "email": "LB@gmail.com",
+        "wachtwoord": "$2y$10$0XCCMXIpeqalEP8bRUDqp.BHVajz0cPlgLejP2J3TStNrEAM1kE.W"
+    },
+    {
+        "id": "lid_697c9d07ea92e1.55328708",
+        "naam": "Made Lief",
+        "adres": "bloemstraat 250",
+        "gemeente": "9999 Rozegem",
+        "telefoon": "0378 222222",
+        "email": "ML@gmail.com",
+        "wachtwoord": "$2y$10$fPtjAp5eg6X.Lz\/MHp2JAuWaEX08Lf6JGYktoTu6Gfy6NSlfBS0da"
+    }
+]
