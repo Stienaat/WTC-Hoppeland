@@ -5,9 +5,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>WTC Hoppeland</title>
+  <title>WTC Hoppeland</title>
   
+
+
 <input type="submit" id="Button1" class="wtc-button" onclick="window.location.href='/index.html';return false;" name="ind " value="🏡 Home" style="position:absolute;left:15px;top:15px;width:92px;height:25px;box-shadow:0 6px 20px rgba(0,0,0,.50);z-index:6;">
+
 
 <style>
   /* Laat de pagina wel scrollen, maar verberg de scrollbars */
@@ -184,6 +187,30 @@ window.addEventListener('DOMContentLoaded', function () {
   form.addEventListener('submit', onSubmit);
 });
 </script>
+<script>
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (data.ok) {
+    // later kan je hier een echte ledenzone tonen
+    alert("Welkom " + data.naam);
+  } else {
+    alert(data.error);
+  }
+});
+</script>
+
 
 <link href="WTC.css" rel="stylesheet">
 <link href="Contact.css" rel="stylesheet">
