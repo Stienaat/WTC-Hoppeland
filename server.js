@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";              // ← JE MIST DEZE IMPORT!
 import { fileURLToPath } from "url";
 import bcrypt from "bcryptjs";
 import multer from "multer";
@@ -10,6 +11,11 @@ const upload = multer();
 // Fix voor __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Express setup (MOET BOVEN ALLE ROUTES STAAN)
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // =====================================
 // NOTICE OPHALEN (uit notice.md)
@@ -24,12 +30,6 @@ app.get("/notice", (req, res) => {
     res.send(data);
   });
 });
-
-
-// Express setup
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 // =====================================
 // NOTICE OPSLAAN (admin)
@@ -46,7 +46,9 @@ app.post("/notice", upload.none(), (req, res) => {
   });
 });
 
+// Static files (MOET ONDER DE ROUTES STAAN)
 app.use(express.static(path.join(__dirname, "public")));
+
 
 // Supabase client
 const supabase = createClient(
