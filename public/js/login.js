@@ -1,11 +1,3 @@
-/************************************************************
- * 0) HULPFUNCTIES
- ************************************************************/
-function setStatus(el, msg, type = "error") {
-  if (!el) return;
-  el.textContent = msg;
-  el.style.color = type === "error" ? "#b91c1c" : "green";
-}
 
 /************************************************************
  * 1) ADMIN UI OPEN / CLOSE
