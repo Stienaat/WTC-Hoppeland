@@ -1,0 +1,659 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>leden</title>
+
+<link href="leden.css" rel="stylesheet">
+<link href="WTC.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- Home-knop verbeterd -->
+	<input
+	  type="submit" id="ButtonHome" class="wtc-button"
+	  onclick="window.location.href='./index.html';return false;"
+	  name="Form"
+	  value="🏡 Home"
+	  style="position:absolute;left:15px;top:10px;width:92px;height:22px;
+			 box-shadow:0 6px 20px rgba(0,0,0,.50);z-index:5;">
+			 
+<!-- ========================= -->
+<!-- NOTICE “BESTE LEDEN”    Notice   ✅ -->
+<!-- ========================= -->
+<div id="Text3" style="position:absolute;left:750px;top:10px;width:500px;z-index:0;">
+	<h2>&emsp;Mededelingen.</h2>
+	<div id="noticeBox" class="notice-box" contenteditable="false"></div>
+</div>
+
+	
+<!-- ========================= -->
+<!-- LOGIN / REGISTRATIE CARD  ✅ --> 
+<!-- ========================= -->
+<div id="Form1" style="position:absolute;left:400px;top:50px;width:420px;height:480px;border-radius:20px;box-shadow:0 6px 20px rgba(0,0,0,.5);z-index:0;">
+
+	<form id="loginForm">
+		<input type="hidden" name="formid" value="form1">
+			<label id="Label8" style="position:absolute;left:20px;top:15px;width:200px;height:38px;line-height:38px;z-index:6;">
+				<h3>Login </h3></br>
+				<h3>Registratie</h3>
+			</label>
+
+<div id="hoplog" style="position:absolute;left:270px;top:11px;width:122px;height:121px;z-index:2;">
+        <img src="images/Logo.png" id="hoplogo" alt="" width="122" height="121">
+</div>
+
+	<!-- ALLEEN BIJ REGISTRATIE -->
+	<div id="regFields" class="reg-only">
+		<input type="text" id="Editbox1" style="top:190px;"
+			   name="name" value=""  placeholder="Naam en Voornaam" spellcheck="false">
+
+		<input type="text" id="Editbox2" style="top:130px;"
+			   name="address" value=""  placeholder="Straat, nr bus " spellcheck="false">
+
+		<input type="text" id="Editbox3" style="top:170px;"
+			   name="city" value=""  placeholder="Postcode + Gemeente" spellcheck="false">
+		
+		<input type="text" id="Editbox5" style="top:250px;"
+			   name="phone" value=""  placeholder="Telefoon/GSM" spellcheck="false">
+		<input type="paswoord" id="Editbox7" style="top:330px; "
+			   name="code_repeat; " value=""  placeholder="Herhaal paswoord * * * * * * 6 tekens" spellcheck="false">	   
+	</div>	  
+		<input type="email" id="Editbox4" class="log-only"
+			   style="top:210px; font-size: 18px ;"
+			   name="email" value="" required placeholder="E-mail" spellcheck="false">
+		<input type="paswoord" id="Editbox6" class="log-only"
+			   style="top:290px;"
+			   name="code" value="" required placeholder="Paswoord             * * * * * * 6 tekens" spellcheck="false">
+
+	<!-- KNOPPEN => LOGIN REGISTREER-->
+	   
+		<input type="submit" id="Button1" class="wtc-button"
+			   name="actie"
+			   value="login"
+			   style="position:absolute;left:40px;top:370px;width:150pxz-index:9;">
+
+		<input type="submit" id="Button2" class="wtc-button"
+			   name="actie"
+			   value="registreer"
+			   style="position:absolute;left:230px;top:370px;width:150px;z-index:10;">
+
+	<!-- KNOPPEN ONDERAAN / geen lid?-->
+		
+		<input type="button" id="GoRegister" class="wtc-button" value="Geen lid?"
+			   style="position:absolute;left:40px;top:420px;color:white;z-index:11;">
+			   			   
+			<script>
+				document.getElementById('GoRegister').addEventListener('click', function () {
+				// image verbergen
+				const img = document.getElementById('hoplogo');
+				if (img) img.style.display = 'none';
+
+				// hier blijft jouw bestaande actie werken (als je die al had via JS)
+				// of voeg hier extra acties toe
+			  });
+			</script>		   		   
+			
+		<input type="button" id="GoLogin" class="wtc-button" value="Reeds lid?"
+			   style="position:absolute;left:40px;top:420px;color:white;z-index:11;">
+			   
+			   <script>
+				document.getElementById('GoLogin').addEventListener('click', function () {
+				// image tonen
+				const img = document.getElementById('hoplogo');
+				if (img) img.style.display = 'flex';
+			 });
+			</script>		
+			   			
+	<input type="submit"  id="Forgotlink"  class="wtc-button"  onclick="window.location.href='./paswoord_vergeten.php';return false;"
+		name="btn"
+		value="Paswoord vergeten?"
+		style="position:absolute;left:230px;top:420px;z-index:11">
+
+	</form>
+</div>
+	
+<!-- ========================= -->
+<!-- FASE 1 PIN   ✅ -->
+<!-- ========================= -->
+<div id="Image1" style="position:absolute; left:1200px; top:10px; width:40px; height:40px; z-index:1000;">
+	<img src="images/Logo.png" id="hoplogo" alt="" width="40" height="40">
+</div>
+
+<!-- ========================= -->			
+<!-- ADMIN KAART FASE 1 , ADMIN LOGIN-->
+<!-- ========================= -->
+<div id="adminLogin" class="adminCardF1">    	
+		<div class="overlay-row">
+			<h2>Beheerder</h2>
+			<button type="button" id="btnCloseAdmin" class="wtc-button">Sluiten</button>
+		</div>
+		<div class="overlay-row">
+			<input type="password" id="pinInput" class="wtc-input" style="font-size:1.2em;
+			" name="admin_pin" ;maxlength="6" autocomplete="off";  placeholder="PIN-code:  ******"></input>
+			<button type="button" class="wtc-button" id="btnOk">Ontgrendel</button>
+		</div>
+		<div id="pinError" class="wtc-status;"></div>
+</div>
+
+<!-- ========================= -->
+<!-- ADMIN KAART FASE 2: PANEL NA ONTGRENDELEN -->
+<!-- ========================= -->
+<!-- 2 kolommen x 3 rijen (6 vakken) -->
+
+<div id="adminFase2" class="adminFase2" style="z-index:9">
+	<div class="cell" id="BEHEER">
+		<div class="overlay-row">
+			<h3>Beheer</h3>
+			<button type="button" id="btnCloseAdmin2" class="wtc-button">Sluiten</button>
+		</div>
+		<div class="overlay-row">
+			<div class="text-kader" style="font-size: 15px; width:120px">Mededeling -----> :</div>
+			<div>
+				<button type="button" id="btnEditNotice"  class="wtc-button" style="min-width:70px">Edit</button>
+				<button type="button" id="btnNoticeClose" class="wtc-button" style="min-width:70px">Opslaan</button>
+			</div>
+					
+		</div>	
+		<div class="overlay-row" >
+			<button type="button" class="wtc-button" onclick= "window.location.href='./leden-admin.php'">Leden-config</button>
+			<button type="button" class="wtc-button" onclick= "window.location.href='./signups-admin.php'">Events-config</button>
+			<button type="button" class="wtc-button" onclick= "window.location.href='./routes/routes.html'">Fietsroutes</button>
+		</div>		
+		<div class="overlay-row" >
+			<button type="button" class="wtc-button" onclick= "window.location.href='./leden-dashboard.php?overlay=1'">Leden pagina</button>
+			<button type="button" class="wtc-button" onclick= "window.location.href='./kalender.php'">Kalender</button>	
+			<button type="button" class="wtc-button" onclick= "window.location.href='./shop.html'">Shop Openen</button>	
+		</div>
+				
+		<div class="overlay-row" >
+			<button type="button" class="wtc-button"  onclick= "window.location.href='./help.html'">Help</button>	
+		</div>
+		<!-- knop pincode wijzigen -->		
+		<div class="overlay-row" style="margin-top:3px;">
+			<button type="button" id="btnPinChange" class="wtc-button" >Pin-code wijzigen </button>
+		<div id="btnMedSave" class="wtc-status" ;></div>
+		</div>	
+	</div>
+			
+	<div class="cell" id="not-format"> <h5> Notice formatteren! </h5>
+		<div style=" font-size: 14px; line-height: 0.4";>
+			<pre># --------        <h5> Opmaak</h5></pre>
+			<pre>## -------         <h6>Notice<h6></pre>
+			<pre>- --------         <a>- Lijsten</a></pre>
+			<pre>**------**         <strong>Vet</strong></pre>
+			<pre>*--------*         <em>cursief</em></pre>
+			<pre>__--------__       <u>onderlijnd</u></pre>
+			<pre>[lg]------[/lg]    <a>Grote tekst</a></pre>
+			<pre>[sm]------[/sm]    <a>kleine tekst</a></pre>
+		</div>	
+	</div>
+	
+	<div class="cell" id="Formatteren"> <h3 style="margin: -4px;">Configuratie.</h3><br/><br/>
+		<div class="overlay-row">			
+			<label for="cfgOrgName">Naam</label>
+			<input type="text" class= "wtc-input" id="cfgOrgName" placeholder="bv. WTC Voorbeeld";>		 
+		</div>		
+		<div class="overlay-row">		
+			<label for="cfgIban">IBAN</label>
+				<input type="text" class= "wtc-input" id="cfgIban" placeholder="BE12 3456 7890 1234">
+		</div>  
+		<div class="overlay-row">		
+			<label for="cfgBic">BIC</label>
+				<input type="text" class= "wtc-input" id="cfgBic" placeholder="GEBABEBB">
+		</div>  		
+		<div class="overlay-row">		
+			<label for="cfgMed">Mededeling</label>
+				<input type="text" class= "wtc-input" id="cfgMed" placeholder="EVT{eventId}-LID{memberId">
+		</div>  
+		<div class="overlay-row">
+			<button type="button" id="btnSaveConfig" class="wtc-button" >Opslaan</button>
+		<div id="confSaveStatus" class="wtc-status"></div>
+		</div>
+	</div>
+	
+	<div class="cell" id="Fietsroutes"> <h3>Fietsroute Uploaden</h3> 			
+		<div>			
+			<input type="text" id="routeNaam" class="text-kader" name="naam" maxlength="100" required placeholder="Naam">
+		</div>
+		<div class="overlay-row">	
+			<select id="routeGroep" class="text-kader" style="height: 28px" name="groep" required>
+				<option value="A">Groep A</option>
+				<option value="B">B</option>
+				<option value="C">C</option>
+			</select>
+			<input type="text" id="routeAfstand" class="text-kader"  step="1"  name="afstand" required placeholder="Afstand   Km" >
+		</div>
+		<div>
+			<input type="text" id="routeStart" class="text-kader"  name="start" required placeholder="Startplaats">
+		</div>
+		<div class="overlay-row">   
+			<input type="file" id="routeFile" name="gpxfile" accept=".gpx" required style="display:none;">
+
+			<button type="button" id="btnChooseFile" style="border: 1px solid #3599E4; border-radius: 8px; font-size: 14px; padding:5px">Kies GPX‑bestand ------------></button>
+			<span id="fileName" style="margin-left:10px; font-size:14px;"></span>
+
+			<button type="submit" id="btnUploadRoute" class="wtc-button">Uploaden</button>
+		</div>
+
+			<div id="routeError" class="wtc-status"></div>		
+	</div>
+	<div class="cell">Reserve</div>    
+	<div class="cell">Reserve</div>  
+</div>	
+
+		<script>
+		document.getElementById('btnChooseFile').addEventListener('click', function () {
+			document.getElementById('routeFile').click();
+		});
+
+		document.getElementById('routeFile').addEventListener('change', function () {
+			const file = this.files[0];
+			document.getElementById('fileName').textContent = file ? file.name : '';
+		});
+		</script>
+
+
+	<!-- PINCODE WIJZIGEN POPUP -->
+<div id="pinChangeOverlay" style="display:none;" aria-hidden="true">
+  <div class="overlay-card">
+	<div class="overlay-row" style="padding-bottom: 20px;"><h3>Pincode wijzigen</h3>
+		<button type="button" id="btnClosePinChange" class="wtc-button">Sluiten</button>
+    </div>
+      <div class="overlay-row">
+        <label for="oldPinInput">Huidige PIN</label>
+        <input type="password" id="oldPinInput" class="wtc-input" maxlength="6">
+      </div>
+
+      <div class="overlay-row">
+        <label for="newPinInput">Nieuwe PIN (6 cijfers)</label>
+        <input type="password" id="newPinInput" class="wtc-input" maxlength="6">
+      </div>
+
+      <div class="overlay-row">
+        <label for="newPinInput2">Herhaal nieuwe PIN</label>
+        <input type="password" id="newPinInput2" class="wtc-input" maxlength="6">
+      </div>
+
+      <div class="overlay-row">
+        <button type="button" id="btnChangeCode" class="wtc-button">Pincode wijzigen
+        </button>
+      </div>
+
+     <div id="pinError2" class="wtc-status"></div>
+    
+  </div>
+</div>
+
+<script>
+
+  'use strict';
+
+/************************************************************
+ * CORE HELPERS
+ ************************************************************/
+async function ajax(url, options = {}) {
+  options.headers = {
+    ...(options.headers || {}),
+    'Accept': 'application/json'
+  };
+
+  const res = await fetch(url, options);
+  const ct = res.headers.get('content-type') || '';
+
+  if (!ct.includes('application/json')) {
+    const text = await res.text();
+    throw new Error('Server returned non-JSON:\n' + text.slice(0, 200));
+  }
+
+  return res.json();
+} 
+
+ /*********Helper meldingen ***********/
+ 
+	function setStatus(el, message = '', type = 'info'){
+  if (!el) return;
+
+  el.textContent = message;
+  el.classList.remove('ok', 'error', 'info');
+  el.classList.add(type);
+}
+	
+
+  /************************************************************
+   * 0) BASIS DOM
+   ************************************************************/
+  const logo         = document.getElementById('Image1');
+  const adminOverlay = document.getElementById('adminOverlay');
+ 
+  
+  const API_NOTICE = './notice_api.php';
+  const ROUTES_API = '/WTC/routes/upload_do.php';
+  
+  
+ 
+  /************************************************************
+   * 2) NOTICE
+   ************************************************************/
+  const box    = document.getElementById('noticeBox');
+ 
+  const btnEditNotice  = document.getElementById('btnEditNotice');
+  const btnNoticeClose = document.getElementById('btnNoticeClose');
+  const btnMedSave = document.getElementById('btnMedSave');
+
+  
+ function setRaw(text){
+    if (box) box.dataset.raw = String(text || '');
+  }
+  function getRaw(){
+    return box ? (box.dataset.raw || '') : '';
+  }
+function fmt(text){
+  const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+  const lines = String(text||'')
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .map(l => l.trim());
+
+  let html = '';
+  let inList = false;
+
+ const R = {
+    lg:   new RegExp("\\[lg\\]\\s*([\\s\\S]*?)\\s*\\[\\/lg\\]", "g"),
+	
+	sm:   new RegExp("\\[sm\\]\\s*([\\s\\S]*?)\\s*\\[\\/sm\\]", "g"),
+		
+	bold: new RegExp("\\*\\*\\s*([\\s\\S]+?)\\s*\\*\\*", "g"),
+	em:   new RegExp("\\*\\s*([\\s\\S]+?)\\s*\\*", "g"),   
+	u:    new RegExp("__\\s*([\\s\\S]+?)\\s*__", "g")
+	
+	};
+	
+ const pushLine = (raw) => {let body = esc(raw);
+   
+   let cls = 'n-line';
+
+    if (body.startsWith('##')) {
+      cls = 'n-h2';
+      body = body.replace(/^##\s*/, '');
+    } else if (body.startsWith('#')) {
+      cls = 'n-h1';
+      body = body.replace(/^#\s*/, '');
+    }
+
+    body = body.replace(R.lg, '<span class="n-lg">$1</span>');
+    body = body.replace(R.sm, '<span class="n-sm">$1</span>');
+    body = body.replace(R.bold, '<strong>$1</strong>');
+    body = body.replace(R.em, '<em>$1</em>');
+    body = body.replace(R.u, '<u>$1</u>');
+
+    html += `<div class="${cls}">${body || '&nbsp;'}</div>`;
+  };
+
+  for (let line of lines) {
+
+    const m = /^\-\s*(.*)$/.exec(line);
+    if (m) {
+      if (!inList) {
+        html += '<ul class="n-ul">';
+        inList = true;
+      }
+
+      let item = esc(m[1]);
+      item = item.replace(R.bold, '<strong>$1</strong>');
+      item = item.replace(R.em, '<em>$1</em>');
+      item = item.replace(R.u, '<u>$1</u>');
+
+      html += `<li>${item || '&nbsp;'}</li>`;
+      continue;
+    }
+
+    if (inList) {
+      html += '</ul>';
+      inList = false;
+    }
+
+    pushLine(line);
+  }
+
+  if (inList) html += '</ul>';
+
+  return html;
+}
+
+
+
+
+
+  function render(){
+    if (!box) return;
+    box.innerHTML = fmt(getRaw());
+  }
+
+  function loadNotice(){
+    if (!box) return;
+    setStatus(status, 'Tekst laden…', 'info');
+    fetch(API_NOTICE + '?action=getNotice', { cache:'no-store' })
+      .then(r => r.json())
+      .then(d => {
+        if (d.ok){
+          setRaw(d.text || '');
+          render();
+          setStatus('');
+        }
+      })
+      .catch(()=>setStatus('Fout bij laden.'));
+  }
+
+  function startEditNotice(){
+    if (!box) return;
+    box.innerText = getRaw();
+    box.contentEditable = 'true';
+    box.focus();
+  }
+
+async function saveNotice(){
+  if (!box) return;
+ 
+  if (noticeBox.contentEditable !== "true") return;
+
+  const adminStatus = document.getElementById('admin-status');
+
+  const raw = (box.innerText || '').replace(/\r\n?/g, '\n');
+  setRaw(raw);
+  box.setAttribute('contenteditable','false');
+  
+  render();
+  
+  const fdNotice = new FormData();
+  fdNotice.append('action', 'setNotice');
+  fdNotice.append('text', raw);
+
+  setStatus(btnMedSave, 'Bewaren…', 'info');
+
+  try {
+    const j = await ajax(API_NOTICE, {
+      method: 'POST',
+      body: fdNotice
+    });
+
+    if (!j.ok){
+      setStatus(btnMedSave, 'Kon tekst niet bewaren.', 'error');
+      return;
+    }
+
+    setStatus(btnMedSave, '✔ Opgeslagen', 'ok');
+    box.setAttribute('contenteditable','false');
+	
+	
+
+  } catch (e){
+    console.error(e);
+    setStatus(adminStatus, 'Technische fout bij bewaren.', 'error');
+  }
+}
+
+
+  btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
+  btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
+	
+
+	/************************************************************
+ * 3) ADMIN CONFIG (naam + IBAN + BIC + Mededeling)
+ ************************************************************/
+ 
+function initAdminConfigCard(){
+
+  const elName  = document.getElementById('cfgOrgName');
+  const elIban  = document.getElementById('cfgIban');
+  const elBic  = document.getElementById('cfgBic');
+  const elMed  = document.getElementById('cfgMed');
+  const btnSave = document.getElementById('btnSaveConfig');
+  const elStat  = document.getElementById('configSaveStatus');
+
+  const confSaveStatus  = document.getElementById('confSaveStatus');
+
+  if (!elName || !elIban || !elBic || !elMed ||!btnSave) return;
+  
+
+  // Laden
+  (async () => {
+    try {
+      const j = await ajax('api_admin_config.php');
+      if (j?.ok && j.config){
+        elName.value = j.config.vereniging?.naam || '';
+        elIban.value = j.config.vereniging?.iban || '';
+		elBic.value = j.config.vereniging?.bic || '';
+		elMed.value = j.config.vereniging?.med || '';
+      }
+    } catch (e){
+      setStatus(confSaveStatus, 'Kon configuratie niet laden.', 'error');
+    }
+  })();
+
+  // Opslaan
+	 btnSave.addEventListener('click', async () => {
+	 setStatus(confSaveStatus, 'Naam en bestand zijn verplicht.', 'error');
+
+  try {
+    const j = await ajax('api_admin_config.php', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        vereniging: {
+          naam: elName.value.trim(),
+          iban: elIban.value.trim(),
+		  bic: elBic.value.trim(),
+		  med: elMed.value.trim()
+        }
+      })
+    });
+
+    if (!j.ok){
+	   setStatus(confSaveStatus, 'Niet opgeslagen.', 'error');
+      return;
+    }
+
+	setStatus(confSaveStatus,'✔ Opgeslagen.','ok');
+  } catch (e){
+    console.error(e);
+   	   setStatus(confSaveStatus, 'Technische fout!', 'error');
+  }
+});
+}
+
+/************************************************************
+ * 4) ROUTES
+ ************************************************************/
+	const btnUploadRoute = document.getElementById('btnUploadRoute');
+	const btnCloseRoute  = document.getElementById('btnCloseRoute');
+	const routeOverlay  = document.getElementById('routeOverlay');
+	const routeError    = document.getElementById('routeError');
+
+function closeRouteOverlay(){
+	  routeOverlay && routeOverlay.classList.remove('show');
+	}
+
+	if (btnCloseRoute){
+	  btnCloseRoute.addEventListener('click', closeRouteOverlay);
+	}
+
+	if (btnUploadRoute){
+	  btnUploadRoute.addEventListener('click', async () => {
+
+    const naam  = document.getElementById('routeNaam')?.value.trim();
+    const groep = document.getElementById('routeGroep')?.value;
+	const afstand = document.getElementById('routeAfstand').value.trim();
+	const start   = document.getElementById('routeStart').value.trim();
+    const file  = document.getElementById('routeFile')?.files[0];
+	
+ 
+
+    if (!naam || !file){
+	  setStatus(routeError, 'Naam en bestand zijn verplicht.', 'error');
+	  return;
+    }
+
+	const fd = new FormData();
+	fd.append('naam', naam);
+	fd.append('groep', groep);
+	fd.append('afstand', afstand);
+	fd.append('start', start);
+	fd.append('gpxfile', file);
+	
+    try {
+      const res = await fetch('/WTC/routes/upload_do.php', {
+        method: 'POST',
+        body: fd
+      });
+
+      if (!res.ok){
+        setStatus(routeError,' Upload mislukt.','error');
+        return;
+      }
+
+      closeRouteOverlay();
+      setStatus(routeError, '✔ Route toegevoegd.', 'ok');
+
+    } catch (e){
+      console.error(e);
+      setStatus(routeError, 'Technische fout bij upload.', 'error');
+    }
+  });
+}
+	
+document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('overlay') === '1') {
+        // wacht tot ALLE scripts geladen zijn
+        setTimeout(() => {
+            if (typeof openAdminPhase2 === 'function') {
+                openAdminPhase2();
+            }
+        }, 50);
+    }
+});
+</script>
+<script>
+fetch("/notice")
+  .then(r => r.text())
+  .then(txt => {
+    document.getElementById("noticeBox").innerText = txt;
+  })
+  .catch(() => {
+    document.getElementById("noticeBox").innerText =
+      "Mededelingen konden niet geladen worden.";
+  });
+</script>
+
+
+<p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
+<script src="/js/login.js"></script>
+
+</body>
+</html>
+
