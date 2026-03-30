@@ -11,6 +11,35 @@ const upload = multer();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// =====================================
+// NOTICE OPHALEN (uit notice.md)
+// =====================================
+app.get("/notice", (req, res) => {
+  const filePath = path.join(__dirname, "data", "notice.md");
+
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).send("Kon mededelingen niet laden.");
+    }
+    res.send(data);
+  });
+});
+
+// =====================================
+// NOTICE OPSLAAN (admin)
+// =====================================
+app.post("/notice", upload.none(), (req, res) => {
+  const { text } = req.body;
+  const filePath = path.join(__dirname, "data", "notice.md");
+
+  fs.writeFile(filePath, text, "utf8", (err) => {
+    if (err) {
+      return res.json({ ok: false });
+    }
+    return res.json({ ok: true });
+  });
+});
+
 // Express setup
 const app = express();
 app.use(express.json());
@@ -100,38 +129,6 @@ app.post("/register", upload.none(), async (req, res) => {
     return res.json({ ok: false, error: "Serverfout" });
   }
 });
-
-
-// =====================================
-// NOTICE OPHALEN (uit notice.md)
-// =====================================
-app.get("/notice", (req, res) => {
-  const filePath = path.join(__dirname, "data", "notice.md");
-
-  fs.readFile(filePath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).send("Kon mededelingen niet laden.");
-    }
-    res.send(data);
-  });
-});
-
-// =====================================
-// NOTICE OPSLAAN (admin)
-// =====================================
-app.post("/notice", upload.none(), (req, res) => {
-  const { text } = req.body;
-  const filePath = path.join(__dirname, "data", "notice.md");
-
-  fs.writeFile(filePath, text, "utf8", (err) => {
-    if (err) {
-      return res.json({ ok: false });
-    }
-    return res.json({ ok: true });
-  });
-});
-
-
 
 // =====================================
 // EVENTS OPHALEN
