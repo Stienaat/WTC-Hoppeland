@@ -103,35 +103,34 @@ app.post("/register", upload.none(), async (req, res) => {
 
 
 // =====================================
-// NOTICE (opslaan & ophalen)
+// NOTICE OPHALEN (uit notice.md)
 // =====================================
-app.get("/notice", async (req, res) => {
-  const { data, error } = await supabase
-    .from("notice")
-    .select("*")
-    .limit(1);
+app.get("/notice", (req, res) => {
+  const filePath = path.join(__dirname, "data", "notice.md");
 
-  if (error || data.length === 0) {
-    return res.status(500).send("Kon mededelingen niet laden.");
-  }
-
-  res.send(data[0].text);
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).send("Kon mededelingen niet laden.");
+    }
+    res.send(data);
+  });
 });
 
-app.post("/notice", upload.none(), async (req, res) => {
+// =====================================
+// NOTICE OPSLAAN (admin)
+// =====================================
+app.post("/notice", upload.none(), (req, res) => {
   const { text } = req.body;
+  const filePath = path.join(__dirname, "data", "notice.md");
 
-  const { error } = await supabase
-    .from("notice")
-    .update({ text })
-    .eq("id", 1);
-
-  if (error) {
-    return res.json({ ok: false });
-  }
-
-  return res.json({ ok: true });
+  fs.writeFile(filePath, text, "utf8", (err) => {
+    if (err) {
+      return res.json({ ok: false });
+    }
+    return res.json({ ok: true });
+  });
 });
+
 
 
 // =====================================
