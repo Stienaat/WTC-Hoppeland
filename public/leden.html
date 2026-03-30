@@ -897,7 +897,6 @@ fetch("/notice")
 </script>
 
 <script>
-// LOGIN / REGISTRATIE HANDLER
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -906,8 +905,34 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const email = document.getElementById("Editbox4").value.trim();
   const password = document.getElementById("Editbox6").value.trim();
 
-  if (!email || !password) {
-    alert("Gelieve e-mail en paswoord in te vullen.");
+  if (actie === "registreer") {
+
+    const naam = document.getElementById("Editbox1").value.trim();
+    const adres = document.getElementById("Editbox2").value.trim();
+    const gemeente = document.getElementById("Editbox3").value.trim();
+    const telefoon = document.getElementById("Editbox5").value.trim();
+
+    const res = await fetch("/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        naam,
+        adres,
+        gemeente,
+        telefoon,
+        email,
+        password
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      alert("Registratie gelukt!");
+    } else {
+      alert(data.error);
+    }
+
     return;
   }
 
@@ -926,25 +951,9 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       alert(data.error || "Login mislukt.");
     }
   }
-
-if (actie === "registreer") {
-    const res = await fetch("/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
-
-    if (data.ok) {
-      alert("Registratie gelukt!");
-    } else {
-      alert(data.error || "Registratie mislukt.");
-    }
-}
-
 });
 </script>
+
 
 
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
