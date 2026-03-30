@@ -291,7 +291,6 @@
 
 <script>
 
-  'use strict';
 
 /************************************************************
  * CORE HELPERS
@@ -443,7 +442,8 @@ function fmt(text){
           setStatus('');
         }
       })
-      .catch(()=>setStatus('Fout bij laden.'));
+      .catch(()=>setStatus(document.getElementById("loginStatus"), "Fout bij laden.", "error");
+
   }
 
   function startEditNotice(){
