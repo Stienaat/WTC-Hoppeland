@@ -17,6 +17,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+URL: https://orvjhbtoxjqhedsgnxqp.supabase.co
+KEY: OK
+
+
 // =====================================
 // NOTICE OPHALEN (uit notice.md)
 // =====================================
@@ -70,7 +74,7 @@ app.post("/login", upload.none(), async (req, res) => {
     const { email, password } = req.body;
 
     const { data: leden, error } = await supabase
-      .from("leden")
+      .from("Leden")
       .select("*")
       .eq("email", email.toLowerCase())
       .limit(1);
