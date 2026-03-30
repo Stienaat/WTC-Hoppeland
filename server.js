@@ -73,17 +73,17 @@ app.post("/login", upload.none(), async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const { data: leden, error } = await supabase
+    const { data: Leden, error } = await supabase
       .from("Leden")
       .select("*")
       .eq("email", email.toLowerCase())
       .limit(1);
 
-    if (error || leden.length === 0) {
+    if (error || Leden.length === 0) {
       return res.json({ ok: false, error: "Onbekende gebruiker" });
     }
 
-    const lid = leden[0];
+    const lid = Leden[0];
     const match = await bcrypt.compare(password, lid.wachtwoord);
 
     if (!match) {
@@ -113,7 +113,7 @@ app.post("/register", upload.none(), async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
 
     const { error } = await supabase
-      .from("leden")
+      .from("Leden")
       .insert([
         {
           naam,
