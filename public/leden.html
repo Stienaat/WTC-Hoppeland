@@ -927,9 +927,22 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     }
   }
 
-  if (actie === "registreer") {
-    alert("Registratie nog niet actief.");
-  }
+if (actie === "registreer") {
+    const res = await fetch("/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+      alert("Registratie gelukt!");
+    } else {
+      alert(data.error || "Registratie mislukt.");
+    }
+}
+
 });
 </script>
 
