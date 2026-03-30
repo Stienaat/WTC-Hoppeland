@@ -102,38 +102,36 @@ app.post("/login", upload.none(), async (req, res) => {
 // =====================================
 // REGISTRATIE
 // =====================================
-app.post("/register", upload.none(), async (req, res) => {
+app.post("/register", async (req, res) => {
+  const { name, address, city, email, phone, code } = req.body;
+
   try {
-    const { naam, email, password, adres, gemeente, telefoon } = req.body;
-
-    const hash = await bcrypt.hash(password, 10);
-
     const { error } = await supabase
-      .from("Leden")
-      .insert([
-        {
-          naam,
-          email: email.toLowerCase(),
-          wachtwoord: hash,
-          adres,
-          gemeente,
-          telefoon
-        }
-      ]);
+      .from("leden")
+      .insert([{ name, address, city, email, phone, code }]);
 
-  if (error) {
-  console.error("Supabase fout:", error);
-  return res.json({ ok: false, error: error.message });
-}
+    if (error) {
+      if (error.code === "23505") {
+        // UNIQUE violation
+        return res.status(400).json({
+          ok: false,
+          message: "Dit e-mailadres bestaat al."
+        });
+      }
+      throw error;
+    }
 
-
-    return res.json({ ok: true });
+    return res.json({ ok: true, message: "Registratie gelukt." });
 
   } catch (err) {
-    console.error(err);
-    return res.json({ ok: false, error: "Serverfout" });
+    console.error("Registratie fout:", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Serverfout bij registratie."
+    });
   }
 });
+
 
 // =====================================
 // EVENTS OPHALEN
