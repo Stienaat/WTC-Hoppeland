@@ -25,6 +25,12 @@ app.get("/notice", (req, res) => {
   });
 });
 
+
+// Express setup
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // =====================================
 // NOTICE OPSLAAN (admin)
 // =====================================
@@ -40,10 +46,6 @@ app.post("/notice", upload.none(), (req, res) => {
   });
 });
 
-// Express setup
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Supabase client
