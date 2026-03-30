@@ -64,7 +64,7 @@
 		
 		<input type="password" id="Editbox6" class="log-only"
 			   style="top:290px;"
-			   name="code" value="" required placeholder="Paswoord          * * * * * * 6 tekens" spellcheck="false">
+			   name="code" value="" required placeholder="Paswoord            * * * * * * 6 tekens" spellcheck="false">
 		
 		<input type="password" id="Editbox7" class="reg-only" style="top:330px; "
 			   name="code_repeat; " value=""  placeholder="Herhaal paswoord * * * * * * 6 tekens" spellcheck="false">	   
@@ -299,104 +299,109 @@
 async function ajax(url, options = {}) {
   options.headers = {
     ...(options.headers || {}),
-    'Accept': 'application/json'
+    "Accept": "application/json"
   };
 
   const res = await fetch(url, options);
-  const ct = res.headers.get('content-type') || '';
+  const ct = res.headers.get("content-type") || "";
 
-  if (!ct.includes('application/json')) {
+  if (!ct.includes("application/json")) {
     const text = await res.text();
-    throw new Error('Server returned non-JSON:\n' + text.slice(0, 200));
+    throw new Error("Server returned non-JSON:\n" + text.slice(0, 200));
   }
 
   return res.json();
-} 
+}
 
- /*********Helper meldingen ***********/
- 
-	function setStatus(el, message = '', type = 'info'){
+/********* Helper meldingen ***********/
+function setStatus(el, message = "", type = "info") {
   if (!el) return;
-
   el.textContent = message;
-  el.classList.remove('ok', 'error', 'info');
+  el.classList.remove("ok", "error", "info");
   el.classList.add(type);
 }
-	
 
-  /************************************************************
-   * 0) BASIS DOM
-   ************************************************************/
-  const logo         = document.getElementById('Image1');
-  const adminOverlay = document.getElementById('adminOverlay');
- 
-  
-  const API_NOTICE = './notice_api.php';
-  const ROUTES_API = '/WTC/routes/upload_do.php';
-  
-  
- 
-  /************************************************************
-   * 2) NOTICE
-   ************************************************************/
-  const box    = document.getElementById('noticeBox');
- 
-  const btnEditNotice  = document.getElementById('btnEditNotice');
-  const btnNoticeClose = document.getElementById('btnNoticeClose');
-  const btnMedSave = document.getElementById('btnMedSave');
+/************************************************************
+ * 0) BASIS DOM
+ ************************************************************/
+const logo         = document.getElementById("Image1");
+const adminOverlay = document.getElementById("adminOverlay");
 
-  
- function setRaw(text){
-    if (box) box.dataset.raw = String(text || '');
-  }
-  function getRaw(){
-    return box ? (box.dataset.raw || '') : '';
-  }
-function fmt(text){
-  const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const API_NOTICE = "/notice";
 
-  const lines = String(text||'')
-    .replace(/\r\n?/g, '\n')
-    .split('\n')
+/************************************************************
+ * 2) NOTICE
+ ************************************************************/
+const box = document.getElementById("noticeBox");
+const btnEditNotice  = document.getElementById("btnEditNotice");
+const btnNoticeClose = document.getElementById("btnNoticeClose");
+const btnMedSave     = document.getElementById("btnMedSave");
+const noticeStatus   = document.getElementById("noticeStatus");
+
+function setRaw(text) {
+  if (box) box.dataset.raw = String(text || "");
+}
+function getRaw() {
+  return box ? (box.dataset.raw || "") : "";
+}
+
+function fmt(text) {
+  const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+  const lines = String(text || "")
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
     .map(l => l.trim());
 
-  let html = '';
+  let html = "";
   let inList = false;
 
- const R = {
-    lg:   new RegExp("\\[lg\\]\\s*([\\s\\S]*?)\\s*\\[\\/lg\\]", "g"),
-	
-	sm:   new RegExp("\\[sm\\]\\s*([\\s\\S]*?)\\s*\\[\\/sm\\]", "g"),
-		
-	bold: new RegExp("\\*\\*\\s*([\\s\\S]+?)\\s*\\*\\*", "g"),
-	em:   new RegExp("\\*\\s*([\\s\\S]+?)\\s*\\*", "g"),   
-	u:    new RegExp("__\\s*([\\s\\S]+?)\\s*__", "g")
-	
-	};
-	
- const pushLine = (raw) => {let body = esc(raw);
-   
-   let cls = 'n-line';
+  const R = {
+    lg:   /
 
-    if (body.startsWith('##')) {
-      cls = 'n-h2';
-      body = body.replace(/^##\s*/, '');
-    } else if (body.startsWith('#')) {
-      cls = 'n-h1';
-      body = body.replace(/^#\s*/, '');
+\[lg\]
+
+\s*([\s\S]*?)\s*
+
+\[\/lg\]
+
+/g,
+    sm:   /
+
+\[sm\]
+
+\s*([\s\S]*?)\s*
+
+\[\/sm\]
+
+/g,
+    bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
+    em:   /\*\s*([\s\S]+?)\s*\*/g,
+    u:    /__\s*([\s\S]+?)\s*__/g
+  };
+
+  const pushLine = raw => {
+    let body = esc(raw);
+    let cls = "n-line";
+
+    if (body.startsWith("##")) {
+      cls = "n-h2";
+      body = body.replace(/^##\s*/, "");
+    } else if (body.startsWith("#")) {
+      cls = "n-h1";
+      body = body.replace(/^#\s*/, "");
     }
 
-    body = body.replace(R.lg, '<span class="n-lg">$1</span>');
-    body = body.replace(R.sm, '<span class="n-sm">$1</span>');
-    body = body.replace(R.bold, '<strong>$1</strong>');
-    body = body.replace(R.em, '<em>$1</em>');
-    body = body.replace(R.u, '<u>$1</u>');
+    body = body.replace(R.lg, "<span class=\"n-lg\">$1</span>");
+    body = body.replace(R.sm, "<span class=\"n-sm\">$1</span>");
+    body = body.replace(R.bold, "<strong>$1</strong>");
+    body = body.replace(R.em, "<em>$1</em>");
+    body = body.replace(R.u, "<u>$1</u>");
 
-    html += `<div class="${cls}">${body || '&nbsp;'}</div>`;
+    html += `<div class="${cls}">${body || "&nbsp;"}</div>`;
   };
 
   for (let line of lines) {
-
     const m = /^\-\s*(.*)$/.exec(line);
     if (m) {
       if (!inList) {
@@ -405,258 +410,215 @@ function fmt(text){
       }
 
       let item = esc(m[1]);
-      item = item.replace(R.bold, '<strong>$1</strong>');
-      item = item.replace(R.em, '<em>$1</em>');
-      item = item.replace(R.u, '<u>$1</u>');
+      item = item.replace(R.bold, "<strong>$1</strong>");
+      item = item.replace(R.em, "<em>$1</em>");
+      item = item.replace(R.u, "<u>$1</u>");
 
-      html += `<li>${item || '&nbsp;'}</li>`;
+      html += `<li>${item || "&nbsp;"}</li>`;
       continue;
     }
 
     if (inList) {
-      html += '</ul>';
+      html += "</ul>";
       inList = false;
     }
 
     pushLine(line);
   }
 
-  if (inList) html += '</ul>';
+  if (inList) html += "</ul>";
 
   return html;
 }
 
-
-
-
-
-  function render(){
-    if (!box) return;
-    box.innerHTML = fmt(getRaw());
-  }
-
-  function loadNotice(){
-    if (!box) return;
-    setStatus(status, 'Tekst laden…', 'info');
-    fetch(API_NOTICE + '?action=getNotice', { cache:'no-store' })
-      .then(r => r.json())
-      .then(d => {
-        if (d.ok){
-          setRaw(d.text || '');
-          render();
-          setStatus('');
-        }
-      })
-      .catch(()=>setStatus('Fout bij laden.'));
-  }
-
-  function startEditNotice(){
-    if (!box) return;
-    box.innerText = getRaw();
-    box.contentEditable = 'true';
-    box.focus();
-  }
-
-async function saveNotice(){
+function render() {
   if (!box) return;
- 
-  if (noticeBox.contentEditable !== "true") return;
+  box.innerHTML = fmt(getRaw());
+}
 
-  const adminStatus = document.getElementById('admin-status');
+function loadNotice() {
+  if (!box) return;
+  setStatus(noticeStatus, "Tekst laden…", "info");
 
-  const raw = (box.innerText || '').replace(/\r\n?/g, '\n');
+  fetch(API_NOTICE, { cache: "no-store" })
+    .then(r => r.text())
+    .then(txt => {
+      setRaw(txt || "");
+      render();
+      setStatus(noticeStatus, "");
+    })
+    .catch(() => setStatus(noticeStatus, "Fout bij laden.", "error"));
+}
+
+function startEditNotice() {
+  if (!box) return;
+  box.innerText = getRaw();
+  box.contentEditable = "true";
+  box.focus();
+}
+
+async function saveNotice() {
+  if (!box) return;
+  if (box.contentEditable !== "true") return;
+
+  const raw = (box.innerText || "").replace(/\r\n?/g, "\n");
   setRaw(raw);
-  box.setAttribute('contenteditable','false');
-  
+  box.setAttribute("contenteditable", "false");
   render();
-  
-  const fdNotice = new FormData();
-  fdNotice.append('action', 'setNotice');
-  fdNotice.append('text', raw);
 
-  setStatus(btnMedSave, 'Bewaren…', 'info');
+  const fdNotice = new FormData();
+  fdNotice.append("text", raw);
+
+  setStatus(btnMedSave, "Bewaren…", "info");
 
   try {
     const j = await ajax(API_NOTICE, {
-      method: 'POST',
+      method: "POST",
       body: fdNotice
     });
 
-    if (!j.ok){
-      setStatus(btnMedSave, 'Kon tekst niet bewaren.', 'error');
+    if (!j.ok) {
+      setStatus(btnMedSave, "Kon tekst niet bewaren.", "error");
       return;
     }
 
-    setStatus(btnMedSave, '✔ Opgeslagen', 'ok');
-    box.setAttribute('contenteditable','false');
-	
-	
-
-  } catch (e){
+    setStatus(btnMedSave, "✔ Opgeslagen", "ok");
+  } catch (e) {
     console.error(e);
-    setStatus(adminStatus, 'Technische fout bij bewaren.', 'error');
+    setStatus(noticeStatus, "Technische fout bij bewaren.", "error");
   }
 }
 
+btnEditNotice  && btnEditNotice.addEventListener("click", startEditNotice);
+btnNoticeClose && btnNoticeClose.addEventListener("click", saveNotice);
 
-  btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
-  btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
-	
-
-	/************************************************************
+/************************************************************
  * 3) ADMIN CONFIG (naam + IBAN + BIC + Mededeling)
  ************************************************************/
- 
-function initAdminConfigCard(){
+function initAdminConfigCard() {
+  const elName  = document.getElementById("cfgOrgName");
+  const elIban  = document.getElementById("cfgIban");
+  const elBic   = document.getElementById("cfgBic");
+  const elMed   = document.getElementById("cfgMed");
+  const btnSave = document.getElementById("btnSaveConfig");
+  const confSaveStatus = document.getElementById("confSaveStatus");
 
-  const elName  = document.getElementById('cfgOrgName');
-  const elIban  = document.getElementById('cfgIban');
-  const elBic  = document.getElementById('cfgBic');
-  const elMed  = document.getElementById('cfgMed');
-  const btnSave = document.getElementById('btnSaveConfig');
-  const elStat  = document.getElementById('configSaveStatus');
+  if (!elName || !elIban || !elBic || !elMed || !btnSave) return;
 
-  const confSaveStatus  = document.getElementById('confSaveStatus');
-
-  if (!elName || !elIban || !elBic || !elMed ||!btnSave) return;
-  
-
-  // Laden
   (async () => {
     try {
-      const j = await ajax('api_admin_config.php');
-      if (j?.ok && j.config){
-        elName.value = j.config.vereniging?.naam || '';
-        elIban.value = j.config.vereniging?.iban || '';
-		elBic.value = j.config.vereniging?.bic || '';
-		elMed.value = j.config.vereniging?.med || '';
+      const j = await ajax("api_admin_config.php");
+      if (j?.ok && j.config) {
+        elName.value = j.config.vereniging?.naam || "";
+        elIban.value = j.config.vereniging?.iban || "";
+        elBic.value  = j.config.vereniging?.bic  || "";
+        elMed.value  = j.config.vereniging?.med  || "";
       }
-    } catch (e){
-      setStatus(confSaveStatus, 'Kon configuratie niet laden.', 'error');
+    } catch (e) {
+      setStatus(confSaveStatus, "Kon configuratie niet laden.", "error");
     }
   })();
 
-  // Opslaan
-	 btnSave.addEventListener('click', async () => {
-	 setStatus(confSaveStatus, 'Naam en bestand zijn verplicht.', 'error');
+  btnSave.addEventListener("click", async () => {
+    try {
+      const j = await ajax("api_admin_config.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vereniging: {
+            naam: elName.value.trim(),
+            iban: elIban.value.trim(),
+            bic:  elBic.value.trim(),
+            med:  elMed.value.trim()
+          }
+        })
+      });
 
-  try {
-    const j = await ajax('api_admin_config.php', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        vereniging: {
-          naam: elName.value.trim(),
-          iban: elIban.value.trim(),
-		  bic: elBic.value.trim(),
-		  med: elMed.value.trim()
-        }
-      })
-    });
+      if (!j.ok) {
+        setStatus(confSaveStatus, "Niet opgeslagen.", "error");
+        return;
+      }
 
-    if (!j.ok){
-	   setStatus(confSaveStatus, 'Niet opgeslagen.', 'error');
-      return;
+      setStatus(confSaveStatus, "✔ Opgeslagen.", "ok");
+    } catch (e) {
+      console.error(e);
+      setStatus(confSaveStatus, "Technische fout!", "error");
     }
-
-	setStatus(confSaveStatus,'✔ Opgeslagen.','ok');
-  } catch (e){
-    console.error(e);
-   	   setStatus(confSaveStatus, 'Technische fout!', 'error');
-  }
-});
+  });
 }
 
 /************************************************************
  * 4) ROUTES
  ************************************************************/
-	const btnUploadRoute = document.getElementById('btnUploadRoute');
-	const btnCloseRoute  = document.getElementById('btnCloseRoute');
-	const routeOverlay  = document.getElementById('routeOverlay');
-	const routeError    = document.getElementById('routeError');
+const btnUploadRoute = document.getElementById("btnUploadRoute");
+const btnCloseRoute  = document.getElementById("btnCloseRoute");
+const routeOverlay   = document.getElementById("routeOverlay");
+const routeError     = document.getElementById("routeError");
 
-function closeRouteOverlay(){
-	  routeOverlay && routeOverlay.classList.remove('show');
-	}
-
-	if (btnCloseRoute){
-	  btnCloseRoute.addEventListener('click', closeRouteOverlay);
-	}
-
-	if (btnUploadRoute){
-	  btnUploadRoute.addEventListener('click', async () => {
-
-    const naam  = document.getElementById('routeNaam')?.value.trim();
-    const groep = document.getElementById('routeGroep')?.value;
-	const afstand = document.getElementById('routeAfstand').value.trim();
-	const start   = document.getElementById('routeStart').value.trim();
-    const file  = document.getElementById('routeFile')?.files[0];
-	
- 
-
-    if (!naam || !file){
-	  setStatus(routeError, 'Naam en bestand zijn verplicht.', 'error');
-	  return;
-    }
-
-	const fd = new FormData();
-	fd.append('naam', naam);
-	fd.append('groep', groep);
-	fd.append('afstand', afstand);
-	fd.append('start', start);
-	fd.append('gpxfile', file);
-	
-    try {
-      const res = await fetch('/WTC/routes/upload_do.php', {
-        method: 'POST',
-        body: fd
-      });
-
-      if (!res.ok){
-        setStatus(routeError,' Upload mislukt.','error');
-        return;
-      }
-
-      closeRouteOverlay();
-      setStatus(routeError, '✔ Route toegevoegd.', 'ok');
-
-    } catch (e){
-      console.error(e);
-      setStatus(routeError, 'Technische fout bij upload.', 'error');
-    }
-  });
+function closeRouteOverlay() {
+  routeOverlay && routeOverlay.classList.remove("show");
 }
-	
-document.addEventListener('DOMContentLoaded', function () {
-    const params = new URLSearchParams(window.location.search);
 
-    if (params.get('overlay') === '1') {
-        // wacht tot ALLE scripts geladen zijn
-        setTimeout(() => {
-            if (typeof openAdminPhase2 === 'function') {
-                openAdminPhase2();
-            }
-        }, 50);
+btnCloseRoute && btnCloseRoute.addEventListener("click", closeRouteOverlay);
+
+btnUploadRoute && btnUploadRoute.addEventListener("click", async () => {
+  const naam    = document.getElementById("routeNaam")?.value.trim();
+  const groep   = document.getElementById("routeGroep")?.value;
+  const afstand = document.getElementById("routeAfstand").value.trim();
+  const start   = document.getElementById("routeStart").value.trim();
+  const file    = document.getElementById("routeFile")?.files[0];
+
+  if (!naam || !file) {
+    setStatus(routeError, "Naam en bestand zijn verplicht.", "error");
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append("naam", naam);
+  fd.append("groep", groep);
+  fd.append("afstand", afstand);
+  fd.append("start", start);
+  fd.append("gpxfile", file);
+
+  try {
+    const res = await fetch("/WTC/routes/upload_do.php", {
+      method: "POST",
+      body: fd
+    });
+
+    if (!res.ok) {
+      setStatus(routeError, "Upload mislukt.", "error");
+      return;
     }
+
+    closeRouteOverlay();
+    setStatus(routeError, "✔ Route toegevoegd.", "ok");
+  } catch (e) {
+    console.error(e);
+    setStatus(routeError, "Technische fout bij upload.", "error");
+  }
 });
-</script>
-<script>
-fetch("/notice")
-  .then(r => r.text())
-  .then(txt => {
-    document.getElementById("noticeBox").innerText = txt;
-  })
-  .catch(() => {
-    document.getElementById("noticeBox").innerText =
-      "Mededelingen konden niet geladen worden.";
-  });
-</script>
+
+document.addEventListener("DOMContentLoaded", function () {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get("overlay") === "1") {
+    setTimeout(() => {
+      if (typeof openAdminPhase2 === "function") {
+        openAdminPhase2();
+      }
+    }, 50);
+  }
+});
+
 
 
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
-<script src="/js/login.js"></script>
+<script src="/js/login.js?v=1"></script>
+
 <link href="leden.css" rel="stylesheet">
 <link href="WTC.css" rel="stylesheet">
+
 </body>
 </html>
 
