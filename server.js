@@ -4,10 +4,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-
 import multer from "multer";
-const upload = multer();
 
+const app = express();
+const upload = multer();
 
 app.post("/leden", upload.none(), async (req, res) => {
   try {
