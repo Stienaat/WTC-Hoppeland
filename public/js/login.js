@@ -2,6 +2,11 @@
 /************************************************************
  * 1) ADMIN UI OPEN / CLOSE
  ************************************************************/
+ document.addEventListener("DOMContentLoaded", () => {
+    // AL je code hierbinnen
+});
+
+ 
 const adminLogin   = document.getElementById("adminLogin");
 const adminFase2   = document.getElementById("adminFase2");
 const adminStatus  = document.getElementById("admin-status");
