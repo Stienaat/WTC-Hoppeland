@@ -17,10 +17,6 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-URL: https://orvjhbtoxjqhedsgnxqp.supabase.co
-KEY: OK
-
-
 // =====================================
 // NOTICE OPHALEN (uit notice.md)
 // =====================================
