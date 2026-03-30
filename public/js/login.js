@@ -85,7 +85,7 @@ btnOk?.addEventListener("click", () => {
   handleAdminLogin(pinInput.value.trim());
 });
 
-adminlogo?.addEventListener("dblclick", e => {
+adminLogo?.addEventListener("dblclick", e => {
   e.preventDefault();
   openAdminPhase1();
   pinInput?.focus();
