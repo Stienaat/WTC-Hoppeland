@@ -430,21 +430,24 @@ function fmt(text){
     box.innerHTML = fmt(getRaw());
   }
 
-  function loadNotice(){
-    if (!box) return;
-    setStatus(status, 'Tekst laden…', 'info');
-    fetch(API_NOTICE + '?action=getNotice', { cache:'no-store' })
-      .then(r => r.json())
-      .then(d => {
-        if (d.ok){
-          setRaw(d.text || '');
-          render();
-          setStatus('');
-        }
-      })
-      .catch(()=>setStatus(document.getElementById("loginStatus"), "Fout bij laden.", "error");
+function loadNotice(){
+  if (!box) return;
+  setStatus(status, 'Tekst laden…', 'info');
 
-  }
+  fetch(API_NOTICE + '?action=getNotice', { cache:'no-store' })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok){
+        setRaw(d.text || '');
+        render();
+        setStatus(status, '');
+      }
+    })
+    .catch(() => 
+      setStatus(document.getElementById("loginStatus"), "Fout bij laden.", "error")
+    );
+}
+
 
   function startEditNotice(){
     if (!box) return;
