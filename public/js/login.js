@@ -13,7 +13,8 @@ function setStatus(el, msg, type = "error") {
 const adminLogin   = document.getElementById("adminLogin");
 const adminFase2   = document.getElementById("adminFase2");
 const adminStatus  = document.getElementById("admin-status");
-const logo         = document.getElementById("hoplogo");
+const adminLogo = document.getElementById("hoplogo");
+
 
 function openAdminPhase1() {
   if (adminLogin) adminLogin.style.display = "block";
@@ -84,7 +85,7 @@ btnOk?.addEventListener("click", () => {
   handleAdminLogin(pinInput.value.trim());
 });
 
-logo?.addEventListener("dblclick", e => {
+adminlogo?.addEventListener("dblclick", e => {
   e.preventDefault();
   openAdminPhase1();
   pinInput?.focus();
