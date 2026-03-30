@@ -1,13 +1,32 @@
 import express from "express";
-import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
-import { createClient } from "@supabase/supabase-js";
-import bcrypt from "bcryptjs";
+import fs from "fs";
+import bcrypt from "bcrypt";
 import multer from "multer";
 
-const app = express();
 const upload = multer();
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+
+// ✔ HEALTH CHECK (Render verwacht dit!)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(process.cwd(), "public", "index.html"));
+});
+
+// ✔ AL JE ANDERE ROUTES HIERONDER
+// voorbeeld:
+app.post("/leden", upload.none(), (req, res) => {
+  res.json({ ok: true });
+});
+
+// ✔ SERVER START
+app.listen(process.env.PORT || 10000, () => {
+  console.log("Server draait op poort 10000");
+});
+
 
 app.post("/leden", upload.none(), async (req, res) => {
   try {
