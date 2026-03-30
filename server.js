@@ -213,3 +213,106 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Server draait op poort " + PORT);
 });
+
+//=======================================
+//  Login route
+//=======================================
+
+app.post("/login", async (req, res) => {
+  const { email, code } = req.body;
+
+  if (!email || !code) {
+    return res.status(400).json({ ok: false, message: "Email en paswoord verplicht." });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("leden")
+      .select("*")
+      .eq("email", email)
+      .eq("code", code)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      return res.status(401).json({ ok: false, message: "Onjuiste login." });
+    }
+
+    return res.json({ ok: true, message: "Login OK" });
+
+  } catch (err) {
+    console.error("Login fout:", err);
+    return res.status(500).json({ ok: false, message: "Serverfout bij login." });
+  }
+});
+
+//=======================================
+//  Admin-Login route
+//=======================================
+
+app.post("/admin-login", async (req, res) => {
+  const { pin } = req.body;
+
+  if (!pin) {
+    return res.status(400).json({ ok: false, message: "PIN verplicht." });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("admin")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data || data.pin !== pin) {
+      return res.status(401).json({ ok: false, message: "PIN fout." });
+    }
+
+    return res.json({ ok: true, message: "PIN OK" });
+
+  } catch (err) {
+    console.error("Admin login fout:", err);
+    return res.status(500).json({ ok: false, message: "Serverfout." });
+  }
+});
+
+//=======================================
+//  Admin-Pin wijzigen
+//=======================================
+app.post("/admin-change-pin", async (req, res) => {
+  const { oldPin, newPin } = req.body;
+
+  if (!oldPin || !newPin) {
+    return res.status(400).json({ ok: false, message: "Beide PINs verplicht." });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("admin")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data || data.pin !== oldPin) {
+      return res.status(401).json({ ok: false, message: "Oude PIN fout." });
+    }
+
+    const { error: updateError } = await supabase
+      .from("admin")
+      .update({ pin: newPin })
+      .eq("id", 1);
+
+    if (updateError) throw updateError;
+
+    return res.json({ ok: true, message: "PIN gewijzigd." });
+
+  } catch (err) {
+    console.error("PIN wijzig fout:", err);
+    return res.status(500).json({ ok: false, message: "Serverfout." });
+  }
+});
