@@ -121,10 +121,11 @@ app.post("/register", upload.none(), async (req, res) => {
         }
       ]);
 
-    if (error) {
-      console.error(error);
-      return res.json({ ok: false, error: "Email bestaat al?" });
-    }
+  if (error) {
+  console.error("Supabase fout:", error);
+  return res.json({ ok: false, error: error.message });
+}
+
 
     return res.json({ ok: true });
 
