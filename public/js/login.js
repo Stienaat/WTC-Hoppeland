@@ -237,8 +237,9 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   }
 });
 
-if (result.ok) {
-  window.location.href = "/leden-dashboard.html";
+if (!result.ok) {
+  alert(result.message);
+  return;
 }
 
 
