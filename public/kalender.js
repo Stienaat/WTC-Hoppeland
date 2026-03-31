@@ -1,6 +1,8 @@
 /* ============================================================
    CONFIG
 ============================================================ */
+const API_EVENTS_URL  = "/events";
+const API_SIGNUPS_URL = "/signups";
 
 function getUserEmail() {
   return localStorage.getItem("email");
