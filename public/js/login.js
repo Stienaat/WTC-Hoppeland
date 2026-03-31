@@ -226,7 +226,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     const data = await res.json();
 
     if (data.ok) {
-      localStorage.setItem("token", data.token);
+     localStorage.setItem("email", email);
       window.location.href = "leden-dashboard.html";
     } else {
       alert(data.error || "Login mislukt.");
