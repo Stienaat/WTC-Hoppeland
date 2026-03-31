@@ -1,12 +1,16 @@
 /* ============================================================
    CONFIG
 ============================================================ */
-
 const API_EVENTS_URL  = "/events";
 const API_SIGNUPS_URL = "/signups";
 
-// const USER_EMAIL = localStorage.getItem("email");
-const IS_ADMIN   = localStorage.getItem("is_admin") === "true";
+function getUserEmail() {
+  return localStorage.getItem("email");
+}
+
+function isAdmin() {
+  return localStorage.getItem("is_admin") === "true";
+}
 
 const slotMinutes = 30;
 const startMin = 8 * 60;
@@ -165,48 +169,88 @@ async function loadEvents(){
    GRID RENDERING
 ============================================================ */
 
-function renderGrid() {
+function render(){
+  labelEl.textContent = formatWeekLabel(currentWeekStart);
   gridEl.innerHTML = "";
 
-  const header = document.createElement("div");
-  header.className = "gridHeader";
+  const todayKey = toDateOnlyKey(new Date());
 
-  for (let i = 0; i < 7; i++) {
-    const d = addDays(currentWeekStart, i);
-    const div = document.createElement("div");
-    div.className = "dayHeader";
-    div.textContent = formatDayLabel(d);
-    header.appendChild(div);
+  gridEl.appendChild(makeCell("", "cell head", "columnheader"));
+  for(let c=0;c<7;c++){
+    const d = addDays(currentWeekStart,c);
+    gridEl.appendChild(makeCell(
+      formatDayLabel(d),
+      "cell head" + (toDateOnlyKey(d)===todayKey ? " today" : ""),
+      "columnheader"
+    ));
   }
 
-  gridEl.appendChild(header);
+  const totalSlots = (endMin-startMin)/slotMinutes;
 
-  const body = document.createElement("div");
-  body.className = "gridBody";
+  for(let i=0;i<totalSlots;i++){
+    const tMin = startMin+i*slotMinutes;
+    const h = Math.floor(tMin/60);
+    const m = tMin%60;
 
-  for (let m = startMin; m < endMin; m += slotMinutes) {
-    const row = document.createElement("div");
-    row.className = "timeRow";
+    gridEl.appendChild(makeCell(m===0?`${pad2(h)}:00`:"","cell hour","rowheader"));
 
-    const label = document.createElement("div");
-    label.className = "timeLabel";
+    for(let c=0;c<7;c++){
+      const d = addDays(currentWeekStart,c);
+      const dateKey = toDateOnlyKey(d);
+      const startIso = `${dateKey}T${pad2(h)}:${pad2(m)}`;
+      const endMin2 = tMin+slotMinutes;
+      const eh = Math.floor(endMin2/60);
+      const em = endMin2%60;
 
-    if (m % 60 === 0) {
-      label.textContent = `${pad2(m/60)}:00`;
+      const cell = makeCell("","cell body","gridcell");
+      cell.dataset.slotStart = startIso;
+      cell.dataset.slotEnd = `${dateKey}T${pad2(eh)}:${pad2(em)}`;
+      gridEl.appendChild(cell);
     }
-
-    row.appendChild(label);
-
-    for (let d = 0; d < 7; d++) {
-      const cell = document.createElement("div");
-      cell.className = "timeCell";
-      row.appendChild(cell);
-    }
-
-    body.appendChild(row);
   }
 
-  gridEl.appendChild(body);
+  const eventLayer = document.createElement("div");
+  eventLayer.className = "eventLayer";
+  gridEl.appendChild(eventLayer);
+
+  if (isAdmin()) {
+    eventLayer.addEventListener("contextmenu", (ev) => {
+      if (ev.ctrlKey) return;
+      ev.preventDefault();
+
+      const prev = eventLayer.style.pointerEvents;
+      eventLayer.style.pointerEvents = "none";
+      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "none");
+
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+
+      eventLayer.style.pointerEvents = prev;
+      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "");
+
+      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
+      if (!cell) return;
+
+      const startD = new Date(cell.dataset.slotStart);
+      const endD = new Date(cell.dataset.slotEnd);
+
+      openEventDialog({
+        id: null,
+        title: "",
+        start: cell.dataset.slotStart,
+        end: cell.dataset.slotEnd,
+        info: "",
+        requires_signup: false,
+        mandatory: false,
+        paid: false,
+        price: 0,
+        startD,
+        endD
+      });
+    });
+  }
+
+  renderEvents(eventLayer);
+  scrollToDefault();
 }
 
 /* ============================================================
@@ -256,7 +300,7 @@ function renderEvents() {
     evEl.appendChild(time);
 
     evEl.addEventListener("click", () => {
-      if (IS_ADMIN) {
+      if (isAdmin()) {
         openAdminDialog(ev);
       } else {
         openMemberDialog(ev);
@@ -299,26 +343,26 @@ function renderWeek() {
 }
 
 function scrollToDefaultTime() {
-  const body = gridEl.querySelector(".gridBody");
-  if (!body) return;
+  const scroller = document.getElementById("gridScroll");
+  if (!scroller) return;
 
   const totalMinutes = endMin - startMin;
   const offsetMinutes = defaultScrollToMin - startMin;
   const ratio = offsetMinutes / totalMinutes;
 
-  body.scrollTop = body.scrollHeight * ratio;
+  scroller.scrollTop = scroller.scrollHeight * ratio;
 }
 
 /* ============================================================
    NAVIGATION
 ============================================================ */
 
-document.getElementById("btnPrevWeek")?.addEventListener("click", () => {
+document.getElementById("btnPrev")?.addEventListener("click", () => {
   currentWeekStart = addDays(currentWeekStart, -7);
   renderWeek();
 });
 
-document.getElementById("btnNextWeek")?.addEventListener("click", () => {
+document.getElementById("btnNext")?.addEventListener("click", () => {
   currentWeekStart = addDays(currentWeekStart, 7);
   renderWeek();
 });
@@ -353,7 +397,7 @@ async function openMemberDialog(eventData) {
 
   signupDownloaded = false;
 
-  const statusJson = await getSignupStatus(eventData.id, USER_EMAIL);
+  const statusJson = await getSignupStatus(eventData.id, getUserEmail());
   let status = null;
 
   if (statusJson?.signed_up) {
@@ -461,7 +505,7 @@ function attachMemberEvents(e, status) {
     chk.disabled = true;
     showQR();
     btn.style.display = "block";
-    lastSignup = { event_id: e.id, email: USER_EMAIL, status };
+    lastSignup = { event_id: e.id, email: getUserEmail(), status };
     return;
   }
 
@@ -626,7 +670,7 @@ function renderAdminRight(e) {
 
 async function handleSaveEvent() {
 
-  if (!IS_ADMIN) return;
+  if (!isAdmin()) return;
   if (!editingEvent) return;
 
   const fTitle = dialogBody.querySelector("#fTitle");
@@ -677,7 +721,7 @@ async function handleSaveEvent() {
 }
 
 async function handleDeleteEvent() {
-  if (!IS_ADMIN) return;
+  if (!isAdmin()) return;
   if (!editingEvent || !editingEvent.id) return;
 
   if (!confirm("Event verwijderen?")) return;
