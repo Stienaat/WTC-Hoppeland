@@ -287,9 +287,6 @@ app.get("/me", async (req, res) => {
 // =====================================
 // events route
 // =====================================
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
 // GET /events
 app.get("/events", async (req, res) => {
