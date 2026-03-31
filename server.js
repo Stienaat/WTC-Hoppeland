@@ -4,6 +4,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
+import bcrypt from "bcrypt";
 
 const upload = multer();
 
@@ -65,29 +66,30 @@ app.post("/notice", upload.none(), (req, res) => {
 app.post("/register", async (req, res) => {
   const { naam, adres, gemeente, telefoon, email, password } = req.body;
 
-  if (!naam || !email || !password) {
-    return res.json({ ok: false, error: "Verplichte velden ontbreken." });
+  try {
+    const hash = await bcrypt.hash(password, 10);
+
+    const { data, error } = await supabase
+      .from("Leden")
+      .insert({
+        naam,
+        adres,
+        gemeente,
+        telefoon,
+        email,
+        wachtwoord: hash
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.json({ ok: false, error: err.message });
   }
-
-  const { data, error } = await supabase
-    .from("Leden")
-    .insert({
-      naam,
-      adres,
-      gemeente,
-      telefoon,
-      email,
-      wachtwoord: password
-    })
-    .select()
-    .single();
-
-  if (error) {
-    return res.json({ ok: false, error: "Registratie mislukt." });
-  }
-
-  res.json({ ok: true, user: data });
 });
+
 
 // =====================================
 // LEDEN LOGIN
@@ -95,31 +97,29 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.json({ ok: false, error: "Email en wachtwoord verplicht." });
-  }
+  try {
+    const { data: user, error } = await supabase
+      .from("Leden")
+      .select("*")
+      .eq("email", email)
+      .single();
 
-  const { data, error } = await supabase
-    .from("Leden")
-    .select("*")
-    .eq("email", email)
-    .eq("wachtwoord", password)
-    .single();
-
-  if (error || !data) {
-    return res.json({ ok: false, error: "Login mislukt." });
-  }
-
-  res.json({
-    ok: true,
-    token: "dummy-token",
-    user: {
-      id: data.id,
-      naam: data.naam,
-      email: data.email
+    if (error || !user) {
+      return res.json({ ok: false, error: "Onbekend emailadres." });
     }
-  });
+
+    const ok = await bcrypt.compare(password, user.wachtwoord);
+
+    if (!ok) {
+      return res.json({ ok: false, error: "Fout wachtwoord." });
+    }
+
+    res.json({ ok: true, user });
+  } catch (err) {
+    res.json({ ok: false, error: err.message });
+  }
 });
+
 
 // =====================================
 // ADMIN LOGIN (PIN)
