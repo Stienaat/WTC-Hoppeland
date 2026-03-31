@@ -261,6 +261,29 @@ app.post("/api/contact", async (req, res) => {
 });
 
 // =====================================
+// verificatie login
+// =====================================
+app.get("/me", async (req, res) => {
+  const email = req.query.email;
+
+  if (!email) {
+    return res.json({ ok: false, error: "Geen email ontvangen." });
+  }
+
+  const { data: user, error } = await supabase
+    .from("Leden")
+    .select("*")
+    .eq("email", email)
+    .single();
+
+  if (error || !user) {
+    return res.json({ ok: false, error: "Lid niet gevonden." });
+  }
+
+  res.json({ ok: true, user });
+});
+
+// =====================================
 // SERVER START
 // =====================================
 const PORT = process.env.PORT || 10000;
