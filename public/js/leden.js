@@ -40,8 +40,8 @@ async function ajax(url, options = {}) {
   const adminOverlay = document.getElementById('adminOverlay');
  
   
-  const API_NOTICE = './notice_api.php';
-  const ROUTES_API = '/WTC/routes/upload_do.php';
+  const API_NOTICE = /notice_api.php';
+  const ROUTES_API = /WTC/routes/upload_do.php';
   
   
  
