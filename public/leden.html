@@ -1,11 +1,9 @@
 <!doctype html>
 <html>
+
 <head>
-<meta charset="utf-8">
-<title>leden</title>
-
-
-
+	<meta charset="utf-8">
+	<title>leden</title>
 </head>
 
 <body>
@@ -288,6 +286,18 @@
     
   </div>
 </div>
+
+<script>
+fetch("/notice")
+  .then(r => r.text())
+  .then(txt => {
+    document.getElementById("noticeBox").innerText = txt;
+  })
+  .catch(() => {
+    document.getElementById("noticeBox").innerText =
+      "Mededelingen konden niet geladen worden.";
+  });
+</script>
 
 
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
