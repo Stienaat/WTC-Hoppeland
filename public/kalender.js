@@ -301,14 +301,14 @@ function renderWeek() {
 }
 
 function scrollToDefaultTime() {
-  const body = gridEl.querySelector(".gridBody");
-  if (!body) return;
+  const scroller = document.getElementById("gridScroll");
+  if (!scroller) return;
 
   const totalMinutes = endMin - startMin;
   const offsetMinutes = defaultScrollToMin - startMin;
   const ratio = offsetMinutes / totalMinutes;
 
-  body.scrollTop = body.scrollHeight * ratio;
+  scroller.scrollTop = scroller.scrollHeight * ratio;
 }
 
 /* ============================================================
