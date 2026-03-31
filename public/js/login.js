@@ -10,7 +10,7 @@
 const adminLogin   = document.getElementById("adminLogin");
 const adminFase2   = document.getElementById("adminFase2");
 const adminStatus  = document.getElementById("admin-status");
-const adminLogo = document.getElementById("hoplogo");
+const adminLogo = document.getElementById("adminLogo");
 
 
 function openAdminPhase1() {
