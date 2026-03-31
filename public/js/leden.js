@@ -348,15 +348,5 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 50);
     }
 });
-</script>
-<script>
-fetch("/notice")
-  .then(r => r.text())
-  .then(txt => {
-    document.getElementById("noticeBox").innerText = txt;
-  })
-  .catch(() => {
-    document.getElementById("noticeBox").innerText =
-      "Mededelingen konden niet geladen worden.";
-  });
-</script>
+
+
