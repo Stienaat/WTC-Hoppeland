@@ -169,46 +169,88 @@ async function loadEvents(){
    GRID RENDERING
 ============================================================ */
 
-function renderGrid() {
+function render(){
+  labelEl.textContent = formatWeekLabel(currentWeekStart);
   gridEl.innerHTML = "";
 
-  const header = document.createElement("div");
-  header.className = "gridHeader";
+  const todayKey = toDateOnlyKey(new Date());
 
-  for (let i = 0; i < 7; i++) {
-    const d = addDays(currentWeekStart, i);
-    const div = document.createElement("div");
-    div.className = "dayHeader";
-    div.textContent = formatDayLabel(d);
-    header.appendChild(div);
+  gridEl.appendChild(makeCell("", "cell head", "columnheader"));
+  for(let c=0;c<7;c++){
+    const d = addDays(currentWeekStart,c);
+    gridEl.appendChild(makeCell(
+      formatDayLabel(d),
+      "cell head" + (toDateOnlyKey(d)===todayKey ? " today" : ""),
+      "columnheader"
+    ));
   }
 
-  gridEl.appendChild(header);
+  const totalSlots = (endMin-startMin)/slotMinutes;
 
-  const body = document.createElement("div");
-  body.className = "gridBody";
+  for(let i=0;i<totalSlots;i++){
+    const tMin = startMin+i*slotMinutes;
+    const h = Math.floor(tMin/60);
+    const m = tMin%60;
 
-  for (let m = startMin; m < endMin; m += slotMinutes) {
-    const row = document.createElement("div");
-    row.className = "timeRow";
+    gridEl.appendChild(makeCell(m===0?`${pad2(h)}:00`:"","cell hour","rowheader"));
 
-    const label = document.createElement("div");
-    label.className = "timeLabel";
-    if (m % 60 === 0) {
-      label.textContent = `${pad2(m / 60)}:00`;
+    for(let c=0;c<7;c++){
+      const d = addDays(currentWeekStart,c);
+      const dateKey = toDateOnlyKey(d);
+      const startIso = `${dateKey}T${pad2(h)}:${pad2(m)}`;
+      const endMin2 = tMin+slotMinutes;
+      const eh = Math.floor(endMin2/60);
+      const em = endMin2%60;
+
+      const cell = makeCell("","cell body","gridcell");
+      cell.dataset.slotStart = startIso;
+      cell.dataset.slotEnd = `${dateKey}T${pad2(eh)}:${pad2(em)}`;
+      gridEl.appendChild(cell);
     }
-    row.appendChild(label);
-
-    for (let d = 0; d < 7; d++) {
-      const cell = document.createElement("div");
-      cell.className = "timeCell";
-      row.appendChild(cell);
-    }
-
-    body.appendChild(row);
   }
 
-  gridEl.appendChild(body);
+  const eventLayer = document.createElement("div");
+  eventLayer.className = "eventLayer";
+  gridEl.appendChild(eventLayer);
+
+  if (isAdmin()) {
+    eventLayer.addEventListener("contextmenu", (ev) => {
+      if (ev.ctrlKey) return;
+      ev.preventDefault();
+
+      const prev = eventLayer.style.pointerEvents;
+      eventLayer.style.pointerEvents = "none";
+      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "none");
+
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+
+      eventLayer.style.pointerEvents = prev;
+      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "");
+
+      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
+      if (!cell) return;
+
+      const startD = new Date(cell.dataset.slotStart);
+      const endD = new Date(cell.dataset.slotEnd);
+
+      openEventDialog({
+        id: null,
+        title: "",
+        start: cell.dataset.slotStart,
+        end: cell.dataset.slotEnd,
+        info: "",
+        requires_signup: false,
+        mandatory: false,
+        paid: false,
+        price: 0,
+        startD,
+        endD
+      });
+    });
+  }
+
+  renderEvents(eventLayer);
+  scrollToDefault();
 }
 
 /* ============================================================
