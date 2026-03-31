@@ -28,57 +28,33 @@ const supabase = createClient(
 app.use(express.static(path.join(__dirname, "public")));
 
 // =====================================
-// HEALTH CHECK / HOME
+// HOME
 // =====================================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // =====================================
-// NOTICE OPHALEN (uit notice.md)
+// NOTICE OPHALEN
 // =====================================
 app.get("/notice", (req, res) => {
   const filePath = path.join(__dirname, "data", "notice.md");
 
   fs.readFile(filePath, "utf8", (err, data) => {
-    if (err) {
-      console.error("Notice read error:", err);
-      return res.status(500).send("Kon mededelingen niet laden.");
-    }
+    if (err) return res.status(500).send("Kon mededelingen niet laden.");
     res.send(data);
   });
 });
 
-// Compatibiliteit met oude PHP URL:
-// /notice_api.php?action=getNotice
-app.get("/notice_api.php", (req, res) => {
-  const action = req.query.action;
-  if (action === "getNotice") {
-    const filePath = path.join(__dirname, "data", "notice.md");
-    fs.readFile(filePath, "utf8", (err, data) => {
-      if (err) {
-        console.error("Notice read error:", err);
-        return res.status(500).send("Kon mededelingen niet laden.");
-      }
-      res.send(data);
-    });
-  } else {
-    res.status(400).send("Ongeldige actie.");
-  }
-});
-
 // =====================================
-// NOTICE OPSLAAN (admin)
+// NOTICE OPSLAAN
 // =====================================
 app.post("/notice", upload.none(), (req, res) => {
   const { text } = req.body;
   const filePath = path.join(__dirname, "data", "notice.md");
 
   fs.writeFile(filePath, text, "utf8", (err) => {
-    if (err) {
-      console.error("Notice write error:", err);
-      return res.json({ ok: false });
-    }
+    if (err) return res.json({ ok: false });
     return res.json({ ok: true });
   });
 });
@@ -113,9 +89,8 @@ app.post("/register", async (req, res) => {
   res.json({ ok: true, user: data });
 });
 
-
 // =====================================
-// LEDEN LOGIN (met code, 6 tekens)
+// LEDEN LOGIN
 // =====================================
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -125,10 +100,10 @@ app.post("/login", async (req, res) => {
   }
 
   const { data, error } = await supabase
-    .from("Leden")               // LET OP: hoofdletter L
+    .from("Leden")
     .select("*")
     .eq("email", email)
-    .eq("wachtwoord", password)  // jouw kolomnaam
+    .eq("wachtwoord", password)
     .single();
 
   if (error || !data) {
@@ -146,15 +121,14 @@ app.post("/login", async (req, res) => {
   });
 });
 
-
 // =====================================
-// ADMIN-LOGIN (PIN)
+// ADMIN LOGIN (PIN)
 // =====================================
-app.post("/admin-login", upload.none(), async (req, res) => {
+app.post("/admin-login", async (req, res) => {
   const { pin } = req.body;
 
   if (!pin) {
-    return res.status(400).json({ ok: false, message: "PIN verplicht." });
+    return res.json({ ok: false, message: "PIN verplicht." });
   }
 
   try {
@@ -164,32 +138,26 @@ app.post("/admin-login", upload.none(), async (req, res) => {
       .eq("id", 1)
       .maybeSingle();
 
-    if (error) {
-      console.error("Admin query fout:", error);
-      throw error;
-    }
+    if (error) throw error;
 
     if (!data || data.pin !== pin) {
-      return res.status(401).json({ ok: false, message: "PIN fout." });
+      return res.json({ ok: false, message: "PIN fout." });
     }
 
     return res.json({ ok: true, message: "PIN OK" });
   } catch (err) {
-    console.error("Admin login fout (catch):", err);
-    return res.status(500).json({ ok: false, message: "Serverfout." });
+    return res.json({ ok: false, message: "Serverfout." });
   }
 });
 
 // =====================================
-// ADMIN-PIN WIJZIGEN
+// ADMIN PIN WIJZIGEN
 // =====================================
-app.post("/admin-change-pin", upload.none(), async (req, res) => {
+app.post("/admin-change-pin", async (req, res) => {
   const { oldPin, newPin } = req.body;
 
   if (!oldPin || !newPin) {
-    return res
-      .status(400)
-      .json({ ok: false, message: "Beide PINs verplicht." });
+    return res.json({ ok: false, message: "Beide PINs verplicht." });
   }
 
   try {
@@ -199,13 +167,10 @@ app.post("/admin-change-pin", upload.none(), async (req, res) => {
       .eq("id", 1)
       .maybeSingle();
 
-    if (error) {
-      console.error("Admin query fout:", error);
-      throw error;
-    }
+    if (error) throw error;
 
     if (!data || data.pin !== oldPin) {
-      return res.status(401).json({ ok: false, message: "Oude PIN fout." });
+      return res.json({ ok: false, message: "Oude PIN fout." });
     }
 
     const { error: updateError } = await supabase
@@ -213,20 +178,16 @@ app.post("/admin-change-pin", upload.none(), async (req, res) => {
       .update({ pin: newPin })
       .eq("id", 1);
 
-    if (updateError) {
-      console.error("PIN update fout:", updateError);
-      throw updateError;
-    }
+    if (updateError) throw updateError;
 
     return res.json({ ok: true, message: "PIN gewijzigd." });
   } catch (err) {
-    console.error("PIN wijzig fout (catch):", err);
-    return res.status(500).json({ ok: false, message: "Serverfout." });
+    return res.json({ ok: false, message: "Serverfout." });
   }
 });
 
 // =====================================
-// EVENTS OPHALEN
+// EVENTS
 // =====================================
 app.get("/events", async (req, res) => {
   try {
@@ -235,28 +196,22 @@ app.get("/events", async (req, res) => {
       .select("*")
       .order("start", { ascending: true });
 
-    if (error) {
-      console.error("Events fout:", error);
-      return res.json({ ok: false });
-    }
+    if (error) return res.json({ ok: false });
 
     res.json({ ok: true, events: data });
   } catch (err) {
-    console.error("Events fout (catch):", err);
     res.json({ ok: false });
   }
 });
 
 // =====================================
-// INSCHRIJVEN VOOR EVENT
+// EVENT INSCHRIJVEN
 // =====================================
 app.post("/signup", upload.none(), async (req, res) => {
   const { member_id, event_id } = req.body;
 
   if (!member_id || !event_id) {
-    return res
-      .status(400)
-      .json({ ok: false, message: "Lid en event verplicht." });
+    return res.json({ ok: false, message: "Lid en event verplicht." });
   }
 
   try {
@@ -264,14 +219,10 @@ app.post("/signup", upload.none(), async (req, res) => {
       .from("signups")
       .insert([{ member_id, event_id, status: "ingeschreven" }]);
 
-    if (error) {
-      console.error("Signup fout:", error);
-      return res.json({ ok: false });
-    }
+    if (error) return res.json({ ok: false });
 
     return res.json({ ok: true });
   } catch (err) {
-    console.error("Signup fout (catch):", err);
     return res.json({ ok: false });
   }
 });
@@ -300,13 +251,11 @@ app.post("/api/contact", async (req, res) => {
       ]);
 
     if (error) {
-      console.error("Contact insert fout:", error);
       return res.json({ ok: false, error: "Database insert failed" });
     }
 
     return res.json({ ok: true });
   } catch (err) {
-    console.error("Contact fout (catch):", err);
     return res.json({ ok: false, error: "Server error" });
   }
 });
