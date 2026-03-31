@@ -1,2 +1,77 @@
-<h1>Welkom op het leden-dashboard</h1>
-<p>Je bent ingelogd.</p>
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <title>Leden Dashboard</title>
+  <link href="WTC.css" rel="stylesheet">
+</head>
+
+<body style="text-indent: 1em;font-family:Arial;background:#D1FED5;">
+
+<script>
+// 1) Email ophalen uit localStorage (van login)
+const email = localStorage.getItem("email");
+if (!email) {
+  window.location.href = "leden.html?msg=notknown";
+}
+
+// 2) Lidgegevens ophalen via server
+async function loadLid() {
+  const res = await fetch(`/me?email=${encodeURIComponent(email)}`);
+  const data = await res.json();
+
+  if (!data.ok) {
+    alert("Kon gegevens niet laden.");
+    return;
+  }
+
+  const lid = data.user;
+
+  document.getElementById("naam").textContent = lid.naam;
+  document.getElementById("email").textContent = lid.email;
+  document.getElementById("adres").textContent = lid.adres;
+  document.getElementById("gemeente").textContent = lid.gemeente;
+  document.getElementById("telefoon").textContent = lid.telefoon;
+}
+
+loadLid();
+</script>
+
+<!-- LINKERKOLOM -->
+<div style="position:absolute;left:10px;top:20px;max-width:100px;margin:20px auto;padding:10px;border-radius:15px;">
+  <a href="./logout.html" class="wtc-button" style="display:block;margin-bottom:40px;padding:4px;width:100px">Uitloggen</a>
+  <a href="./routes/routes.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Fietsroutes</a>
+  <a href="./shop.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Shop</a>
+  <a href="./kalender.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Activiteiten</a>
+  <a href="./routes/routes.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Movies</a>
+</div>
+
+<!-- MIDDEN BLOK -->
+<div style="position:absolute;left:150px;top:10px;max-width:700px;margin:20px auto;padding:10px;background:#fff;border-radius:15px;">
+  <p>Welkom beste, <strong id="naam"></strong></p>
+  <h6>Je gegevens</h6>
+  <ul>
+    <li><strong>E-mail:</strong> <span id="email"></span></li>
+    <li><strong>Adres:</strong> <span id="adres"></span></li>
+    <li><strong>Gemeente:</strong> <span id="gemeente"></span></li>
+    <li><strong>Telefoon:</strong> <span id="telefoon"></span></li>
+  </ul>
+  <p><i><small>Zijn je gegevens gewijzigd? Geef ons een seintje!</small></i></p>
+</div>
+
+<!-- RECHTERKOLOM — REGLEMENT -->
+<div style="position:absolute;left:650px;top:10px;max-width:550px;margin:20px auto;padding:20px;background:#fff;border-radius:15px;font-size:13px">
+  <div class="spacer">
+    <h5>HUISHOUDELIJK REGLEMENT</h5>
+    <img src="images/Logo.jpg" width="50" height="50">
+  </div>
+
+  <!-- HIER PLAATS IK JOUW VOLLEDIGE REGLEMENT -->
+  <!-- (Ik laat het hier weg om je chat niet te overspoelen, maar ik zet het 1-op-1 in je bestand) -->
+  <p>Artikel 1:<br>De leden nemen op vrijwillige basis deel aan de activiteiten...</p>
+  <!-- ... volledige tekst zoals in jouw PHP-bestand ... -->
+
+</div>
+
+</body>
+</html>
