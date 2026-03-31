@@ -263,6 +263,7 @@ app.post("/api/contact", async (req, res) => {
 // =====================================
 // verificatie login
 // =====================================
+
 app.get("/me", async (req, res) => {
   const email = req.query.email;
 
@@ -282,6 +283,126 @@ app.get("/me", async (req, res) => {
 
   res.json({ ok: true, user });
 });
+
+// =====================================
+// events route
+// =====================================
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+// GET /events
+app.get("/events", async (req, res) => {
+  const { data: events, error } = await supabase
+    .from("Events")
+    .select("*")
+    .order("start", { ascending: true });
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  // config ophalen voor QR
+  const { data: cfg } = await supabase
+    .from("Config")
+    .select("*")
+    .limit(1)
+    .single();
+
+  const iban  = cfg?.iban || "";
+  const bic   = cfg?.bic || "";
+  const name  = cfg?.creditor_name || "";
+
+  const withQr = (events || []).map(ev => {
+    const datum = (ev.start || "").slice(0, 10);
+    const qr_text = buildEpcQrText(
+      name,
+      iban,
+      bic,
+      ev.price || 0,
+      `bet :${ev.title || ""} dd ${datum}`,
+      ""
+    );
+    return { ...ev, qr_text };
+  });
+
+  res.json(withQr);
+});
+
+// helper
+function moneyAmount(x) {
+  return "EUR" + Number(x || 0).toFixed(2);
+}
+
+function sanitizeLine(s) {
+  return String(s || "").replace(/[\r\n]/g, " ").trim();
+}
+
+function buildEpcQrText(creditorName, iban, bic, amount, remittance, info = "") {
+  creditorName = sanitizeLine(creditorName);
+  iban = sanitizeLine(iban).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  bic  = sanitizeLine(bic).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  remittance = sanitizeLine(remittance);
+  info = sanitizeLine(info);
+
+  return [
+    "BCD",
+    "002",
+    "1",
+    "SCT",
+    bic,
+    creditorName,
+    iban,
+    moneyAmount(amount),
+    "",
+    remittance,
+    info
+  ].join("\n");
+}
+app.post("/events", async (req, res) => {
+  const { action, id, title, start, end, info, requires_signup, mandatory, paid, price } = req.body;
+
+  // TODO: check is_admin via jouw eigen login-systeem
+
+  if (action === "update") {
+    const { error } = await supabase
+      .from("Events")
+      .update({ title, start, end, info, requires_signup, mandatory, paid, price })
+      .eq("id", id);
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ ok: true });
+  }
+
+  if (action === "delete") {
+    const { error } = await supabase
+      .from("Events")
+      .delete()
+      .eq("id", id);
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ ok: true });
+  }
+
+  // create
+  const { data, error } = await supabase
+    .from("Events")
+    .insert({
+      title,
+      start,
+      end,
+      info,
+      requires_signup,
+      mandatory,
+      paid,
+      price
+    })
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  res.json({ id: data.id });
+});
+
 
 // =====================================
 // SERVER START
