@@ -186,23 +186,6 @@ app.post("/admin-change-pin", async (req, res) => {
   }
 });
 
-// =====================================
-// EVENTS
-// =====================================
-app.get("/events", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("events")
-      .select("*")
-      .order("start", { ascending: true });
-
-    if (error) return res.json({ ok: false });
-
-    res.json({ ok: true, events: data });
-  } catch (err) {
-    res.json({ ok: false });
-  }
-});
 
 // =====================================
 // EVENT INSCHRIJVEN
