@@ -39,7 +39,8 @@ async function ajax(url, options = {}) {
   const logo         = document.getElementById('Image1');
   const adminOverlay = document.getElementById('adminOverlay'); 
   
-  const API_NOTICE = /notice_api.php';
+  const API_NOTICE = '/notice';
+
   const ROUTES_API = /WTC/routes/upload_do.php';
   
   
@@ -156,7 +157,8 @@ function loadNotice(){
   if (!box) return;
   setStatus(status, 'Tekst laden…', 'info');
 
-  fetch(API_NOTICE + '?action=getNotice', { cache:'no-store' })
+  fetch(API_NOTICE)
+
     .then(r => r.json())
     .then(d => {
       if (d.ok){
