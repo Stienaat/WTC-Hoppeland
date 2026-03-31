@@ -194,11 +194,9 @@ function renderGrid() {
 
     const label = document.createElement("div");
     label.className = "timeLabel";
-
     if (m % 60 === 0) {
-      label.textContent = `${pad2(m/60)}:00`;
+      label.textContent = `${pad2(m / 60)}:00`;
     }
-
     row.appendChild(label);
 
     for (let d = 0; d < 7; d++) {
