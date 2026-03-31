@@ -4,7 +4,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const upload = multer();
 
