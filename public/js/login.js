@@ -1,10 +1,10 @@
- console.error("Admin login error:", err);
+
 /************************************************************
  * 1) ADMIN UI OPEN / CLOSE
  ************************************************************/
  document.addEventListener("DOMContentLoaded", () => {
     // AL je code hierbinnen
-});
+
 
  
 const adminLogin   = document.getElementById("adminLogin");
@@ -234,4 +234,4 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   }
 });
 
-
+});
