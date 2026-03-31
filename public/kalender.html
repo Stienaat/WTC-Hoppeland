@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Boek – Rooster</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="kalender.css">
+
+  <!-- Login info uit localStorage -->
+  <script>
+    const USER_EMAIL = localStorage.getItem("email");
+    const IS_ADMIN   = localStorage.getItem("is_admin") === "true";
+
+    if (!USER_EMAIL && !IS_ADMIN) {
+      window.location.href = "leden.html?msg=notknown";
+    }
+  </script>
+
+</head>
+
+<body>
+
+  <div class="rooster">
+    <div class="toolbar">
+      <button type="button" id="btnPrev" class="wtc-button">← week</button>
+      <button type="button" id="btnToday" class="wtc-button">vandaag</button>
+      <button type="button" id="btnNext" class="wtc-button">week →</button>
+
+      <p style="color:GREEN">
+        Welkom beste, <strong id="naam"></strong>
+      </p>
+
+      <div class="spacer"></div>
+      <div class="weekLabel" id="weekLabel"></div>
+
+      <a href="leden-dashboard.html" class="wtc-button" style="padding:3px 5px">⏪ Terug</a>
+      <img src="images/Logo.png" width="50" height="50">
+    </div>
+
+    <div id="gridScroll" class="gridScroll">
+      <div id="grid" class="grid" role="grid" aria-label="Weekkalender"></div>
+    </div>
+  </div>
+
+  <!-- EVENT DIALOG -->
+  <dialog id="eventDialog">
+    <form id="eventForm">
+      <div class="dialog-header">
+
+        <!-- Sluiten -->
+        <button id="btnCloseTop" type="button" class="wtc-button">Sluiten</button>
+
+        <!-- Admin-only -->
+        <menu id="adminActions" style="display:none">
+          <button id="btnSave" type="button" class="wtc-button">Opslaan</button>
+          <button id="btnDelete" type="button" class="wtc-button">Verwijderen</button>
+        </menu>
+
+      </div>
+
+      <div class="dialog-content">
+        <div id="eventDialogBody">
+          <label for="fInfo">Info</label>
+          <textarea id="fInfo" rows="5"></textarea>
+        </div>
+
+        <div id="memberActions"></div>
+      </div>
+
+      <button type="submit" style="display:none"></button>
+    </form>
+  </dialog>
+
+  <!-- JS -->
+  <script src="kalender.js"></script>
+
+</body>
+</html>

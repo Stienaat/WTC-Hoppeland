@@ -1,0 +1,365 @@
+    :root{
+      --line: rgba(0,0,0,0.12);
+      --today: #404EC0;
+      --head: lightblue;
+      --hour: lightyellow;
+
+      --timeCol: 72px;
+      --slotH: 28px; /* hoogte per 30-min slot */
+    }
+#eventDialog {
+  padding: 0;
+}
+
+.dialogTopBar {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  z-index: 10;
+}
+
+#eventDialogBody {
+  padding: 12px;
+}
+
+    body{
+      font-family: system-ui, Arial, sans-serif;
+      margin:0;
+      padding:16px;
+      background-color:#E4DABF;
+    }
+
+    .rooster{
+      max-width: 1100px;
+      margin: 0 auto;
+      border:1px solid #404EC0;
+      border-radius:10px;
+      padding:12px;
+      background: #F6F4C9;
+    }
+
+    .toolbar{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin: 4px 0 12px;
+    }
+    .toolbar .spacer{ flex:1; }
+    .weekLabel{ font-weight:700; }
+
+    .gridScroll{
+      max-height: 720px;
+      overflow: auto;
+      border-radius: 10px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: var(--timeCol) repeat(7, 1fr);
+      grid-auto-rows: var(--slotH);
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      background:#fff;
+    }
+
+    /* Overlay bovenop grid */
+    .eventLayer{
+      position:absolute;
+      inset:0;
+      display:grid;
+      grid-template-columns: var(--timeCol) repeat(7, 1fr);
+      grid-auto-rows: var(--slotH);
+      pointer-events:none;
+      z-index: 3;
+    }
+    .eventLayer .event{ pointer-events:auto; }
+
+    .cell{
+      border-left: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 2px 6px;
+      font-size: 12px;
+      background:#fff;
+      user-select:none;
+      box-sizing: border-box;
+    }
+
+    .cell.head{
+      background: var(--head);
+      font-weight: 800;
+      color:#000;
+      position: sticky;
+      top: 0;
+      z-index: 4;
+    }
+
+    .cell.hour{
+      background: var(--hour);
+      font-weight: 800;
+      color:#000;
+      justify-content:flex-start;
+      padding-left:8px;
+      position: sticky;
+      left: 0;
+      z-index: 2;
+    }
+    .cell.hour.minor{
+      background:#fff;
+      font-weight:400;
+      color:#666;
+    }
+
+    .cell.today{
+      box-shadow: inset 1px 0 0 var(--today), inset -1px 0 0 var(--today);
+    }
+
+    .cell.slot-open{ background: rgba(255,255,255,0.7); }
+    .cell.slot-closed{ background: lightyellow; }
+
+    .event{
+      margin: 0;
+      box-sizing: border-box;
+      transform: scale(0.96);
+      transform-origin: center;
+      padding: 6px 6px;
+      border-radius: 7px;
+      background: rgba(64, 78, 192, 0.12);
+      border: 1px solid rgba(64, 78, 192, 0.35);
+      font-size: 12px;
+      line-height: 1.2;
+      overflow:hidden;
+      cursor: pointer;
+    }
+    .event .title{ font-weight: 700; }
+    .event .time{ display:none; }                      /* tijd tonen we in popup */
+
+dialog{
+      border: 1px solid rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 14px;
+      max-width: 700px;
+      width: 600px;
+    }
+
+@media (max-width: 800px){
+      :root{ --timeCol: 60px; }
+      .cell{ font-size: 11px; }
+    }
+	
+dialog label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+dialog input,
+dialog textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.25);
+  font-size: 13px;
+  box-sizing: border-box;
+  resize: vertical;
+  white-space: pre-wrap;   /* ⭐ zorgt dat ENTER zichtbaar blijft */
+}
+
+.dialog-actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+
+/* checkbox zelf iets rustiger */
+dialog .chk input[type="checkbox"] {
+  transform: scale(1.1);
+}
+
+/* prijsveld netjes laten inspringen */
+#priceRow {
+  margin-left: 28px;
+  margin-top: 6px;
+}
+
+/* === ADMIN POPUP CHECKBOXES === */
+
+dialog .chk {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+dialog .chk input[type="checkbox"] {
+  margin: 0;
+  justify-self: center;
+}
+
+/* prijsveld netjes onder 'betalend' */
+#priceRow {
+  margin-left: 30px;
+  margin-top: 6px;
+}
+/* read-only velden (member) */
+dialog input[disabled],
+dialog textarea[disabled] {
+  background: #f6f6f6;
+  color: #444;
+  cursor: default;
+}
+
+/* readonly checkboxrij */
+dialog .chk.readonly {
+  opacity: 0.85;
+}
+#eventDialog {
+  width: 750px !important;
+  max-height: none;
+  padding: 0;
+}
+
+#eventDialog form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width:100%;
+  max-width:none;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 6px;
+  border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 2;
+}
+
+.event-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin-bottom: 12px;
+}
+
+.info-flag {
+  font-size: 14px;
+  color:#4CAF50;
+}
+						
+							/* ALLE CSS VOOR DE DIALOG */
+
+/* ============================================
+   DIALOG LAYOUT (MEMBER vs ADMIN)
+   ============================================ */
+
+/* standaard: MEMBER-mode → 2 kolommen */
+.dialog-content {
+    display: flex;
+    flex-direction: row;
+    flex: 1;             /* FIX 1 */
+    overflow: visible;
+}
+
+.dialog-content #eventDialogBody,
+.dialog-content #memberActions {
+	background: rgba(0, 255, 0, 0.2);   /* GROEN */
+    width: 50%;
+	margin: 15px;
+}
+
+/* ADMIN-mode → 1 kolom */
+.dialog-content.admin-mode {
+    display: block;
+}
+
+.dialog-content.admin-mode #eventDialogBody {
+    width: 95%;
+	background: rgba(255, 0, 0, 0.2);   /* ROOD */
+}
+
+.dialog-content.admin-mode #memberActions {
+    display: none;
+}
+
+/* FORM moet ook mee krimpen in admin-mode */
+#eventDialog form {
+    width: 700px;        /* standaard breedte */
+    max-width: 700px;
+}
+
+#eventDialog form.admin-mode {
+    width: 330px;        /* admin small */
+    max-width: 100%;
+}
+
+/* standaard: member */
+#eventDialog {
+  width: 600px;
+  max-width: 700px;
+}
+
+/* admin-mode: dialog krimpt */
+#eventDialog.admin-mode {
+  width: 350px;      /* of auto */
+  max-width: 365px;  /* kies wat mooi is */
+}
+
+#eventDialog.admin-mode {
+    width: 350px;
+    max-width: 365px;
+}
+.statusok {
+	color: GREEN;
+	font-size: 14px;
+	font-weight: 900;
+}
+	
+.signupLabel {   
+    margin: 0px;   
+}
+
+.signupText {
+	font-size: 15px;
+	font-weight: 500;
+	color: blue;
+	margin-left: 20px;
+	display: block; /* zorgt dat alle regels dezelfde marge krijgen */ 
+	max-width: 260px; 
+}
+
+.signupLabel input {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.dialog-content.admin-mode #adminActions {
+    display: flex;
+}
+.dialog-content:not(.admin-mode) #adminActions {
+    display: none;
+}
+
+.admin-mode #adminActions {
+    display: flex;
+}
+.hidden {
+    display: none !important;
+}
