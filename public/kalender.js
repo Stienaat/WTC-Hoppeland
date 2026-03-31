@@ -2,11 +2,16 @@
    CONFIG
 ============================================================ */
 
-const API_EVENTS_URL  = "/events";
-const API_SIGNUPS_URL = "/signups";
+function getUserEmail() {
+  return localStorage.getItem("email");
+}
 
-const USER_EMAIL = localStorage.getItem("email");
-const IS_ADMIN   = localStorage.getItem("is_admin") === "true";
+function isAdmin() {
+  return localStorage.getItem("is_admin") === "true";
+}
+
+const getUserEmail() = localStorage.getItem("email");
+const isADMIN()  = localStorage.getItem("is_admin") === "true";
 
 const slotMinutes = 30;
 const startMin = 8 * 60;
@@ -256,7 +261,7 @@ function renderEvents() {
     evEl.appendChild(time);
 
     evEl.addEventListener("click", () => {
-      if (IS_ADMIN) {
+      if (isAdmin()) {
         openAdminDialog(ev);
       } else {
         openMemberDialog(ev);
@@ -313,12 +318,12 @@ function scrollToDefaultTime() {
    NAVIGATION
 ============================================================ */
 
-document.getElementById("btnPrevWeek")?.addEventListener("click", () => {
+document.getElementById("btnPrev")?.addEventListener("click", () => {
   currentWeekStart = addDays(currentWeekStart, -7);
   renderWeek();
 });
 
-document.getElementById("btnNextWeek")?.addEventListener("click", () => {
+document.getElementById("btnNext")?.addEventListener("click", () => {
   currentWeekStart = addDays(currentWeekStart, 7);
   renderWeek();
 });
@@ -353,7 +358,7 @@ async function openMemberDialog(eventData) {
 
   signupDownloaded = false;
 
-  const statusJson = await getSignupStatus(eventData.id, USER_EMAIL);
+  const statusJson = await getSignupStatus(eventData.id, getUserEmail());
   let status = null;
 
   if (statusJson?.signed_up) {
@@ -461,7 +466,7 @@ function attachMemberEvents(e, status) {
     chk.disabled = true;
     showQR();
     btn.style.display = "block";
-    lastSignup = { event_id: e.id, email: USER_EMAIL, status };
+    lastSignup = { event_id: e.id, email: getUserEmail(), status };
     return;
   }
 
@@ -626,7 +631,7 @@ function renderAdminRight(e) {
 
 async function handleSaveEvent() {
 
-  if (!IS_ADMIN) return;
+  if (!isAdmin()) return;
   if (!editingEvent) return;
 
   const fTitle = dialogBody.querySelector("#fTitle");
@@ -677,7 +682,7 @@ async function handleSaveEvent() {
 }
 
 async function handleDeleteEvent() {
-  if (!IS_ADMIN) return;
+  if (!isAdmin()) return;
   if (!editingEvent || !editingEvent.id) return;
 
   if (!confirm("Event verwijderen?")) return;
