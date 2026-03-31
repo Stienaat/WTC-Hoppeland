@@ -39,11 +39,14 @@ loadLid();
 
 <!-- LINKERKOLOM -->
 <div style="position:absolute;left:10px;top:20px;max-width:100px;margin:20px auto;padding:10px;border-radius:15px;">
-  <a href="./logout.html" class="wtc-button" style="display:block;margin-bottom:40px;padding:4px;width:100px">Uitloggen</a>
+	<a href="#" id="logoutBtn" class="wtc-button"
+		style="display:block;margin-bottom:40px;padding:4px;width:100px">Uitloggen
+	</a>
+
   <a href="./routes/routes.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Fietsroutes</a>
   <a href="./shop.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Shop</a>
   <a href="./kalender.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Activiteiten</a>
-  <a href="./routes/routes.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Movies</a>
+  <a href="./movies.html" class="wtc-button" style="display:block;margin-bottom:10px;padding:4px;width:100px">Movies</a>
 </div>
 
 <!-- MIDDEN BLOK -->
@@ -240,10 +243,21 @@ Tijdens activiteiten georganiseerd door WTC HOPPELAND vzw worden er soms foto’
 Dit beeldmateriaal kan gebruikt worden op onze sociale media, op onze website, of tijdens het ledenfeest.<Br>
 
 Foto’s en ander beeldmateriaal blijven te allen tijde eigendom van WTC HOPPELAND vzw.<Br><Br>.
-
-
-
 </div>
+
+<script>
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      // alle login-info weg
+      localStorage.removeItem("email");
+      localStorage.removeItem("token"); // voor het geval die ooit gebruikt werd
+      // terug naar loginpagina
+      window.location.href = "leden.html";
+    });
+  }
+</script>
+
 
 </body>
 </html>
