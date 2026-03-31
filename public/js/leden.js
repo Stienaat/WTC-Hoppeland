@@ -41,7 +41,7 @@ async function ajax(url, options = {}) {
   
   const API_NOTICE = '/notice';
 
-  const ROUTES_API = /WTC/routes/upload_do.php';
+ // const ROUTES_API = /WTC/routes/upload_do.php';
   
   
  
