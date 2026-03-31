@@ -37,8 +37,7 @@ async function ajax(url, options = {}) {
    * 0) BASIS DOM
    ************************************************************/
   const logo         = document.getElementById('Image1');
-  const adminOverlay = document.getElementById('adminOverlay');
- 
+  const adminOverlay = document.getElementById('adminOverlay'); 
   
   const API_NOTICE = /notice_api.php';
   const ROUTES_API = /WTC/routes/upload_do.php';
@@ -48,8 +47,7 @@ async function ajax(url, options = {}) {
   /************************************************************
    * 2) NOTICE
    ************************************************************/
-  const box    = document.getElementById('noticeBox');
- 
+  const box    = document.getElementById('noticeBox'); 
   const btnEditNotice  = document.getElementById('btnEditNotice');
   const btnNoticeClose = document.getElementById('btnNoticeClose');
   const btnMedSave = document.getElementById('btnMedSave');
@@ -72,16 +70,30 @@ function fmt(text){
   let html = '';
   let inList = false;
 
- const R = {
-    lg:   new RegExp("\\[lg\\]\\s*([\\s\\S]*?)\\s*\\[\\/lg\\]", "g"),
-	
-	sm:   new RegExp("\\[sm\\]\\s*([\\s\\S]*?)\\s*\\[\\/sm\\]", "g"),
-		
-	bold: new RegExp("\\*\\*\\s*([\\s\\S]+?)\\s*\\*\\*", "g"),
-	em:   new RegExp("\\*\\s*([\\s\\S]+?)\\s*\\*", "g"),   
-	u:    new RegExp("__\\s*([\\s\\S]+?)\\s*__", "g")
-	
-	};
+const R = {
+  lg:   /
+
+\[lg\]
+
+\s*([\s\S]*?)\s*
+
+\[\/lg\]
+
+/g,
+  sm:   /
+
+\[sm\]
+
+\s*([\s\S]*?)\s*
+
+\[\/sm\]
+
+/g,
+  bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
+  em:   /\*\s*([\s\S]+?)\s*\*/g,
+  u:    /__\s*([\s\S]+?)\s*__/g
+};
+
 	
  const pushLine = (raw) => {let body = esc(raw);
    
