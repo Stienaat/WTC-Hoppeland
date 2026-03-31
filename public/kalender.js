@@ -11,7 +11,9 @@ function isAdmin() {
 }
 
 
-const isADMIN()  = localStorage.getItem("is_admin") === "true";
+function isAdmin() {
+  return localStorage.getItem("is_admin") === "true";
+}
 
 const slotMinutes = 30;
 const startMin = 8 * 60;
