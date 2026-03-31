@@ -86,97 +86,66 @@ app.post("/notice", upload.none(), (req, res) => {
 // =====================================
 // REGISTRATIE (leden)
 // =====================================
-app.post("/register", upload.none(), async (req, res) => {
-  const { name, address, city, email, phone, code } = req.body;
+app.post("/register", async (req, res) => {
+  const { naam, adres, gemeente, telefoon, email, password } = req.body;
 
-  if (!name || !email || !code) {
-    return res
-      .status(400)
-      .json({ ok: false, message: "Naam, email en paswoord verplicht." });
+  if (!naam || !email || !password) {
+    return res.json({ ok: false, error: "Verplichte velden ontbreken." });
   }
 
-  try {
-    const { error } = await supabase
-      .from("leden")
-      .insert([
-        {
-          name,
-          address,
-          city,
-          email: email.toLowerCase(),
-          phone,
-          code
-        }
-      ]);
+  const { data, error } = await supabase
+    .from("Leden")
+    .insert({
+      naam,
+      adres,
+      gemeente,
+      telefoon,
+      email,
+      wachtwoord: password
+    })
+    .select()
+    .single();
 
-    if (error) {
-      console.error("Registratie fout:", error);
-      if (error.code === "23505") {
-        return res
-          .status(400)
-          .json({ ok: false, message: "Dit e-mailadres bestaat al." });
-      }
-      return res
-        .status(500)
-        .json({ ok: false, message: "Serverfout bij registratie." });
-    }
-
-    return res.json({ ok: true, message: "Registratie gelukt." });
-  } catch (err) {
-    console.error("Registratie fout (catch):", err);
-    return res
-      .status(500)
-      .json({ ok: false, message: "Serverfout bij registratie." });
+  if (error) {
+    return res.json({ ok: false, error: "Registratie mislukt." });
   }
+
+  res.json({ ok: true, user: data });
 });
+
 
 // =====================================
 // LEDEN LOGIN (met code, 6 tekens)
 // =====================================
-app.post("/login", upload.none(), async (req, res) => {
-  const { email, code } = req.body;
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
 
-  if (!email || !code) {
-    return res
-      .status(400)
-      .json({ ok: false, message: "Email en paswoord verplicht." });
+  if (!email || !password) {
+    return res.json({ ok: false, error: "Email en wachtwoord verplicht." });
   }
 
-  try {
-    const { data, error } = await supabase
-      .from("leden")
-      .select("*")
-      .eq("email", email.toLowerCase())
-      .eq("code", code)
-      .maybeSingle();
+  const { data, error } = await supabase
+    .from("Leden")               // LET OP: hoofdletter L
+    .select("*")
+    .eq("email", email)
+    .eq("wachtwoord", password)  // jouw kolomnaam
+    .single();
 
-    if (error) {
-      console.error("Login query fout:", error);
-      throw error;
-    }
-
-    if (!data) {
-      return res
-        .status(401)
-        .json({ ok: false, message: "Onjuiste login." });
-    }
-
-    return res.json({
-      ok: true,
-      message: "Login OK",
-      lid: {
-        id: data.id,
-        name: data.name,
-        email: data.email
-      }
-    });
-  } catch (err) {
-    console.error("Login fout (catch):", err);
-    return res
-      .status(500)
-      .json({ ok: false, message: "Serverfout bij login." });
+  if (error || !data) {
+    return res.json({ ok: false, error: "Login mislukt." });
   }
+
+  res.json({
+    ok: true,
+    token: "dummy-token",
+    user: {
+      id: data.id,
+      naam: data.naam,
+      email: data.email
+    }
+  });
 });
+
 
 // =====================================
 // ADMIN-LOGIN (PIN)
