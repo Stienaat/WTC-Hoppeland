@@ -274,7 +274,7 @@ app.get("/me", async (req, res) => {
 // GET /events
 app.get("/events", async (req, res) => {
   const { data: events, error } = await supabase
-    .from("Events")
+    .from("events")
     .select("*")
     .order("start", { ascending: true });
 
@@ -337,51 +337,6 @@ function buildEpcQrText(creditorName, iban, bic, amount, remittance, info = "") 
     info
   ].join("\n");
 }
-app.post("/events", async (req, res) => {
-  const { action, id, title, start, end, info, requires_signup, mandatory, paid, price } = req.body;
-
-  // TODO: check is_admin via jouw eigen login-systeem
-
-  if (action === "update") {
-    const { error } = await supabase
-      .from("Events")
-      .update({ title, start, end, info, requires_signup, mandatory, paid, price })
-      .eq("id", id);
-
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json({ ok: true });
-  }
-
-  if (action === "delete") {
-    const { error } = await supabase
-      .from("Events")
-      .delete()
-      .eq("id", id);
-
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json({ ok: true });
-  }
-
-  // create
-  const { data, error } = await supabase
-    .from("Events")
-    .insert({
-      title,
-      start,
-      end,
-      info,
-      requires_signup,
-      mandatory,
-      paid,
-      price
-    })
-    .select()
-    .single();
-
-  if (error) return res.status(500).json({ error: error.message });
-
-  res.json({ id: data.id });
-});
 
 
 // =====================================
