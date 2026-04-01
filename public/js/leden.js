@@ -159,9 +159,6 @@ fetch(API_NOTICE)
     console.error(e);
     setStatus(status, 'Fout bij laden.', 'error');
   });
-        setStatus(status, 'Fout bij laden.', 'error');
-      }
-    })
     .catch((e) => {
       console.error(e);
       setStatus(status, 'Fout bij laden.', 'error');
