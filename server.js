@@ -95,7 +95,9 @@ app.post("/register", async (req, res) => {
 // LEDEN LOGIN
 // =====================================
 app.post("/login", async (req, res) => {
+  console.log("LOGIN BODY:", req.body);
   const { email, password } = req.body;
+
 
   try {
     const { data: user, error } = await supabase
