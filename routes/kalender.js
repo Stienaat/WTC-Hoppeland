@@ -22,7 +22,6 @@ const dayNames = ["ma","di","woe","do","vr","za","zo"];
 /* ============================================================
    STATE
 ============================================================ */
-
 let events = [];
 let currentWeekStart = startOfWeekMonday(new Date());
 let editingEvent = null;
@@ -31,7 +30,6 @@ let signupDownloaded = false;
 /* ============================================================
    DOM
 ============================================================ */
-
 const gridEl = document.getElementById("grid");
 const labelEl = document.getElementById("weekLabel");
 const eventDialog = document.getElementById("eventDialog");
@@ -42,7 +40,6 @@ const btnCloseTop = document.getElementById("btnCloseTop");
 /* ============================================================
    HELPERS
 ============================================================ */
-
 function pad2(n){ return String(n).padStart(2,"0"); }
 
 function escapeHtml(s){
@@ -77,52 +74,25 @@ function formatDayLabel(d){
 }
 
 function formatWeekLabel(weekStart){
-  const we = addDays(weekStart,6);
+  const we = addDays(weekStart, 6);
   return `${toDateOnlyKey(weekStart)} – ${toDateOnlyKey(we)}`;
-}
-
-function dayIndexFromWeekStart(d, weekStart){
-  const a = new Date(weekStart); a.setHours(0,0,0,0);
-  const b = new Date(d); b.setHours(0,0,0,0);
-  return Math.round((b-a)/86400000);
 }
 
 function toLocalISO(d){
   return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:00`;
 }
 
-function parseLocalISO(iso){
-  return new Date(iso);
-}
-
-function overlaps(a,b){ return a.startM < b.endM && b.startM < a.endM; }
-
-function layoutOverlaps(dayEvents){
-  dayEvents.sort((a,b)=>a.startM-b.startM||b.endM-a.endM);
-  let group=[];
-  function flush(){
-    const n=group.length;
-    if(n<=1){
-      group.forEach(ev=>{ ev.el.style.width="100%"; ev.el.style.transform=""; });
-      group=[]; return;
-    }
-    const w=100/n;
-    group.forEach((ev,i)=>{ ev.el.style.width=`${w}%`; ev.el.style.transform=`translateX(${i*w}%)`; });
-    group=[];
-  }
-  for(const ev of dayEvents){
-    if(!group.length){ group=[ev]; continue; }
-    const last = group[group.length-1];
-    if(overlaps(last, ev)){ group.push(ev); }
-    else { flush(); group=[ev]; }
-  }
-  flush();
+function makeCell(text, cls, role){
+  const d = document.createElement("div");
+  d.className = cls;
+  d.textContent = text;
+  d.setAttribute("role", role);
+  return d;
 }
 
 /* ============================================================
    API HELPERS
 ============================================================ */
-
 async function apiJson(url, options = {}) {
   const r = await fetch(url, {
     credentials: "include",
@@ -146,9 +116,8 @@ async function apiJson(url, options = {}) {
 /* ============================================================
    EVENTS API
 ============================================================ */
-
-async function loadEvents(){
-  const data = await apiJson(API_EVENTS_URL, { method:"GET" });
+async function loadEvents() {
+  const data = await apiJson(API_EVENTS_URL, { method: "GET" });
   const arr = Array.isArray(data) ? data : [];
 
   events = arr.map(e => ({
@@ -165,44 +134,75 @@ async function loadEvents(){
   }));
 }
 
+async function loadMemberHeader() {
+  const naamEl = document.getElementById("naam");
+  if (!naamEl) return;
+
+  const email = getUserEmail();
+
+  if (!email && !isAdmin()) {
+    window.location.href = "leden.html?msg=notknown";
+    return;
+  }
+
+  if (!email) return;
+
+  try {
+    const data = await apiJson(`/me?email=${encodeURIComponent(email)}`, {
+      method: "GET"
+    });
+
+    if (data?.ok && data.user?.naam) {
+      naamEl.textContent = data.user.naam;
+    }
+  } catch (err) {
+    console.error("Naam laden mislukt:", err);
+  }
+}
+
 /* ============================================================
    GRID RENDERING
 ============================================================ */
-
-function render(){
+function render() {
   labelEl.textContent = formatWeekLabel(currentWeekStart);
   gridEl.innerHTML = "";
 
   const todayKey = toDateOnlyKey(new Date());
 
   gridEl.appendChild(makeCell("", "cell head", "columnheader"));
-  for(let c=0;c<7;c++){
-    const d = addDays(currentWeekStart,c);
-    gridEl.appendChild(makeCell(
-      formatDayLabel(d),
-      "cell head" + (toDateOnlyKey(d)===todayKey ? " today" : ""),
-      "columnheader"
-    ));
+
+  for (let c = 0; c < 7; c++) {
+    const d = addDays(currentWeekStart, c);
+    gridEl.appendChild(
+      makeCell(
+        formatDayLabel(d),
+        "cell head" + (toDateOnlyKey(d) === todayKey ? " today" : ""),
+        "columnheader"
+      )
+    );
   }
 
-  const totalSlots = (endMin-startMin)/slotMinutes;
+  const totalSlots = (endMin - startMin) / slotMinutes;
 
-  for(let i=0;i<totalSlots;i++){
-    const tMin = startMin+i*slotMinutes;
-    const h = Math.floor(tMin/60);
-    const m = tMin%60;
+  for (let i = 0; i < totalSlots; i++) {
+    const tMin = startMin + i * slotMinutes;
+    const h = Math.floor(tMin / 60);
+    const m = tMin % 60;
 
-    gridEl.appendChild(makeCell(m===0?`${pad2(h)}:00`:"","cell hour","rowheader"));
+    gridEl.appendChild(
+      makeCell(m === 0 ? `${pad2(h)}:00` : "", "cell hour", "rowheader")
+    );
 
-    for(let c=0;c<7;c++){
-      const d = addDays(currentWeekStart,c);
+    for (let c = 0; c < 7; c++) {
+      const d = addDays(currentWeekStart, c);
       const dateKey = toDateOnlyKey(d);
       const startIso = `${dateKey}T${pad2(h)}:${pad2(m)}`;
-      const endMin2 = tMin+slotMinutes;
-      const eh = Math.floor(endMin2/60);
-      const em = endMin2%60;
 
-      const cell = makeCell("","cell body","gridcell");
+      const endMin2 = tMin + slotMinutes;
+      const eh = Math.floor(endMin2 / 60);
+      const em = endMin2 % 60;
+
+      const cell = makeCell("", "cell body", "gridcell");
       cell.dataset.slotStart = startIso;
       cell.dataset.slotEnd = `${dateKey}T${pad2(eh)}:${pad2(em)}`;
       gridEl.appendChild(cell);
@@ -233,19 +233,21 @@ function render(){
       const startD = new Date(cell.dataset.slotStart);
       const endD = new Date(cell.dataset.slotEnd);
 
-      openEventDialog({
-        id: null,
-        title: "",
-        start: cell.dataset.slotStart,
-        end: cell.dataset.slotEnd,
-        info: "",
-        requires_signup: false,
-        mandatory: false,
-        paid: false,
-        price: 0,
-        startD,
-        endD
-      });
+      if (typeof openEventDialog === "function") {
+        openEventDialog({
+          id: null,
+          title: "",
+          start: cell.dataset.slotStart,
+          end: cell.dataset.slotEnd,
+          info: "",
+          requires_signup: false,
+          mandatory: false,
+          paid: false,
+          price: 0,
+          startD,
+          endD
+        });
+      }
     });
   }
 
@@ -253,96 +255,19 @@ function render(){
   scrollToDefault();
 }
 
-/* ============================================================
-   EVENTS RENDERING
-============================================================ */
-
-function renderEvents() {
-  const body = gridEl.querySelector(".gridBody");
-  if (!body) return;
-
-  // verwijder oude event‑elementen
-  body.querySelectorAll(".eventItem").forEach(el => el.remove());
-
-  const dayBuckets = [[],[],[],[],[],[],[]];
-
-  for (const ev of events) {
-    const startD = new Date(ev.start);
-    const endD   = new Date(ev.end);
-
-    const dayIdx = dayIndexFromWeekStart(startD, currentWeekStart);
-    if (dayIdx < 0 || dayIdx > 6) continue;
-
-    const startM = startD.getHours()*60 + startD.getMinutes();
-    const endM   = endD.getHours()*60   + endD.getMinutes();
-
-    const totalSlots = (endMin - startMin) / slotMinutes;
-    const topPct    = ((startM - startMin) / (endMin - startMin)) * 100;
-    const heightPct = ((endM   - startMin) / (endMin - startMin)) * 100 - topPct;
-
-    const evEl = document.createElement("div");
-    evEl.className = "eventItem";
-    evEl.style.top    = `${topPct}%`;
-    evEl.style.height = `${heightPct}%`;
-    evEl.dataset.id   = ev.id;
-
-    const title = document.createElement("div");
-    title.className = "eventTitle";
-    title.textContent = ev.title || "(zonder titel)";
-
-    const time = document.createElement("div");
-    time.className = "eventTime";
-    time.textContent =
-      `${pad2(startD.getHours())}:${pad2(startD.getMinutes())} - ` +
-      `${pad2(endD.getHours())}:${pad2(endD.getMinutes())}`;
-
-    evEl.appendChild(title);
-    evEl.appendChild(time);
-
-    evEl.addEventListener("click", () => {
-      if (isAdmin()) {
-        openAdminDialog(ev);
-      } else {
-        openMemberDialog(ev);
-      }
-    });
-
-    // plaats in juiste dag‑kolom
-    const rows = body.querySelectorAll(".timeRow");
-    const firstRow = rows[0];
-    if (!firstRow) continue;
-
-    const dayCell = firstRow.children[1 + dayIdx]; // [0]=timeLabel
-    if (!dayCell) continue;
-
-    // we positioneren relatief t.o.v. de hele body
-    body.appendChild(evEl);
-
-    dayBuckets[dayIdx].push({
-      startM,
-      endM,
-      el: evEl
-    });
-  }
-
-  // overlappende events layouten
-  for (let d = 0; d < 7; d++) {
-    layoutOverlaps(dayBuckets[d]);
-  }
-}
-
-/* ============================================================
-   WEEK RENDERING
-============================================================ */
-
 function renderWeek() {
-  labelEl.textContent = formatWeekLabel(currentWeekStart);
-  renderGrid();
-  renderEvents();
-  scrollToDefaultTime();
+  render();
 }
 
-function scrollToDefaultTime() {
+function renderEvents(eventLayer) {
+  if (!eventLayer) return;
+  eventLayer.innerHTML = "";
+
+  // tijdelijk leeg tot de backend + event-layout weer klopt
+  // zo krijg je eerst terug een normale 7-daagse grid
+}
+
+function scrollToDefault() {
   const scroller = document.getElementById("gridScroll");
   if (!scroller) return;
 
@@ -356,7 +281,6 @@ function scrollToDefaultTime() {
 /* ============================================================
    NAVIGATION
 ============================================================ */
-
 document.getElementById("btnPrev")?.addEventListener("click", () => {
   currentWeekStart = addDays(currentWeekStart, -7);
   renderWeek();
@@ -370,6 +294,23 @@ document.getElementById("btnNext")?.addEventListener("click", () => {
 document.getElementById("btnToday")?.addEventListener("click", () => {
   currentWeekStart = startOfWeekMonday(new Date());
   renderWeek();
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await loadEvents();
+  } catch (e) {
+    console.error("Events laden mislukt:", e);
+  }
+
+  renderWeek();
+
+  btnCloseTop?.addEventListener("click", () => {
+    eventDialog.close();
+  });
 });
 
 /* ============================================================
