@@ -298,7 +298,37 @@ fetch("/notice")
       "Mededelingen konden niet geladen worden.";
   });
 </script>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
+  const email = document.getElementById('Editbox4').value.trim();
+  const code  = document.getElementById('Editbox6').value.trim();
+  const status = document.getElementById('loginStatus');
+
+  setStatus(status, 'Bezig met inloggen…', 'info');
+
+  try {
+    const { data, error } = await supabase
+      .from('leden')
+      .select('*')
+      .eq('email', email)
+      .eq('code', code)
+      .single();
+
+    if (error || !data) {
+      setStatus(status, 'Onbekende combinatie.', 'error');
+      return;
+    }
+
+    // Succes → redirect
+    window.location.href = 'leden_home.html';
+  } catch (err) {
+    console.error(err);
+    setStatus(status, 'Technische fout.', 'error');
+  }
+});
+</script>
 
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
 
