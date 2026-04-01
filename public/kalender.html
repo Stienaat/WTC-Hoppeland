@@ -51,35 +51,7 @@
 
   <script src="kalender.js"></script>
   
-<script>
-const email = localStorage.getItem("email");
-const isAdmin = localStorage.getItem("is_admin") === "true";
 
-if (!email && !isAdmin) {
-  window.location.href = "leden.html?msg=notknown";
-}
-
-
-async function loadLid() {
-  const res = await fetch(`/me?email=${encodeURIComponent(email)}`);
-  const data = await res.json();
-
-  if (!data.ok) return;
-
-  const lid = data.user;
-
-  // Naam invullen
-  const naamEl = document.getElementById("naam");
-  if (naamEl) naamEl.textContent = lid.naam;
-
-  // Email beschikbaar maken voor kalender.js
-  window.getUserEmail = function () {
-    return lid.email;
-  };
-}
-
-loadLid();
-</script>
 
 
 
