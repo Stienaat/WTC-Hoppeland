@@ -287,22 +287,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-/* ============================================================
-   INIT
-============================================================ */
-
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    await loadEvents();
-  } catch (e) {
-    console.error("Events laden mislukt:", e);
-  }
-  renderWeek();
-
-  btnCloseTop?.addEventListener("click", () => {
-    eventDialog.close();
-  });
-});
 
 /* ============================================================
    MEMBER DIALOG
