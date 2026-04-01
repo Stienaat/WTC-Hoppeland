@@ -3,7 +3,8 @@
  ************************************************************/
 console.log("LEDEN.JS IS GELADEN");
  
- 
+const noticeStatus = document.getElementById('loginStatus');
+
 
 async function ajax(url, options = {}) {
   options.headers = {
@@ -140,21 +141,25 @@ const R = {
 
 function loadNotice(){
   if (!box) return;
+
+  const status = document.getElementById('loginStatus');
   setStatus(status, 'Tekst laden…', 'info');
 
   fetch(API_NOTICE)
-
     .then(r => r.json())
     .then(d => {
       if (d.ok){
         setRaw(d.text || '');
         render();
-        setStatus(status, '');
+        setStatus(status, '', 'info');
+      } else {
+        setStatus(status, 'Fout bij laden.', 'error');
       }
     })
-    .catch(() => 
-      setStatus(document.getElementById("loginStatus"), "Fout bij laden.", "error")
-    );
+    .catch((e) => {
+      console.error(e);
+      setStatus(status, 'Fout bij laden.', 'error');
+    });
 }
 
 
