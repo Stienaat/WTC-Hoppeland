@@ -53,9 +53,12 @@
   
 <script>
 const email = localStorage.getItem("email");
-if (!email) {
+const isAdmin = localStorage.getItem("is_admin") === "true";
+
+if (!email && !isAdmin) {
   window.location.href = "leden.html?msg=notknown";
 }
+
 
 async function loadLid() {
   const res = await fetch(`/me?email=${encodeURIComponent(email)}`);
