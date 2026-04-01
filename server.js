@@ -118,8 +118,10 @@ app.post("/login", async (req, res) => {
 
     res.json({ ok: true, user });
   } catch (err) {
-    res.json({ ok: false, error: err.message });
-  }
+  console.error("LOGIN ERROR:", err);
+  res.json({ ok: false, error: "Technische fout" });
+}
+
 });
 
 
