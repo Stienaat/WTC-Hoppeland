@@ -145,14 +145,20 @@ function loadNotice(){
   const status = document.getElementById('loginStatus');
   setStatus(status, 'Tekst laden…', 'info');
 
-  fetch(API_NOTICE)
-    .then(r => r.json())
-    .then(d => {
-      if (d.ok){
-        setRaw(d.text || '');
-        render();
-        setStatus(status, '', 'info');
-      } else {
+fetch(API_NOTICE)
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  })
+  .then(t => {
+    setRaw(t);
+    render();
+    setStatus(status, '', 'info');
+  })
+  .catch(e => {
+    console.error(e);
+    setStatus(status, 'Fout bij laden.', 'error');
+  });
         setStatus(status, 'Fout bij laden.', 'error');
       }
     })
