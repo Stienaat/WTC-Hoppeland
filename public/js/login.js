@@ -195,18 +195,33 @@ btnClosePinChange?.addEventListener("click", closePinChangePopup);
 /************************************************************
  * 5) MEMBER LOGIN & REGISTRATIE
  ************************************************************/
+/************************************************************/
 document.getElementById("loginForm")?.addEventListener("submit", async e => {
   e.preventDefault();
 
+  // Welke knop werd ingedrukt? (login of registreer)
   const actie = document.activeElement.value;
-  const email = document.getElementById("Editbox4").value.trim();
+
+  // LOGIN velden
+  const email    = document.getElementById("Editbox4").value.trim();
   const password = document.getElementById("Editbox6").value.trim();
 
+  // REGISTRATIE velden
+  const naam      = document.getElementById("Editbox1").value.trim();
+  const adres     = document.getElementById("Editbox2").value.trim();
+  const gemeente  = document.getElementById("Editbox3").value.trim();
+  const telefoon  = document.getElementById("Editbox5").value.trim();
+  const codeRepeat = document.getElementById("Editbox7").value.trim();
+
+  /***********************
+   * REGISTRATIE
+   ***********************/
   if (actie === "registreer") {
-    const naam      = document.getElementById("Editbox1").value.trim();
-    const adres     = document.getElementById("Editbox2").value.trim();
-    const gemeente  = document.getElementById("Editbox3").value.trim();
-    const telefoon  = document.getElementById("Editbox5").value.trim();
+
+    if (password !== codeRepeat) {
+      alert("Paswoorden komen niet overeen");
+      return;
+    }
 
     const res = await fetch("/register", {
       method: "POST",
@@ -219,7 +234,11 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     return;
   }
 
+  /***********************
+   * LOGIN
+   ***********************/
   if (actie === "login") {
+
     const res = await fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -229,12 +248,13 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     const data = await res.json();
 
     if (data.ok) {
-     localStorage.setItem("user_email", email);
+      localStorage.setItem("user_email", email);
       window.location.href = "leden-dashboard.html";
     } else {
       alert(data.error || "Login mislukt.");
     }
   }
 });
+
 
 });
