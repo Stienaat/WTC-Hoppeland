@@ -3,6 +3,7 @@
  * 1) ADMIN UI OPEN / CLOSE
  ************************************************************/
 
+ console.log("LOGIN.JS IS GELADEN");
  
  document.addEventListener("DOMContentLoaded", () => {
     // AL je code hierbinnen
