@@ -50,6 +50,27 @@
   </dialog>
 
   <script src="kalender.js"></script>
+  
+  <script>
+const email = localStorage.getItem("email");
+if (!email) {
+  window.location.href = "leden.html?msg=notknown";
+}
+
+async function loadLid() {
+  const res = await fetch(`/me?email=${encodeURIComponent(email)}`);
+  const data = await res.json();
+
+  if (!data.ok) return;
+
+  const lid = data.user;
+  const naamEl = document.getElementById("naam");
+  if (naamEl) naamEl.textContent = lid.naam;
+}
+
+loadLid();
+</script>
+
 
 </body>
 </html>
