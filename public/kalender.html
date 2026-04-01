@@ -51,7 +51,7 @@
 
   <script src="kalender.js"></script>
   
-  <script>
+<script>
 const email = localStorage.getItem("email");
 if (!email) {
   window.location.href = "leden.html?msg=notknown";
@@ -64,12 +64,20 @@ async function loadLid() {
   if (!data.ok) return;
 
   const lid = data.user;
+
+  // Naam invullen
   const naamEl = document.getElementById("naam");
   if (naamEl) naamEl.textContent = lid.naam;
+
+  // Email beschikbaar maken voor kalender.js
+  window.getUserEmail = function () {
+    return lid.email;
+  };
 }
 
 loadLid();
 </script>
+
 
 
 </body>
