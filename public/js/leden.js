@@ -71,6 +71,29 @@ function fmt(text){
   let html = '';
   let inList = false;
 
+const R = {
+  lg:   /
+
+\[lg\]
+
+\s*([\s\S]*?)\s*
+
+\[\/lg\]
+
+/g,
+  sm:   /
+
+\[sm\]
+
+\s*([\s\S]*?)\s*
+
+\[\/sm\]
+
+/g,
+  bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
+  em:   /\*\s*([\s\S]+?)\s*\*/g,
+  u:    /__\s*([\s\S]+?)\s*__/g
+};
 
 	
  const pushLine = (raw) => {let body = esc(raw);

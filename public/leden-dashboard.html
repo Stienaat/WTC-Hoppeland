@@ -11,9 +11,12 @@
 <script>
 // 1) Email ophalen uit localStorage (van login)
 const email = localStorage.getItem("email");
-if (!email) {
+const isAdmin = localStorage.getItem("isAdmin") === "1";
+
+if (!email && !isAdmin) {
   window.location.href = "leden.html?msg=notknown";
 }
+
 
 // 2) Lidgegevens ophalen via server
 async function loadLid() {
