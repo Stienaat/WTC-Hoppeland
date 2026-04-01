@@ -189,41 +189,40 @@ function render() {
   gridEl.appendChild(eventLayer);
 
   if (isAdmin()) {
-    eventLayer.addEventListener("contextmenu", (ev) => {
-      if (ev.ctrlKey) return;
-      ev.preventDefault();
+	eventLayer.addEventListener("contextmenu", (ev) => {
+	  if (ev.ctrlKey) return;
+	  ev.preventDefault();
 
-      const prev = eventLayer.style.pointerEvents;
-      eventLayer.style.pointerEvents = "none";
-      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "none");
+	  const prev = eventLayer.style.pointerEvents;
+	  eventLayer.style.pointerEvents = "none";
+	  eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "none");
 
-      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+	  const el = document.elementFromPoint(ev.clientX, ev.clientY);
 
-      eventLayer.style.pointerEvents = prev;
-      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "");
+	  eventLayer.style.pointerEvents = prev;
+	  eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "");
 
-      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
-      if (!cell) return;
+	  const cell = el?.closest?.("[data-slot-start][data-slot-end]");
+	  if (!cell) return;
 
-      const startD = new Date(cell.dataset.slotStart);
-      const endD = new Date(cell.dataset.slotEnd);
+	  const startD = new Date(cell.dataset.slotStart);
+	  const endD   = new Date(cell.dataset.slotEnd);
 
-      if (typeof openEventDialog === "function") {
-        openEventDialog({
-          id: null,
-          title: "",
-          start: cell.dataset.slotStart,
-          end: cell.dataset.slotEnd,
-          info: "",
-          requires_signup: false,
-          mandatory: false,
-          paid: false,
-          price: 0,
-          startD,
-          endD
-        });
-      }
-    });
+	  openAdminDialog({
+		id: null,
+		title: "",
+		start: cell.dataset.slotStart,
+		end: cell.dataset.slotEnd,
+		info: "",
+		requires_signup: false,
+		mandatory: false,
+		paid: false,
+		price: 0,
+		startD,
+		endD
+	  });
+	});
+
   }
 
   renderEvents(eventLayer);
