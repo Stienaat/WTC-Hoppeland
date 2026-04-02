@@ -455,7 +455,10 @@ function attachMemberEvents(e, status) {
         return;
       }
       lastSignup = r.signup;
-      signupText.textContent = "Scan de code met uw bankapp.";
+     if (signupText) {
+		signupText.textContent = "Scan de code met uw bankapp.";
+	}
+
       showQR();
       btn.style.display = "block";
       return;
@@ -468,7 +471,10 @@ function attachMemberEvents(e, status) {
       return;
     }
 
-    signupText.textContent = "Ik schrijf mij in.";
+    if (signupText) {
+		signupText.textContent = "Ik schrijf mij in.";
+	}
+
     hideQR();
     btn.style.display = "none";
     lastSignup = null;
@@ -477,7 +483,10 @@ function attachMemberEvents(e, status) {
   btn.onclick = () => {
     if (!lastSignup) return;
     signupDownloaded = true;
-    signupText.textContent = "✔️ U bent ingeschreven";
+    if (signupText) {
+		signupText.textContent = "✔️ U bent ingeschreven";
+	}
+
     downloadConfirmation(e, lastSignup);
   };
 }
@@ -753,13 +762,4 @@ async function loadSignupsForEvent(eventId) {
   }
 }
 
-async function loadSignupsForEvent(eventId) {
-  if (!eventId) return [];
-  try {
-    const data = await apiJson(`/signups?event_id=${eventId}`);
-    return Array.isArray(data) ? data : [];
-  } catch (e) {
-    console.error("Signups laden mislukt:", e);
-    return [];
-  }
-}
+
