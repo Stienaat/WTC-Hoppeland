@@ -192,27 +192,48 @@ app.post("/admin-change-pin", async (req, res) => {
 
 
 // =====================================
-// EVENT INSCHRIJVEN
+// EVENT INSCHRIJVEN (via email)
 // =====================================
 app.post("/signup", upload.none(), async (req, res) => {
-  const { member_id, event_id } = req.body;
+  const { email, event_id } = req.body;
 
-  if (!member_id || !event_id) {
-    return res.json({ ok: false, message: "Lid en event verplicht." });
+  if (!email || !event_id) {
+    return res.json({ ok: false, message: "email en event_id verplicht" });
   }
 
   try {
-    const { error } = await supabase
+    const { data: member, error: memberError } = await supabase
+      .from("Leden")
+      .select("id, naam, email")
+      .eq("email", email)
+      .single();
+
+    if (memberError || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
+    }
+
+    const { error: insertError } = await supabase
       .from("signups")
-      .insert([{ member_id, event_id, status: "ingeschreven" }]);
+      .insert([{ member_id: member.id, event_id, status: "pending" }]);
 
-    if (error) return res.json({ ok: false });
+    if (insertError) {
+      return res.json({ ok: false, message: "Inschrijving mislukt." });
+    }
 
-    return res.json({ ok: true });
+    return res.json({
+      ok: true,
+      signup: {
+        event_id,
+        email: member.email,
+        name: member.naam,
+        status: "pending"
+      }
+    });
   } catch (err) {
-    return res.json({ ok: false });
+    return res.json({ ok: false, message: "Serverfout." });
   }
 });
+
 
 // =====================================
 // CONTACT FORM
@@ -341,6 +362,116 @@ function buildEpcQrText(creditorName, iban, bic, amount, remittance, info = "") 
     info
   ].join("\n");
 }
+
+// =====================================
+// INSCHRIJVINGEN OPHALEN (ADMIN)
+// =====================================
+app.get("/signups", async (req, res) => {
+  const eventId = req.query.event_id;
+
+  if (!eventId) {
+    return res.status(400).json({ error: "event_id verplicht" });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("signups")
+      .select("id, status, Leden(naam, email)")
+      .eq("event_id", eventId);
+
+    if (error) throw error;
+
+    const mapped = (data || []).map(s => ({
+      id: s.id,
+      name: s.Leden?.naam || "",
+      email: s.Leden?.email || "",
+      status: s.status || ""
+    }));
+
+    res.json(mapped);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =====================================
+// INSCHRIJVINGSSTATUS OPHALEN (MEMBER)
+// =====================================
+app.get("/signup-status", async (req, res) => {
+  const { email, event_id } = req.query;
+
+  if (!email || !event_id) {
+    return res.json({ ok: false, error: "email en event_id verplicht" });
+  }
+
+  try {
+    const { data: member, error: memberError } = await supabase
+      .from("Leden")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (memberError || !member) {
+      return res.json({ ok: true, signed_up: false });
+    }
+
+    const { data: signup, error: signupError } = await supabase
+      .from("signups")
+      .select("*")
+      .eq("member_id", member.id)
+      .eq("event_id", event_id)
+      .maybeSingle();
+
+    if (signupError || !signup) {
+      return res.json({ ok: true, signed_up: false });
+    }
+
+    return res.json({
+      ok: true,
+      signed_up: true,
+      status: signup.status || "pending"
+    });
+  } catch (err) {
+    return res.json({ ok: false, error: err.message });
+  }
+});
+
+// =====================================
+// INSCHRIJVING ANNULEREN (MEMBER)
+// =====================================
+app.post("/cancel", upload.none(), async (req, res) => {
+  const { email, event_id } = req.body;
+
+  if (!email || !event_id) {
+    return res.json({ ok: false, message: "email en event_id verplicht" });
+  }
+
+  try {
+    const { data: member, error: memberError } = await supabase
+      .from("Leden")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (memberError || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
+    }
+
+    const { error: deleteError } = await supabase
+      .from("signups")
+      .delete()
+      .eq("member_id", member.id)
+      .eq("event_id", event_id);
+
+    if (deleteError) {
+      return res.json({ ok: false, message: "Annuleren mislukt." });
+    }
+
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.json({ ok: false, message: "Serverfout." });
+  }
+});
 
 
 // =====================================
