@@ -11,6 +11,35 @@ const defaultScrollToMin = 8 * 60;
 
 const dayNames = ["ma","di","woe","do","vr","za","zo"];
 
+function addDays(d, n) {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
+}
+
+function toDateOnlyKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function formatWeekLabel(start) {
+  const end = addDays(start, 6);
+  return `${start.toLocaleDateString("nl-BE")} - ${end.toLocaleDateString("nl-BE")}`;
+}
+
+function formatDayLabel(d) {
+  const idx = (d.getDay() + 6) % 7; // maandag=0
+  return `${dayNames[idx]} ${d.getDate()}/${d.getMonth()+1}`;
+}
+
+function makeCell(text, cls, role) {
+  const div = document.createElement("div");
+  div.className = cls;
+  div.setAttribute("role", role);
+  div.textContent = text;
+  return div;
+}
+
+
 /* ============================================================
    USER MODEL
    ============================================================ */
