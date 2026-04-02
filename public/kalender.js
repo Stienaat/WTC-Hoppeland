@@ -2,7 +2,7 @@
    CONFIG
 ============================================================ */
 
-console.log("kalender.JS IS GELADEN");
+console.log("KALEND.JS IS GELADEN");
 
 const API_EVENTS_URL  = "/events";
 const API_SIGNUPS_URL = "/signups";
