@@ -1,16 +1,19 @@
 /* ============================================================
    CONFIG
 ============================================================ */
+
+console.log("LEDEN.JS IS GELADEN");
+
 const API_EVENTS_URL  = "/events";
 const API_SIGNUPS_URL = "/signups";
 
 function getUserEmail() {
- return localStorage.getItem("user_email");
+	return localStorage.getItem("user_email");
 
 }
 
 function isAdmin() {
-  return localStorage.getItem("is_admin") === "true";
+	return localStorage.getItem("is_admin") === "true";
 }
 
 const slotMinutes = 30;
