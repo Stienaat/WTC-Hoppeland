@@ -41,6 +41,28 @@ const dialogBody  = document.getElementById("eventDialogBody");
 const memberActions = document.getElementById("memberActions");
 const btnCloseTop = document.getElementById("btnCloseTop");
 
+document.addEventListener("DOMContentLoaded", () => {
+    const email = localStorage.getItem("user_email");
+    const admin = localStorage.getItem("is_admin") === "true";
+
+    // Toegang voor leden OF admin
+    if (!email && !admin) {
+        window.location.href = "leden.html?msg=notknown";
+        return;
+    }
+
+    // Naam bepalen
+    let naam = admin ? "Beheerder" : email;
+
+    // Header tonen (als je een header hebt)
+    const header = document.getElementById("header");
+    if (header) {
+        header.textContent = `Welkom beste ${naam}`;
+    }
+
+});
+
+
 /* ============================================================
    HELPERS
 ============================================================ */
