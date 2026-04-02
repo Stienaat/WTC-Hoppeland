@@ -1,327 +1,196 @@
 /* ============================================================
-   CONFIG
-============================================================ */
-
-console.log("KALENDER.JS IS GELADEN");
-
-const API_EVENTS_URL  = "/events";
-const API_SIGNUPS_URL = "/signups";
-
-const slotMinutes = 30;
-const startMin = 8 * 60;
-const endMin   = 20 * 60;
-const defaultScrollToMin = 8 * 60;
-
-const dayNames = ["ma","di","woe","do","vr","za","zo"];
+   KALENDER.JS — COMPLETE NIEUWE VERSIE
+   Frank — WTC Hoppeland
+   ============================================================ */
 
 /* ============================================================
-   STATE
-============================================================ */
-let events = [];
-let currentWeekStart = startOfWeekMonday(new Date());
-let editingEvent = null;
-let signupDownloaded = false;
+   USER MODEL
+   ============================================================ */
 
-/* ============================================================
-   DOM
-============================================================ */
-const gridEl        = document.getElementById("grid");
-const labelEl       = document.getElementById("weekLabel");
-const eventDialog   = document.getElementById("eventDialog");
-const dialogBody    = document.getElementById("eventDialogBody");
-const memberActions = document.getElementById("memberActions");
-const btnCloseTop   = document.getElementById("btnCloseTop");
-
-/* ============================================================
-   USER / ROLE HELPERS
-============================================================ */
-function getUserEmail() {
-  return localStorage.getItem("user_email");
+function getUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "{}");
+  } catch {
+    return {};
+  }
 }
 
 function isAdmin() {
-  return localStorage.getItem("is_admin") === "true";
+  const u = getUser();
+  return u && u.isAdmin === true;
 }
 
-/* ============================================================
-   HELPERS
-============================================================ */
-function pad2(n){ return String(n).padStart(2,"0"); }
-
-function escapeHtml(s){
-  return String(s ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+function getUserEmail() {
+  const u = getUser();
+  return u && u.email ? u.email : null;
 }
 
-function addDays(d,days){
-  const x = new Date(d);
-  x.setDate(x.getDate()+days);
-  return x;
-}
-
-function startOfWeekMonday(d){
-  const x = new Date(d);
-  const day = (x.getDay()+6)%7;
-  x.setHours(0,0,0,0);
-  x.setDate(x.getDate()-day);
-  return x;
-}
-
-function toDateOnlyKey(d){
-  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-}
-
-function formatDayLabel(d){
-  return `${dayNames[(d.getDay()+6)%7]} ${pad2(d.getDate())}/${pad2(d.getMonth()+1)}`;
-}
-
-function formatWeekLabel(weekStart){
-  const we = addDays(weekStart, 6);
-  return `${toDateOnlyKey(weekStart)} – ${toDateOnlyKey(we)}`;
-}
-
-function dayIndexFromWeekStart(d, weekStart){
-  const a = new Date(weekStart); a.setHours(0,0,0,0);
-  const b = new Date(d);         b.setHours(0,0,0,0);
-  return Math.round((b-a)/86400000);
-}
-
-function toLocalISO(d){
-  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:00`;
-}
-
-function overlaps(a,b){ return a.startM < b.endM && b.startM < a.endM; }
-
-function layoutOverlaps(dayEvents){
-  dayEvents.sort((a,b)=>a.startM-b.startM||b.endM-a.endM);
-  let group=[];
-  function flush(){
-    const n=group.length;
-    if(n<=1){
-      group.forEach(ev=>{ ev.el.style.width="100%"; ev.el.style.transform=""; });
-      group=[]; return;
-    }
-    const w=100/n;
-    group.forEach((ev,i)=>{ ev.el.style.width=`${w}%`; ev.el.style.transform=`translateX(${i*w}%)`; });
-    group=[];
-  }
-  for(const ev of dayEvents){
-    if(!group.length){ group=[ev]; continue; }
-    const last = group[group.length-1];
-    if(overlaps(last, ev)){ group.push(ev); }
-    else { flush(); group=[ev]; }
-  }
-  flush();
-}
-
-function makeCell(text, cls, role){
-  const d = document.createElement("div");
-  d.className = cls;
-  d.textContent = text;
-  d.setAttribute("role", role);
-  return d;
+function getUserName() {
+  const u = getUser();
+  return u && u.name ? u.name : "Bezoeker";
 }
 
 /* ============================================================
    API HELPERS
-============================================================ */
+   ============================================================ */
+
 async function apiJson(url, options = {}) {
-  const r = await fetch(url, {
-    credentials: "include",
-    ...options
-  });
-
-  const text = await r.text();
-  let json = null;
-
-  if (text) {
-    try { json = JSON.parse(text); } catch {}
+  try {
+    const r = await fetch(url, options);
+    return await r.json();
+  } catch (err) {
+    console.error("API fout:", err);
+    return null;
   }
-
-  if (!r.ok) {
-    throw new Error((json && (json.error || json.message)) || text || "Request failed");
-  }
-
-  return json;
 }
 
-/* EVENTS API */
 async function loadEvents() {
-  const data = await apiJson(API_EVENTS_URL, { method: "GET" });
-  const arr = Array.isArray(data) ? data : [];
+  return await apiJson("/events");
+}
 
-  events = arr.map(e => ({
-    id: e.id,
-    title: e.title ?? "",
-    start: e.start,
-    end: e.end,
-    info: e.info ?? "",
-    requires_signup: !!e.requires_signup,
-    mandatory: !!e.mandatory,
-    paid: !!e.paid,
-    price: Number(e.price ?? 0),
-    qr_text: e.qr_text ?? null
-  }));
+async function loadSignupsForEvent(eventId) {
+  const r = await apiJson(`/signups?event_id=${eventId}`);
+  if (!r || r.error) {
+    console.error("Signups laden mislukt:", r);
+    return [];
+  }
+  return r;
+}
+
+async function getSignupStatus(eventId, email) {
+  if (!email) return { signed_up: false };
+  return await apiJson(`/signup-status?event_id=${eventId}&email=${encodeURIComponent(email)}`);
+}
+
+async function doSignup(eventId) {
+  const email = getUserEmail();
+  if (!email) return { ok: false };
+  return await apiJson("/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `event_id=${eventId}&email=${encodeURIComponent(email)}`
+  });
+}
+
+async function doCancel(eventId) {
+  const email = getUserEmail();
+  if (!email) return { ok: false };
+  return await apiJson("/cancel", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `event_id=${eventId}&email=${encodeURIComponent(email)}`
+  });
 }
 
 /* ============================================================
-   GRID RENDERING
-============================================================ */
-function render() {
-  labelEl.textContent = formatWeekLabel(currentWeekStart);
-  gridEl.innerHTML = "";
+   DOM ELEMENTS
+   ============================================================ */
 
-  const todayKey = toDateOnlyKey(new Date());
+const eventDialog = document.getElementById("eventDialog");
+const dialogBody  = document.getElementById("dialogBody");
+const memberActions = document.getElementById("memberActions");
 
-  gridEl.appendChild(makeCell("", "cell head", "columnheader"));
+const headerUserName = document.getElementById("headerUserName");
+const weekRange = document.getElementById("weekRange");
+const grid = document.getElementById("grid");
 
-  for (let c = 0; c < 7; c++) {
-    const d = addDays(currentWeekStart, c);
-    gridEl.appendChild(
-      makeCell(
-        formatDayLabel(d),
-        "cell head" + (toDateOnlyKey(d) === todayKey ? " today" : ""),
-        "columnheader"
-      )
-    );
+let events = [];
+let currentWeekStart = null;
+let editingEvent = null;
+let signupDownloaded = false;
+
+/* ============================================================
+   INIT
+   ============================================================ */
+
+async function init() {
+  const user = getUser();
+
+  // Header
+  if (headerUserName) {
+    headerUserName.textContent = user.isAdmin ? "Beheerder" : user.name || "Lid";
   }
 
-  const totalSlots = (endMin - startMin) / slotMinutes;
+  // Week start = maandag
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  currentWeekStart = new Date(now);
+  currentWeekStart.setDate(now.getDate() + diff);
 
-  for (let i = 0; i < totalSlots; i++) {
-    const tMin = startMin + i * slotMinutes;
-    const h = Math.floor(tMin / 60);
-    const m = tMin % 60;
-
-    gridEl.appendChild(
-      makeCell(m === 0 ? `${pad2(h)}:00` : "", "cell hour", "rowheader")
-    );
-
-    for (let c = 0; c < 7; c++) {
-      const d = addDays(currentWeekStart, c);
-      const dateKey = toDateOnlyKey(d);
-      const startIso = `${dateKey}T${pad2(h)}:${pad2(m)}`;
-
-      const endMin2 = tMin + slotMinutes;
-      const eh = Math.floor(endMin2 / 60);
-      const em = endMin2 % 60;
-
-      const cell = makeCell("", "cell body", "gridcell");
-      cell.dataset.slotStart = startIso;
-      cell.dataset.slotEnd = `${dateKey}T${pad2(eh)}:${pad2(em)}`;
-      gridEl.appendChild(cell);
-    }
-  }
-
-  const eventLayer = document.createElement("div");
-  eventLayer.className = "eventLayer";
-  gridEl.appendChild(eventLayer);
-
-  if (isAdmin()) {
-    eventLayer.addEventListener("contextmenu", (ev) => {
-      if (ev.ctrlKey) return;
-      ev.preventDefault();
-
-      const prev = eventLayer.style.pointerEvents;
-      eventLayer.style.pointerEvents = "none";
-      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "none");
-
-      const el = document.elementFromPoint(ev.clientX, ev.clientY);
-
-      eventLayer.style.pointerEvents = prev;
-      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "");
-
-      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
-      if (!cell) return;
-
-      const startD = new Date(cell.dataset.slotStart);
-      const endD   = new Date(cell.dataset.slotEnd);
-
-      openAdminDialog({
-        id: null,
-        title: "",
-        start: cell.dataset.slotStart,
-        end: cell.dataset.slotEnd,
-        info: "",
-        requires_signup: false,
-        mandatory: false,
-        paid: false,
-        price: 0,
-        startD,
-        endD
-      });
-    });
-  }
-
-  renderEvents(eventLayer);
-  scrollToDefault();
+  events = await loadEvents();
+  renderWeek();
 }
+
+document.addEventListener("DOMContentLoaded", init);
+
+/* ============================================================
+   WEEK RENDERING
+   ============================================================ */
 
 function renderWeek() {
-  render();
+  renderWeekHeader();
+  renderGrid();
+  renderEvents();
 }
 
-function renderEvents(layer){
-  if (!layer) return;
-  layer.innerHTML = "";
+function renderWeekHeader() {
+  const start = new Date(currentWeekStart);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
 
-  const ws = new Date(currentWeekStart);
-  const we = addDays(ws, 7);
+  weekRange.textContent =
+    `${start.toLocaleDateString("nl-BE")} - ${end.toLocaleDateString("nl-BE")}`;
+}
 
-  const byDay = new Map();
+function renderGrid() {
+  grid.innerHTML = "";
 
-  events
-    .map(e => ({
-      ...e,
-      startD: new Date(e.start),
-      endD: new Date(e.end)
-    }))
-    .filter(e => e.startD < we && e.endD > ws)
-    .forEach(e => {
-      const day = dayIndexFromWeekStart(e.startD, ws);
-      if (day < 0 || day > 6) return;
+  for (let h = 6; h <= 22; h++) {
+    const row = document.createElement("div");
+    row.className = "gridRow";
+    row.dataset.hour = h;
+    grid.appendChild(row);
+  }
+}
 
-      const startM = e.startD.getHours()*60 + e.startD.getMinutes();
-      const endM   = e.endD.getHours()*60 + e.endD.getMinutes();
+function renderEvents() {
+  const start = new Date(currentWeekStart);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 7);
 
-      const rs = 2 + Math.floor((startM - startMin) / slotMinutes);
-      const re = 2 + Math.ceil((endM - startMin) / slotMinutes);
+  const weekEvents = events.filter(ev => {
+    const d = new Date(ev.start);
+    return d >= start && d < end;
+  });
 
-      const evEl = document.createElement("div");
-      evEl.className = "event";
-      evEl.style.gridColumn = String(2 + day);
-      evEl.style.gridRow = `${rs}/${re}`;
-      evEl.innerHTML = `
-        <div class="title">${escapeHtml(e.title)}</div>
-        <div class="time">${pad2(e.startD.getHours())}:${pad2(e.startD.getMinutes())}–${pad2(e.endD.getHours())}:${pad2(e.endD.getMinutes())}</div>
-      `;
+  for (const ev of weekEvents) {
+    renderEvent(ev);
+  }
+}
 
-      evEl.onclick = (evt) => {
-        evt.stopPropagation();
-        openEventDialog(e);
-      };
+function renderEvent(ev) {
+  const startD = new Date(ev.start);
+  const hour = startD.getHours();
 
-      layer.appendChild(evEl);
+  const row = grid.querySelector(`.gridRow[data-hour="${hour}"]`);
+  if (!row) return;
 
-      if (!byDay.has(day)) byDay.set(day, []);
-      byDay.get(day).push({ startM, endM, el: evEl });
-    });
+  const div = document.createElement("div");
+  div.className = "eventItem";
+  div.textContent = ev.title;
+  div.onclick = () => openEventDialog(ev);
 
-  for (const dayEvents of byDay.values()) layoutOverlaps(dayEvents);
+  row.appendChild(div);
 }
 
 /* ============================================================
-   SCROLL
-============================================================ */
-function scrollToDefault(){
-  const sc = document.getElementById("gridScroll");
-  if (!sc) return;
-  const offsetSlots = (defaultScrollToMin - startMin) / slotMinutes;
-  sc.scrollTop = Math.max(0, offsetSlots * 28); // 28px slothoogte in CSS
+   EVENT DIALOG DISPATCHER
+   ============================================================ */
+
+function openEventDialog(ev) {
+  if (isAdmin()) openAdminDialog(ev);
+  else openMemberDialog(ev);
 }
 
 /* ============================================================
@@ -329,10 +198,10 @@ function scrollToDefault(){
 ============================================================ */
 
 async function openMemberDialog(eventData) {
-
   signupDownloaded = false;
 
-  const statusJson = await getSignupStatus(eventData.id, getUserEmail());
+  const email = getUserEmail();
+  const statusJson = await getSignupStatus(eventData.id, email);
   let status = null;
 
   if (statusJson?.signed_up) {
@@ -455,9 +324,10 @@ function attachMemberEvents(e, status) {
         return;
       }
       lastSignup = r.signup;
-     if (signupText) {
-		signupText.textContent = "Scan de code met uw bankapp.";
-	}
+
+      if (signupText) {
+        signupText.textContent = "Scan de code met uw bankapp.";
+      }
 
       showQR();
       btn.style.display = "block";
@@ -472,8 +342,8 @@ function attachMemberEvents(e, status) {
     }
 
     if (signupText) {
-		signupText.textContent = "Ik schrijf mij in.";
-	}
+      signupText.textContent = "Ik schrijf mij in.";
+    }
 
     hideQR();
     btn.style.display = "none";
@@ -483,9 +353,10 @@ function attachMemberEvents(e, status) {
   btn.onclick = () => {
     if (!lastSignup) return;
     signupDownloaded = true;
+
     if (signupText) {
-		signupText.textContent = "✔️ U bent ingeschreven";
-	}
+      signupText.textContent = "✔️ U bent ingeschreven";
+    }
 
     downloadConfirmation(e, lastSignup);
   };
@@ -526,7 +397,6 @@ function downloadConfirmation(event, signup) {
 ============================================================ */
 
 async function openAdminDialog(eventData) {
-
   const startD = new Date(eventData.start);
   const endD   = new Date(eventData.end);
 
@@ -542,11 +412,15 @@ async function openAdminDialog(eventData) {
   const btnSave   = document.getElementById("btnSave");
   const btnDelete = document.getElementById("btnDelete");
 
-  btnSave.style.display = "inline-block";
-  btnDelete.style.display = e.id ? "inline-block" : "none";
+  if (btnSave) {
+    btnSave.style.display = "inline-block";
+    btnSave.onclick = () => handleSaveEvent();
+  }
 
-  btnSave.onclick = () => handleSaveEvent();
-  btnDelete.onclick = () => handleDeleteEvent();
+  if (btnDelete) {
+    btnDelete.style.display = e.id ? "inline-block" : "none";
+    btnDelete.onclick = () => handleDeleteEvent();
+  }
 
   eventDialog.showModal();
 }
@@ -556,7 +430,7 @@ function renderAdminLeft(e) {
     <h3>Event bewerken</h3>
 
     <label>Titel<br>
-      <input id="fTitle" type="text" value="${escapeHtml(e.title)}">
+      <input id="fTitle" type="text" value="${escapeHtml(e.title || "")}">
     </label>
 
     <div class="row">
@@ -569,7 +443,7 @@ function renderAdminLeft(e) {
     </div>
 
     <label>Info<br>
-      <textarea id="fInfo" rows="5">${escapeHtml(e.info)}</textarea>
+      <textarea id="fInfo" rows="5">${escapeHtml(e.info || "")}</textarea>
     </label>
 
     <hr>
@@ -597,9 +471,9 @@ function renderAdminRight(e) {
   for (const s of e.signups) {
     html += `
       <li>
-        <strong>${escapeHtml(s.name)}</strong><br>
-        ${escapeHtml(s.email)}<br>
-        Status: ${escapeHtml(s.status)}
+        <strong>${escapeHtml(s.name || "")}</strong><br>
+        ${escapeHtml(s.email || "")}<br>
+        Status: ${escapeHtml(s.status || "")}
       </li>
     `;
   }
@@ -609,157 +483,110 @@ function renderAdminRight(e) {
 }
 
 /* ============================================================
-   ADMIN SAVE / DELETE
+   EVENT OPSLAAN / VERWIJDEREN (ADMIN)
 ============================================================ */
 
 async function handleSaveEvent() {
-  if (!isAdmin()) return;
   if (!editingEvent) return;
 
-  const fTitle = dialogBody.querySelector("#fTitle");
-  const fStart = dialogBody.querySelector("#fStart");
-  const fEnd   = dialogBody.querySelector("#fEnd");
-  const fInfo  = dialogBody.querySelector("#fInfo");
-  const fSignup    = dialogBody.querySelector("#fSignup");
-  const fMandatory = dialogBody.querySelector("#fMandatory");
-  const fPaid      = dialogBody.querySelector("#fPaid");
-  const fPrice     = dialogBody.querySelector("#fPrice");
+  const titleEl = document.getElementById("fTitle");
+  const startEl = document.getElementById("fStart");
+  const endEl   = document.getElementById("fEnd");
+  const infoEl  = document.getElementById("fInfo");
+  const signupEl   = document.getElementById("fSignup");
+  const mandatoryEl= document.getElementById("fMandatory");
+  const paidEl     = document.getElementById("fPaid");
+  const priceEl    = document.getElementById("fPrice");
 
-  const dateKey = toDateOnlyKey(editingEvent.startD);
+  const title = (titleEl?.value || "").trim();
+  if (!title) {
+    alert("Titel is verplicht.");
+    return;
+  }
 
-  const [sh, sm] = (fStart.value || "00:00").split(":").map(Number);
-  const [eh, em] = (fEnd.value || "00:00").split(":").map(Number);
+  const startTime = startEl?.value || "00:00";
+  const endTime   = endEl?.value || "00:00";
 
-  const s = new Date(`${dateKey}T${pad2(sh)}:${pad2(sm)}:00`);
-  const e = new Date(`${dateKey}T${pad2(eh)}:${pad2(em)}:00`);
+  const startD = new Date(editingEvent.startD);
+  const [sh, sm] = startTime.split(":").map(Number);
+  startD.setHours(sh, sm, 0, 0);
 
-  if (e <= s) e.setTime(s.getTime() + slotMinutes * 60 * 1000);
+  const endD = new Date(editingEvent.startD);
+  const [eh, em] = endTime.split(":").map(Number);
+  endD.setHours(eh, em, 0, 0);
 
   const payload = {
-    title: fTitle.value.trim(),
-    start: toLocalISO(s),
-    end: toLocalISO(e),
-    info: fInfo.value.trim(),
-    requires_signup: fSignup.checked,
-    mandatory: fMandatory.checked,
-    paid: fPaid.checked,
-    price: Number(fPrice.value || 0)
+    title,
+    info: infoEl?.value || "",
+    start: startD.toISOString(),
+    end: endD.toISOString(),
+    requires_signup: !!(signupEl && signupEl.checked),
+    mandatory: !!(mandatoryEl && mandatoryEl.checked),
+    paid: !!(paidEl && paidEl.checked),
+    price: Number(priceEl?.value || 0)
   };
 
-  try {
-    if (editingEvent.id) {
-      await updateEventOnServer(editingEvent.id, payload);
-    } else {
-      const newId = await createEventOnServer(payload);
-      editingEvent.id = newId;
-    }
+  const isNew = !editingEvent.id;
 
-    await loadEvents();
-    renderWeek();
+  const url = isNew ? "/events" : `/events/${editingEvent.id}`;
+  const method = isNew ? "POST" : "PUT";
+
+  const r = await apiJson(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  if (!r || r.error) {
+    console.error("Event opslaan mislukt:", r);
+    alert("Opslaan mislukt.");
+    return;
+  }
+
+  // Events herladen
+  events = await loadEvents();
+  renderWeek();
+
+  if (eventDialog && eventDialog.close) {
     eventDialog.close();
-
-  } catch (err) {
-    alert("Opslaan mislukt: " + err.message);
   }
 }
 
 async function handleDeleteEvent() {
-  if (!isAdmin()) return;
   if (!editingEvent || !editingEvent.id) return;
 
   if (!confirm("Event verwijderen?")) return;
 
-  try {
-    await deleteEventOnServer(editingEvent.id);
-    await loadEvents();
-    renderWeek();
-    eventDialog.close();
-  } catch (err) {
-    alert("Verwijderen mislukt: " + err.message);
-  }
-}
+  const r = await apiJson(`/events/${editingEvent.id}`, {
+    method: "DELETE"
+  });
 
-/* ============================================================
-   GENERIC EVENT DIALOG DISPATCHER
-============================================================ */
-
-function openEventDialog(eventData){
-  if (isAdmin()) openAdminDialog(eventData);
-  else openMemberDialog(eventData);
-}
-window.openEventDialog = openEventDialog;
-
-/* ============================================================
-   CLOSE BUTTON / SAFETY
-============================================================ */
-
-if (btnCloseTop) btnCloseTop.addEventListener("click", async () => {
-  const chk = document.getElementById("mDoSignup");
-
-  if (chk && chk.checked && !signupDownloaded) {
-    const txt = document.querySelector(".signupText");
-    if (txt) {
-      txt.textContent = "Check uit of druk download!";
-    }
+  if (!r || r.error) {
+    console.error("Event verwijderen mislukt:", r);
+    alert("Verwijderen mislukt.");
     return;
   }
 
-  eventDialog.close();
-});
-
-/* ============================================================
-   INIT
-============================================================ */
-document.addEventListener("DOMContentLoaded", async () => {
-  const email = getUserEmail();
-  const admin = isAdmin();
-	const naamEl = document.getElementById("naam");
-	if (naamEl) {
-		naamEl.textContent = admin ? "Beheerder" : email;
-	}
-
-  if (!email && !admin) {
-    window.location.href = "leden.html?msg=notknown";
-    return;
-  }
-
-  const btnPrev  = document.getElementById("btnPrev");
-  const btnNext  = document.getElementById("btnNext");
-  const btnToday = document.getElementById("btnToday");
-
-  if (btnPrev) btnPrev.addEventListener("click", () => {
-    currentWeekStart = addDays(currentWeekStart, -7);
-    renderWeek();
-  });
-
-  if (btnNext) btnNext.addEventListener("click", () => {
-    currentWeekStart = addDays(currentWeekStart, 7);
-    renderWeek();
-  });
-
-  if (btnToday) btnToday.addEventListener("click", () => {
-    currentWeekStart = startOfWeekMonday(new Date());
-    renderWeek();
-  });
-
-  try {
-    await loadEvents();
-  } catch (e) {
-    console.error("Events laden mislukt:", e);
-  }
-
+  events = await loadEvents();
   renderWeek();
-});
 
-async function loadSignupsForEvent(eventId) {
-  if (!eventId) return [];
-  try {
-    const data = await apiJson(`/signups?event_id=${eventId}`);
-    return Array.isArray(data) ? data : [];
-  } catch (e) {
-    console.error("Signups laden mislukt:", e);
-    return [];
+  if (eventDialog && eventDialog.close) {
+    eventDialog.close();
   }
 }
 
+/* ============================================================
+   KLEINE HELPERS
+============================================================ */
 
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
