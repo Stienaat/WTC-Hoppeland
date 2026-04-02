@@ -10,8 +10,9 @@
 
 <script>
 // 1) Email ophalen uit localStorage (van login)
-const email = localStorage.getItem("email");
-const isAdmin = localStorage.getItem("isAdmin") === "1";
+const email = localStorage.getItem("user_email");
+const isAdmin = localStorage.getItem("is_admin") === "true";
+
 
 if (!email && !isAdmin) {
   window.location.href = "leden.html?msg=notknown";
