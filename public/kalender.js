@@ -90,8 +90,9 @@ const eventDialog = document.getElementById("eventDialog");
 const dialogBody  = document.getElementById("dialogBody");
 const memberActions = document.getElementById("memberActions");
 
-const headerUserName = document.getElementById("headerUserName");
-const weekRange = document.getElementById("weekRange");
+const headerUserName = document.getElementById("naam");
+const weekRange = document.getElementById("weekLabel");
+
 const grid = document.getElementById("grid");
 
 let events = [];
@@ -102,6 +103,31 @@ let signupDownloaded = false;
 /* ============================================================
    INIT
    ============================================================ */
+document.getElementById("btnPrev").onclick = () => {
+  currentWeekStart = addDays(currentWeekStart, -7);
+  render();
+};
+
+document.getElementById("btnNext").onclick = () => {
+  currentWeekStart = addDays(currentWeekStart, 7);
+  render();
+};
+
+document.getElementById("btnToday").onclick = () => {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  currentWeekStart = new Date(now);
+  currentWeekStart.setDate(now.getDate() + diff);
+  render();
+};
+
+const user = getUser();
+const header = document.getElementById("header");
+if (header) {
+  header.textContent = `Welkom beste ${user.isAdmin ? "Beheerder" : user.email}`;
+}
+
 
 async function init() {
   const user = getUser();
@@ -139,7 +165,10 @@ function renderWeekHeader() {
   const end = new Date(start);
   end.setDate(start.getDate() + 6);
 
-  weekRange.textContent =
+  if (weekRange) {
+  weekRange.textContent = `${start.toLocaleDateString("nl-BE")} - ${end.toLocaleDateString("nl-BE")}`;
+}
+
     `${start.toLocaleDateString("nl-BE")} - ${end.toLocaleDateString("nl-BE")}`;
 }
 
@@ -154,10 +183,12 @@ function renderGrid() {
   }
 }
 
-function renderEvents() {
-  const start = new Date(currentWeekStart);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 7);
+function renderEvents(eventLayer) {
+  if (!eventLayer) return;
+  eventLayer.innerHTML = "";
+
+  const start = currentWeekStart;
+  const end = addDays(start, 7);
 
   const weekEvents = events.filter(ev => {
     const d = new Date(ev.start);
@@ -165,9 +196,33 @@ function renderEvents() {
   });
 
   for (const ev of weekEvents) {
-    renderEvent(ev);
+    const startD = new Date(ev.start);
+    const endD   = new Date(ev.end);
+
+    const dayIndex = (startD.getDay() + 6) % 7; // maandag=0
+
+    const startMinEv = startD.getHours() * 60 + startD.getMinutes();
+    const endMinEv   = endD.getHours() * 60 + endD.getMinutes();
+
+    const rowStart = Math.floor((startMinEv - startMin) / slotMinutes) + 2;
+    const rowEnd   = Math.floor((endMinEv - startMin) / slotMinutes) + 2;
+
+    const col = dayIndex + 2;
+
+    const div = document.createElement("div");
+    div.className = "event";
+    div.style.gridColumn = col;
+    div.style.gridRow = `${rowStart} / ${rowEnd}`;
+    div.innerHTML = `
+      <div class="title">${escapeHtml(ev.title)}</div>
+    `;
+
+    div.onclick = () => openEventDialog(ev);
+
+    eventLayer.appendChild(div);
   }
 }
+
 
 function renderEvent(ev) {
   const startD = new Date(ev.start);
