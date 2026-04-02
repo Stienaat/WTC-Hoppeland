@@ -711,7 +711,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const naam = admin ? "Beheerder" : email;
-  const header = document.getElementById("header");
+	header.textContent = `Welkom beste ${naam}`;
   if (header) {
     header.textContent = `Welkom beste ${naam}`;
   }
@@ -743,3 +743,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   renderWeek();
 });
+
+async function loadSignupsForEvent(eventId) {
+  if (!eventId) return [];
+  try {
+    const data = await apiJson(`/signups?event_id=${eventId}`);
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error("Signups laden mislukt:", e);
+    return [];
+  }
+}
