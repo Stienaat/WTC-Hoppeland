@@ -2,19 +2,10 @@
    CONFIG
 ============================================================ */
 
-console.log("KALEND.JS IS GELADEN");
+console.log("KALENDER.JS IS GELADEN");
 
 const API_EVENTS_URL  = "/events";
 const API_SIGNUPS_URL = "/signups";
-
-function getUserEmail() {
-	return localStorage.getItem("user_email");
-
-}
-
-function isAdmin() {
-	return localStorage.getItem("is_admin") === "true";
-}
 
 const slotMinutes = 30;
 const startMin = 8 * 60;
@@ -34,38 +25,23 @@ let signupDownloaded = false;
 /* ============================================================
    DOM
 ============================================================ */
-const gridEl = document.getElementById("grid");
-const labelEl = document.getElementById("weekLabel");
-const eventDialog = document.getElementById("eventDialog");
-const dialogBody  = document.getElementById("eventDialogBody");
+const gridEl        = document.getElementById("grid");
+const labelEl       = document.getElementById("weekLabel");
+const eventDialog   = document.getElementById("eventDialog");
+const dialogBody    = document.getElementById("eventDialogBody");
 const memberActions = document.getElementById("memberActions");
-const btnCloseTop = document.getElementById("btnCloseTop");
+const btnCloseTop   = document.getElementById("btnCloseTop");
 
-document.addEventListener("DOMContentLoaded", () => {
-    const email = localStorage.getItem("user_email");
-    const admin = localStorage.getItem("is_admin") === "true";
-	
-	console.log("initKalender wordt gestart");
-initKalender();
+/* ============================================================
+   USER / ROLE HELPERS
+============================================================ */
+function getUserEmail() {
+  return localStorage.getItem("user_email");
+}
 
-
-    // Toegang voor leden OF admin
-    if (!email && !admin) {
-        window.location.href = "leden.html?msg=notknown";
-        return;
-    }
-
-    // Naam bepalen
-    let naam = admin ? "Beheerder" : email;
-
-    // Header tonen (als je een header hebt)
-    const header = document.getElementById("header");
-    if (header) {
-        header.textContent = `Welkom beste ${naam}`;
-    }
-
-});
-
+function isAdmin() {
+  return localStorage.getItem("is_admin") === "true";
+}
 
 /* ============================================================
    HELPERS
@@ -108,8 +84,38 @@ function formatWeekLabel(weekStart){
   return `${toDateOnlyKey(weekStart)} – ${toDateOnlyKey(we)}`;
 }
 
+function dayIndexFromWeekStart(d, weekStart){
+  const a = new Date(weekStart); a.setHours(0,0,0,0);
+  const b = new Date(d);         b.setHours(0,0,0,0);
+  return Math.round((b-a)/86400000);
+}
+
 function toLocalISO(d){
   return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}:00`;
+}
+
+function overlaps(a,b){ return a.startM < b.endM && b.startM < a.endM; }
+
+function layoutOverlaps(dayEvents){
+  dayEvents.sort((a,b)=>a.startM-b.startM||b.endM-a.endM);
+  let group=[];
+  function flush(){
+    const n=group.length;
+    if(n<=1){
+      group.forEach(ev=>{ ev.el.style.width="100%"; ev.el.style.transform=""; });
+      group=[]; return;
+    }
+    const w=100/n;
+    group.forEach((ev,i)=>{ ev.el.style.width=`${w}%`; ev.el.style.transform=`translateX(${i*w}%)`; });
+    group=[];
+  }
+  for(const ev of dayEvents){
+    if(!group.length){ group=[ev]; continue; }
+    const last = group[group.length-1];
+    if(overlaps(last, ev)){ group.push(ev); }
+    else { flush(); group=[ev]; }
+  }
+  flush();
 }
 
 function makeCell(text, cls, role){
@@ -143,9 +149,7 @@ async function apiJson(url, options = {}) {
   return json;
 }
 
-/* ============================================================
-   EVENTS API
-============================================================ */
+/* EVENTS API */
 async function loadEvents() {
   const data = await apiJson(API_EVENTS_URL, { method: "GET" });
   const arr = Array.isArray(data) ? data : [];
@@ -163,7 +167,6 @@ async function loadEvents() {
     qr_text: e.qr_text ?? null
   }));
 }
-
 
 /* ============================================================
    GRID RENDERING
@@ -219,40 +222,39 @@ function render() {
   gridEl.appendChild(eventLayer);
 
   if (isAdmin()) {
-	eventLayer.addEventListener("contextmenu", (ev) => {
-	  if (ev.ctrlKey) return;
-	  ev.preventDefault();
+    eventLayer.addEventListener("contextmenu", (ev) => {
+      if (ev.ctrlKey) return;
+      ev.preventDefault();
 
-	  const prev = eventLayer.style.pointerEvents;
-	  eventLayer.style.pointerEvents = "none";
-	  eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "none");
+      const prev = eventLayer.style.pointerEvents;
+      eventLayer.style.pointerEvents = "none";
+      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "none");
 
-	  const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
 
-	  eventLayer.style.pointerEvents = prev;
-	  eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "");
+      eventLayer.style.pointerEvents = prev;
+      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "");
 
-	  const cell = el?.closest?.("[data-slot-start][data-slot-end]");
-	  if (!cell) return;
+      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
+      if (!cell) return;
 
-	  const startD = new Date(cell.dataset.slotStart);
-	  const endD   = new Date(cell.dataset.slotEnd);
+      const startD = new Date(cell.dataset.slotStart);
+      const endD   = new Date(cell.dataset.slotEnd);
 
-	  openAdminDialog({
-		id: null,
-		title: "",
-		start: cell.dataset.slotStart,
-		end: cell.dataset.slotEnd,
-		info: "",
-		requires_signup: false,
-		mandatory: false,
-		paid: false,
-		price: 0,
-		startD,
-		endD
-	  });
-	});
-
+      openAdminDialog({
+        id: null,
+        title: "",
+        start: cell.dataset.slotStart,
+        end: cell.dataset.slotEnd,
+        info: "",
+        requires_signup: false,
+        mandatory: false,
+        paid: false,
+        price: 0,
+        startD,
+        endD
+      });
+    });
   }
 
   renderEvents(eventLayer);
@@ -263,60 +265,64 @@ function renderWeek() {
   render();
 }
 
-function renderEvents(eventLayer) {
-  if (!eventLayer) return;
-  eventLayer.innerHTML = "";
+function renderEvents(layer){
+  if (!layer) return;
+  layer.innerHTML = "";
 
-  // tijdelijk leeg tot de backend + event-layout weer klopt
-  // zo krijg je eerst terug een normale 7-daagse grid
-}
+  const ws = new Date(currentWeekStart);
+  const we = addDays(ws, 7);
 
-function scrollToDefault() {
-  const scroller = document.getElementById("gridScroll");
-  if (!scroller) return;
+  const byDay = new Map();
 
-  const totalMinutes = endMin - startMin;
-  const offsetMinutes = defaultScrollToMin - startMin;
-  const ratio = offsetMinutes / totalMinutes;
+  events
+    .map(e => ({
+      ...e,
+      startD: new Date(e.start),
+      endD: new Date(e.end)
+    }))
+    .filter(e => e.startD < we && e.endD > ws)
+    .forEach(e => {
+      const day = dayIndexFromWeekStart(e.startD, ws);
+      if (day < 0 || day > 6) return;
 
-  scroller.scrollTop = scroller.scrollHeight * ratio;
+      const startM = e.startD.getHours()*60 + e.startD.getMinutes();
+      const endM   = e.endD.getHours()*60 + e.endD.getMinutes();
+
+      const rs = 2 + Math.floor((startM - startMin) / slotMinutes);
+      const re = 2 + Math.ceil((endM - startMin) / slotMinutes);
+
+      const evEl = document.createElement("div");
+      evEl.className = "event";
+      evEl.style.gridColumn = String(2 + day);
+      evEl.style.gridRow = `${rs}/${re}`;
+      evEl.innerHTML = `
+        <div class="title">${escapeHtml(e.title)}</div>
+        <div class="time">${pad2(e.startD.getHours())}:${pad2(e.startD.getMinutes())}–${pad2(e.endD.getHours())}:${pad2(e.endD.getMinutes())}</div>
+      `;
+
+      evEl.onclick = (evt) => {
+        evt.stopPropagation();
+        openEventDialog(e);
+      };
+
+      layer.appendChild(evEl);
+
+      if (!byDay.has(day)) byDay.set(day, []);
+      byDay.get(day).push({ startM, endM, el: evEl });
+    });
+
+  for (const dayEvents of byDay.values()) layoutOverlaps(dayEvents);
 }
 
 /* ============================================================
-   NAVIGATION
+   SCROLL
 ============================================================ */
-document.getElementById("btnPrev")?.addEventListener("click", () => {
-  currentWeekStart = addDays(currentWeekStart, -7);
-  renderWeek();
-});
-
-document.getElementById("btnNext")?.addEventListener("click", () => {
-  currentWeekStart = addDays(currentWeekStart, 7);
-  renderWeek();
-});
-
-document.getElementById("btnToday")?.addEventListener("click", () => {
-  currentWeekStart = startOfWeekMonday(new Date());
-  renderWeek();
-});
-
-/* ============================================================
-   INIT
-============================================================ */
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    await loadEvents();
-  } catch (e) {
-    console.error("Events laden mislukt:", e);
-  }
-
-  renderWeek();
-
-  btnCloseTop?.addEventListener("click", () => {
-    eventDialog.close();
-  });
-});
-
+function scrollToDefault(){
+  const sc = document.getElementById("gridScroll");
+  if (!sc) return;
+  const offsetSlots = (defaultScrollToMin - startMin) / slotMinutes;
+  sc.scrollTop = Math.max(0, offsetSlots * 28); // 28px slothoogte in CSS
+}
 
 /* ============================================================
    MEMBER DIALOG
@@ -598,7 +604,6 @@ function renderAdminRight(e) {
 ============================================================ */
 
 async function handleSaveEvent() {
-
   if (!isAdmin()) return;
   if (!editingEvent) return;
 
@@ -664,3 +669,77 @@ async function handleDeleteEvent() {
     alert("Verwijderen mislukt: " + err.message);
   }
 }
+
+/* ============================================================
+   GENERIC EVENT DIALOG DISPATCHER
+============================================================ */
+
+function openEventDialog(eventData){
+  if (isAdmin()) openAdminDialog(eventData);
+  else openMemberDialog(eventData);
+}
+window.openEventDialog = openEventDialog;
+
+/* ============================================================
+   CLOSE BUTTON / SAFETY
+============================================================ */
+
+if (btnCloseTop) btnCloseTop.addEventListener("click", async () => {
+  const chk = document.getElementById("mDoSignup");
+
+  if (chk && chk.checked && !signupDownloaded) {
+    const txt = document.querySelector(".signupText");
+    if (txt) {
+      txt.textContent = "Check uit of druk download!";
+    }
+    return;
+  }
+
+  eventDialog.close();
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+document.addEventListener("DOMContentLoaded", async () => {
+  const email = getUserEmail();
+  const admin = isAdmin();
+
+  if (!email && !admin) {
+    window.location.href = "leden.html?msg=notknown";
+    return;
+  }
+
+  const naam = admin ? "Beheerder" : email;
+  const header = document.getElementById("header");
+  if (header) {
+    header.textContent = `Welkom beste ${naam}`;
+  }
+
+  const btnPrev  = document.getElementById("btnPrev");
+  const btnNext  = document.getElementById("btnNext");
+  const btnToday = document.getElementById("btnToday");
+
+  if (btnPrev) btnPrev.addEventListener("click", () => {
+    currentWeekStart = addDays(currentWeekStart, -7);
+    renderWeek();
+  });
+
+  if (btnNext) btnNext.addEventListener("click", () => {
+    currentWeekStart = addDays(currentWeekStart, 7);
+    renderWeek();
+  });
+
+  if (btnToday) btnToday.addEventListener("click", () => {
+    currentWeekStart = startOfWeekMonday(new Date());
+    renderWeek();
+  });
+
+  try {
+    await loadEvents();
+  } catch (e) {
+    console.error("Events laden mislukt:", e);
+  }
+
+  renderWeek();
+});
