@@ -704,16 +704,14 @@ if (btnCloseTop) btnCloseTop.addEventListener("click", async () => {
 document.addEventListener("DOMContentLoaded", async () => {
   const email = getUserEmail();
   const admin = isAdmin();
+	const naamEl = document.getElementById("naam");
+	if (naamEl) {
+		naamEl.textContent = admin ? "Beheerder" : email;
+	}
 
   if (!email && !admin) {
     window.location.href = "leden.html?msg=notknown";
     return;
-  }
-
-  const naam = admin ? "Beheerder" : email;
-	header.textContent = `Welkom beste ${naam}`;
-  if (header) {
-    header.textContent = `Welkom beste ${naam}`;
   }
 
   const btnPrev  = document.getElementById("btnPrev");
@@ -743,6 +741,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   renderWeek();
 });
+
+async function loadSignupsForEvent(eventId) {
+  if (!eventId) return [];
+  try {
+    const data = await apiJson(`/signups?event_id=${eventId}`);
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error("Signups laden mislukt:", e);
+    return [];
+  }
+}
 
 async function loadSignupsForEvent(eventId) {
   if (!eventId) return [];
