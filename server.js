@@ -374,25 +374,38 @@ app.get("/signups", async (req, res) => {
   }
 
   try {
-    const { data, error } = await supabase
+    // 1) signups ophalen
+    const { data: signups, error: sErr } = await supabase
       .from("signups")
-      .select("id, status, Leden(naam, email)")
+      .select("*")
       .eq("event_id", eventId);
 
-    if (error) throw error;
+    if (sErr) throw sErr;
 
-    const mapped = (data || []).map(s => ({
-      id: s.id,
-      name: s.Leden?.naam || "",
-      email: s.Leden?.email || "",
-      status: s.status || ""
-    }));
+    // 2) leden ophalen
+    const { data: leden, error: lErr } = await supabase
+      .from("Leden")
+      .select("id, naam, email");
+
+    if (lErr) throw lErr;
+
+    // 3) combineren
+    const mapped = (signups || []).map(s => {
+      const lid = leden.find(l => l.id === s.member_id) || {};
+      return {
+        id: s.id,
+        name: lid.naam || "",
+        email: lid.email || "",
+        status: s.status || ""
+      };
+    });
 
     res.json(mapped);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // =====================================
 // INSCHRIJVINGSSTATUS OPHALEN (MEMBER)
