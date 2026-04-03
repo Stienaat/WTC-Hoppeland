@@ -22,6 +22,7 @@ let currentWeekStart;
 let events = [];
 let editingEvent = null;
 let signupDownloaded = false;
+let CURRENT_USER = null;
 
 // ============================================================
 // HELPERS
@@ -71,22 +72,37 @@ function makeCell(text, cls, role) {
 // USER / API HELPERS
 // ============================================================
 
+async function loadCurrentUser() {
+  const res = await fetch("/api/me", {
+    credentials: "include"
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || "Niet ingelogd");
+  }
+
+  CURRENT_USER = {
+    id: data.user?.id ?? null,
+    email: data.user?.email ?? null,
+    isAdmin: !!data.is_admin,
+    name: data.user?.naam ?? ""
+  };
+
+  return CURRENT_USER;
+}
+
 function getUser() {
-  // Verwacht dat je ergens user-info hebt (bv. via server-side inject of localStorage)
-  // Pas dit aan naar jouw echte situatie.
-  const raw = window.user || null;
-  if (raw) return raw;
-  return { email: "lid@example.com", isAdmin: false, name: "" };
+  return CURRENT_USER;
 }
 
 function getUserEmail() {
-  const u = getUser();
-  return u.email || "";
+  return CURRENT_USER?.email || "";
 }
 
-function isAdmin() {
-  const u = getUser();
-  return !!u.isAdmin;
+function isAdminUser() {
+  return !!CURRENT_USER?.isAdmin;
 }
 
 async function apiJson(url, options = {}) {
