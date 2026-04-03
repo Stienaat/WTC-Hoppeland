@@ -129,7 +129,7 @@ function updateHeader() {
   const naamEl = document.getElementById("naam");
   const headerUserName = document.getElementById("headerUserName");
   if (naamEl) naamEl.textContent = name;
-  if (headerUserName) headerUserName.textContent = `Welkom beste, ${name}`;
+  if (headerUserName) headerUserName.textContent = `Welkom allerbeste, ${name}`;
 }
 
 async function loadEvents() {
