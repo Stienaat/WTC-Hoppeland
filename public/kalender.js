@@ -678,6 +678,17 @@ function scrollToDefault() {
   scroller.scrollTop = scroller.scrollHeight * ratio;
 }
 
+<dialog id="eventDialog">
+  <div id="dialogBody"></div>
+  <div id="memberActions"></div>
+
+  <div style="margin-top:16px; text-align:right;">
+    <button id="btnSave" class="wtc-button">Opslaan</button>
+    <button id="btnDelete" class="wtc-button">Verwijderen</button>
+    <button type="button" onclick="document.getElementById('eventDialog').close()">Sluiten</button>
+  </div>
+</dialog>
+
 // ============================================================
 // INIT
 // ============================================================
