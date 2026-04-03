@@ -255,7 +255,6 @@ async function openEventDialog(ev) {
     await openMemberDialog(ev);
   }
 }
-
 window.openEventDialog = openEventDialog;
 
 function renderAdminLeft(e) {
@@ -577,13 +576,13 @@ function renderEvents(eventLayer) {
   const end = addDays(start, 7);
 
   const weekEvents = events.filter((ev) => {
-    const d = parseLocalISO(ev.start);
+    const d = new Date(ev.start);
     return d >= start && d < end;
   });
 
   for (const ev of weekEvents) {
-    const startD = parseLocalISO(ev.start);
-    const endD = parseLocalISO(ev.end);
+    const startD = new Date(ev.start);
+    const endD = new Date(ev.end);
     const dayIndex = (startD.getDay() + 6) % 7;
     const startMinEv = startD.getHours() * 60 + startD.getMinutes();
     const endMinEv = endD.getHours() * 60 + endD.getMinutes();
@@ -593,22 +592,10 @@ function renderEvents(eventLayer) {
 
     const div = document.createElement("div");
     div.className = "event";
-    div.dataset.eventId = ev.id;
     div.style.gridColumn = col;
     div.style.gridRow = `${rowStart} / ${rowEnd}`;
     div.innerHTML = `<div class="title">${escapeHtml(ev.title)}</div>`;
-
-    div.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      await openEventDialog({
-        ...ev,
-        startD,
-        endD
-      });
-    });
-
+    div.onclick = () => openEventDialog(ev);
     eventLayer.appendChild(div);
   }
 }
