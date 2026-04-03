@@ -1,8 +1,6 @@
-/* ============================================================
-   KALENDER.JS — COMPLETE NIEUWE VERSIE
-   Frank — WTC Hoppeland
-   ============================================================ */
-
+// ============================================================
+// BASIS-CONSTANTEN EN STATE
+// ============================================================
 
 const slotMinutes = 30;
 const startMin = 8 * 60;
@@ -10,6 +8,36 @@ const endMin   = 20 * 60;
 const defaultScrollToMin = 8 * 60;
 
 const dayNames = ["ma","di","woe","do","vr","za","zo"];
+
+const gridEl  = document.getElementById("grid");
+const labelEl = document.getElementById("weekLabel");
+
+const eventDialog    = document.getElementById("eventDialog");
+const dialogBody     = document.getElementById("dialogBody");
+const memberActions  = document.getElementById("memberActions");
+const btnSaveGlobal  = document.getElementById("btnSave");
+const btnDeleteGlobal= document.getElementById("btnDelete");
+
+let currentWeekStart;
+let events = [];
+let editingEvent = null;
+let signupDownloaded = false;
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
 
 function addDays(d, n) {
   const r = new Date(d);
@@ -39,255 +67,86 @@ function makeCell(text, cls, role) {
   return div;
 }
 
-
-/* ============================================================
-   USER MODEL
-   ============================================================ */
+// ============================================================
+// USER / API HELPERS
+// ============================================================
 
 function getUser() {
+  // Verwacht dat je ergens user-info hebt (bv. via server-side inject of localStorage)
+  // Pas dit aan naar jouw echte situatie.
+  const raw = window.user || null;
+  if (raw) return raw;
+  return { email: "lid@example.com", isAdmin: false, name: "" };
+}
+
+function getUserEmail() {
+  const u = getUser();
+  return u.email || "";
+}
+
+function isAdmin() {
+  const u = getUser();
+  return !!u.isAdmin;
+}
+
+async function apiJson(url, options = {}) {
+  const res = await fetch(url, options);
+  if (!res.ok) {
+    return { error: true, status: res.status };
+  }
   try {
-    return JSON.parse(localStorage.getItem("user") || "{}");
+    return await res.json();
   } catch {
     return {};
   }
 }
 
-function isAdmin() {
-  const u = getUser();
-  return u && u.isAdmin === true;
-}
-
-function getUserEmail() {
-  const u = getUser();
-  return u && u.email ? u.email : null;
-}
-
-function getUserName() {
-  const u = getUser();
-  return u && u.name ? u.name : "Bezoeker";
-}
-
-/* ============================================================
-   API HELPERS
-   ============================================================ */
-
-async function apiJson(url, options = {}) {
-  try {
-    const r = await fetch(url, options);
-    return await r.json();
-  } catch (err) {
-    console.error("API fout:", err);
-    return null;
-  }
-}
-
 async function loadEvents() {
-  return await apiJson("/events");
-}
-
-async function loadSignupsForEvent(eventId) {
-  const r = await apiJson(`/signups?event_id=${eventId}`);
-  if (!r || r.error) {
-    console.error("Signups laden mislukt:", r);
-    return [];
-  }
-  return r;
+  const r = await apiJson("/events");
+  if (!r || r.error) return [];
+  return Array.isArray(r) ? r : (r.events || []);
 }
 
 async function getSignupStatus(eventId, email) {
-  if (!email) return { signed_up: false };
-  return await apiJson(`/signup-status?event_id=${eventId}&email=${encodeURIComponent(email)}`);
+  if (!email) return null;
+  return await apiJson(`/events/${eventId}/signup?email=${encodeURIComponent(email)}`);
 }
 
 async function doSignup(eventId) {
   const email = getUserEmail();
-  if (!email) return { ok: false };
-  return await apiJson("/signup", {
+  const r = await apiJson(`/events/${eventId}/signup`, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `event_id=${eventId}&email=${encodeURIComponent(email)}`
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
   });
+  return r;
 }
 
 async function doCancel(eventId) {
   const email = getUserEmail();
-  if (!email) return { ok: false };
-  return await apiJson("/cancel", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `event_id=${eventId}&email=${encodeURIComponent(email)}`
+  const r = await apiJson(`/events/${eventId}/signup`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
   });
+  return r;
 }
 
-/* ============================================================
-   DOM ELEMENTS
-   ============================================================ */
-
-const eventDialog = document.getElementById("eventDialog");
-const dialogBody  = document.getElementById("dialogBody");
-const memberActions = document.getElementById("memberActions");
-
-const headerUserName = document.getElementById("naam");
-const weekRange = document.getElementById("weekLabel");
-
-const grid = document.getElementById("grid");
-
-let events = [];
-let currentWeekStart = null;
-let editingEvent = null;
-let signupDownloaded = false;
-
-/* ============================================================
-   INIT
-   ============================================================ */
-document.getElementById("btnPrev").onclick = () => {
-  currentWeekStart = addDays(currentWeekStart, -7);
-  render();
-};
-
-document.getElementById("btnNext").onclick = () => {
-  currentWeekStart = addDays(currentWeekStart, 7);
-  render();
-};
-
-document.getElementById("btnToday").onclick = () => {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = (day === 0 ? -6 : 1) - day;
-  currentWeekStart = new Date(now);
-  currentWeekStart.setDate(now.getDate() + diff);
-  render();
-};
-
-const user = getUser();
-const header = document.getElementById("header");
-if (header) {
-  header.textContent = `Welkom beste ${user.isAdmin ? "Beheerder" : user.email}`;
-}
-
-
-async function init() {
-  const user = getUser();
-
-  // Header
-  if (headerUserName) {
-    headerUserName.textContent = user.isAdmin ? "Beheerder" : user.name || "Lid";
-  }
-
-  // Week start = maandag
-  const now = new Date();
-  const day = now.getDay();
-  const diff = (day === 0 ? -6 : 1) - day;
-  currentWeekStart = new Date(now);
-  currentWeekStart.setDate(now.getDate() + diff);
-
-  events = await loadEvents();
-  renderWeek();
-}
-
-document.addEventListener("DOMContentLoaded", init);
-
-/* ============================================================
-   WEEK RENDERING
-   ============================================================ */
-
-function renderWeek() {
-  renderWeekHeader();
-  renderGrid();
-  renderEvents();
-}
-
-function renderWeekHeader() {
-  const start = new Date(currentWeekStart);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-
-  if (weekRange) {
-  weekRange.textContent = `${start.toLocaleDateString("nl-BE")} - ${end.toLocaleDateString("nl-BE")}`;
-}
-
-    `${start.toLocaleDateString("nl-BE")} - ${end.toLocaleDateString("nl-BE")}`;
-}
-
-function renderGrid() {
-  grid.innerHTML = "";
-
-  for (let h = 6; h <= 22; h++) {
-    const row = document.createElement("div");
-    row.className = "gridRow";
-    row.dataset.hour = h;
-    grid.appendChild(row);
-  }
-}
-
-function renderEvents(eventLayer) {
-  if (!eventLayer) return;
-  eventLayer.innerHTML = "";
-
-  const start = currentWeekStart;
-  const end = addDays(start, 7);
-
-  const weekEvents = events.filter(ev => {
-    const d = new Date(ev.start);
-    return d >= start && d < end;
-  });
-
-  for (const ev of weekEvents) {
-    const startD = new Date(ev.start);
-    const endD   = new Date(ev.end);
-
-    const dayIndex = (startD.getDay() + 6) % 7; // maandag=0
-
-    const startMinEv = startD.getHours() * 60 + startD.getMinutes();
-    const endMinEv   = endD.getHours() * 60 + endD.getMinutes();
-
-    const rowStart = Math.floor((startMinEv - startMin) / slotMinutes) + 2;
-    const rowEnd   = Math.floor((endMinEv - startMin) / slotMinutes) + 2;
-
-    const col = dayIndex + 2;
-
-    const div = document.createElement("div");
-    div.className = "event";
-    div.style.gridColumn = col;
-    div.style.gridRow = `${rowStart} / ${rowEnd}`;
-    div.innerHTML = `
-      <div class="title">${escapeHtml(ev.title)}</div>
-    `;
-
-    div.onclick = () => openEventDialog(ev);
-
-    eventLayer.appendChild(div);
-  }
-}
-
-
-function renderEvent(ev) {
-  const startD = new Date(ev.start);
-  const hour = startD.getHours();
-
-  const row = grid.querySelector(`.gridRow[data-hour="${hour}"]`);
-  if (!row) return;
-
-  const div = document.createElement("div");
-  div.className = "eventItem";
-  div.textContent = ev.title;
-  div.onclick = () => openEventDialog(ev);
-
-  row.appendChild(div);
-}
-
-/* ============================================================
-   EVENT DIALOG DISPATCHER
-   ============================================================ */
+// ============================================================
+// DIALOG DISPATCH
+// ============================================================
 
 function openEventDialog(ev) {
-  if (isAdmin()) openAdminDialog(ev);
-  else openMemberDialog(ev);
+  if (isAdmin()) {
+    openAdminDialog(ev);
+  } else {
+    openMemberDialog(ev);
+  }
 }
 
-/* ============================================================
-   MEMBER DIALOG
-============================================================ */
+// ============================================================
+// MEMBER DIALOG
+// ============================================================
 
 async function openMemberDialog(eventData) {
   signupDownloaded = false;
@@ -484,15 +343,21 @@ function downloadConfirmation(event, signup) {
   URL.revokeObjectURL(url);
 }
 
-/* ============================================================
-   ADMIN DIALOG
-============================================================ */
+// ============================================================
+// ADMIN DIALOG
+// ============================================================
+
+async function loadSignupsForEvent(eventId) {
+  const r = await apiJson(`/events/${eventId}/signups`);
+  if (!r || r.error) return [];
+  return Array.isArray(r) ? r : (r.signups || []);
+}
 
 async function openAdminDialog(eventData) {
   const startD = new Date(eventData.start);
   const endD   = new Date(eventData.end);
 
-  const signups = await loadSignupsForEvent(eventData.id);
+  const signups = eventData.id ? await loadSignupsForEvent(eventData.id) : [];
 
   const e = { ...eventData, startD, endD, signups };
 
@@ -501,8 +366,8 @@ async function openAdminDialog(eventData) {
 
   editingEvent = e;
 
-  const btnSave   = document.getElementById("btnSave");
-  const btnDelete = document.getElementById("btnDelete");
+  const btnSave   = btnSaveGlobal || document.getElementById("btnSave");
+  const btnDelete = btnDeleteGlobal || document.getElementById("btnDelete");
 
   if (btnSave) {
     btnSave.style.display = "inline-block";
@@ -574,10 +439,6 @@ function renderAdminRight(e) {
   return html;
 }
 
-/* ============================================================
-   EVENT OPSLAAN / VERWIJDEREN (ADMIN)
-============================================================ */
-
 async function handleSaveEvent() {
   if (!editingEvent) return;
 
@@ -635,7 +496,6 @@ async function handleSaveEvent() {
     return;
   }
 
-  // Events herladen
   events = await loadEvents();
   renderWeek();
 
@@ -667,38 +527,212 @@ async function handleDeleteEvent() {
   }
 }
 
-/* ============================================================
-   KLEINE HELPERS
-============================================================ */
+// ============================================================
+// RENDER GRID + EVENTS
+// ============================================================
 
-function pad2(n) {
-  return String(n).padStart(2, "0");
+function render() {
+  labelEl.textContent = formatWeekLabel(currentWeekStart);
+  gridEl.innerHTML = "";
+
+  const todayKey = toDateOnlyKey(new Date());
+
+  // Dagkoppen
+  gridEl.appendChild(makeCell("", "cell head", "columnheader"));
+
+  for (let c = 0; c < 7; c++) {
+    const d = addDays(currentWeekStart, c);
+    gridEl.appendChild(
+      makeCell(
+        formatDayLabel(d),
+        "cell head" + (toDateOnlyKey(d) === todayKey ? " today" : ""),
+        "columnheader"
+      )
+    );
+  }
+
+  // Tijdslijnen
+  const totalSlots = (endMin - startMin) / slotMinutes;
+
+  for (let i = 0; i < totalSlots; i++) {
+    const tMin = startMin + i * slotMinutes;
+    const h = Math.floor(tMin / 60);
+    const m = tMin % 60;
+
+    gridEl.appendChild(
+      makeCell(m === 0 ? `${pad2(h)}:00` : "", "cell hour", "rowheader")
+    );
+
+    for (let c = 0; c < 7; c++) {
+      const d = addDays(currentWeekStart, c);
+      const dateKey = toDateOnlyKey(d);
+      const startIso = `${dateKey}T${pad2(h)}:${pad2(m)}`;
+
+      const endMin2 = tMin + slotMinutes;
+      const eh = Math.floor(endMin2 / 60);
+      const em = endMin2 % 60;
+
+      const cell = makeCell("", "cell body", "gridcell");
+      cell.dataset.slotStart = startIso;
+      cell.dataset.slotEnd = `${dateKey}T${pad2(eh)}:${pad2(em)}`;
+      gridEl.appendChild(cell);
+    }
+  }
+
+  // Event layer
+  const eventLayer = document.createElement("div");
+  eventLayer.className = "eventLayer";
+  gridEl.appendChild(eventLayer);
+
+  // Admin rechtsklik
+  if (isAdmin()) {
+    eventLayer.addEventListener("contextmenu", (ev) => {
+      if (ev.ctrlKey) return;
+      ev.preventDefault();
+
+      const prev = eventLayer.style.pointerEvents;
+      eventLayer.style.pointerEvents = "none";
+      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "none");
+
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+
+      eventLayer.style.pointerEvents = prev;
+      eventLayer.querySelectorAll(".event").forEach(x => x.style.pointerEvents = "");
+
+      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
+      if (!cell) return;
+
+      const startD = new Date(cell.dataset.slotStart);
+      const endD   = new Date(cell.dataset.slotEnd);
+
+      openAdminDialog({
+        id: null,
+        title: "",
+        start: cell.dataset.slotStart,
+        end: cell.dataset.slotEnd,
+        info: "",
+        requires_signup: false,
+        mandatory: false,
+        paid: false,
+        price: 0,
+        startD,
+        endD
+      });
+    });
+  }
+
+  renderEvents(eventLayer);
+  scrollToDefault();
 }
 
-function escapeHtml(str) {
-  return String(str || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+function renderWeek() {
+  render();
 }
 
-function addDays(d, n) {
-  const r = new Date(d);
-  r.setDate(r.getDate() + n);
-  return r;
+function renderEvents(eventLayer) {
+  if (!eventLayer) return;
+  eventLayer.innerHTML = "";
+
+  const start = currentWeekStart;
+  const end = addDays(start, 7);
+
+  const weekEvents = events.filter(ev => {
+    const d = new Date(ev.start);
+    return d >= start && d < end;
+  });
+
+  for (const ev of weekEvents) {
+    const startD = new Date(ev.start);
+    const endD   = new Date(ev.end);
+
+    const dayIndex = (startD.getDay() + 6) % 7; // maandag=0
+
+    const startMinEv = startD.getHours() * 60 + startD.getMinutes();
+    const endMinEv   = endD.getHours() * 60 + endD.getMinutes();
+
+    const rowStart = Math.floor((startMinEv - startMin) / slotMinutes) + 2;
+    const rowEnd   = Math.floor((endMinEv - startMin) / slotMinutes) + 2;
+
+    const col = dayIndex + 2;
+
+    const div = document.createElement("div");
+    div.className = "event";
+    div.style.gridColumn = col;
+    div.style.gridRow = `${rowStart} / ${rowEnd}`;
+    div.innerHTML = `<div class="title">${escapeHtml(ev.title)}</div>`;
+
+    div.onclick = () => openEventDialog(ev);
+
+    eventLayer.appendChild(div);
+  }
 }
 
-function toDateOnlyKey(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function scrollToDefault() {
+  const scroller = document.getElementById("gridScroll");
+  if (!scroller) return;
+
+  const totalMinutes = endMin - startMin;
+  const offsetMinutes = defaultScrollToMin - startMin;
+  const ratio = offsetMinutes / totalMinutes;
+
+  scroller.scrollTop = scroller.scrollHeight * ratio;
 }
 
-function formatWeekLabel(start) {
-  const end = addDays(start, 6);
-  return `${start.toLocaleDateString("nl-BE")} - ${end.toLocaleDateString("nl-BE")}`;
+// ============================================================
+// INIT
+// ============================================================
+
+async function init() {
+  // Weekstart = maandag van deze week
+  const now = new Date();
+  const day = now.getDay(); // 0=zo,1=ma,...
+  const diff = (day === 0 ? -6 : 1) - day;
+  currentWeekStart = new Date(now);
+  currentWeekStart.setHours(0,0,0,0);
+  currentWeekStart.setDate(now.getDate() + diff);
+
+  // User header
+  const user = getUser();
+  const header = document.getElementById("header");
+  if (header) {
+    const naam = user.isAdmin ? "Beheerder" : (user.name || user.email || "Lid");
+    header.textContent = `Welkom beste ${naam}`;
+  }
+
+  // Weeknavigatie
+  const btnPrev = document.getElementById("btnPrev");
+  const btnNext = document.getElementById("btnNext");
+  const btnToday= document.getElementById("btnToday");
+
+  if (btnPrev) {
+    btnPrev.onclick = () => {
+      currentWeekStart = addDays(currentWeekStart, -7);
+      renderWeek();
+    };
+  }
+
+  if (btnNext) {
+    btnNext.onclick = () => {
+      currentWeekStart = addDays(currentWeekStart, 7);
+      renderWeek();
+    };
+  }
+
+  if (btnToday) {
+    btnToday.onclick = () => {
+      const now = new Date();
+      const day = now.getDay();
+      const diff = (day === 0 ? -6 : 1) - day;
+      currentWeekStart = new Date(now);
+      currentWeekStart.setHours(0,0,0,0);
+      currentWeekStart.setDate(now.getDate() + diff);
+      renderWeek();
+    };
+  }
+
+  // Events laden
+  events = await loadEvents();
+  renderWeek();
 }
 
-function formatDayLabel(d) {
-  const idx = (d.getDay() + 6) % 7; // maandag=0
-  return `${dayNames[idx]} ${d.getDate()}/${d.getMonth() + 1}`;
-}
+document.addEventListener("DOMContentLoaded", init);
