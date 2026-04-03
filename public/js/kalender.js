@@ -529,42 +529,41 @@ function render() {
   eventLayer.className = "eventLayer";
   gridEl.appendChild(eventLayer);
 
-if (isAdminUser()) {
-  eventLayer.addEventListener("contextmenu", async (ev) => {
-    if (ev.ctrlKey) return;
+  if (isAdminUser()) {
+    eventLayer.addEventListener("contextmenu", (ev) => {
+      if (ev.ctrlKey) return;
+      ev.preventDefault();
 
-    ev.preventDefault();
-    ev.stopPropagation();
+      const prev = eventLayer.style.pointerEvents;
+      eventLayer.style.pointerEvents = "none";
+      eventLayer.querySelectorAll(".event").forEach((x) => (x.style.pointerEvents = "none"));
 
-    const prev = eventLayer.style.pointerEvents;
-    eventLayer.style.pointerEvents = "none";
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
 
-    const eventEls = eventLayer.querySelectorAll(".event");
-    eventEls.forEach((x) => (x.style.pointerEvents = "none"));
+      eventLayer.style.pointerEvents = prev;
+      eventLayer.querySelectorAll(".event").forEach((x) => (x.style.pointerEvents = ""));
 
-    const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
+      if (!cell) return;
 
-    eventLayer.style.pointerEvents = prev;
-    eventEls.forEach((x) => (x.style.pointerEvents = ""));
+      const startD = new Date(cell.dataset.slotStart);
+      const endD = new Date(cell.dataset.slotEnd);
 
-    const cell = el?.closest?.("[data-slot-start][data-slot-end]");
-    if (!cell) return;
-
-    await openAdminDialog({
-      id: null,
-      title: "",
-      start: cell.dataset.slotStart,
-      end: cell.dataset.slotEnd,
-      info: "",
-      requires_signup: false,
-      mandatory: false,
-      paid: false,
-      price: 0,
-      startD: parseLocalISO(cell.dataset.slotStart),
-      endD: parseLocalISO(cell.dataset.slotEnd)
+      openEventDialog({
+        id: null,
+        title: "",
+        start: cell.dataset.slotStart,
+        end: cell.dataset.slotEnd,
+        info: "",
+        requires_signup: false,
+        mandatory: false,
+        paid: false,
+        price: 0,
+        startD,
+        endD
+      });
     });
-  });
-}
+  }
 
   renderEvents(eventLayer);
   scrollToDefault();
