@@ -248,13 +248,14 @@ function generateQR(e) {
   });
 }
 
-function openEventDialog(ev) {
+async function openEventDialog(ev) {
   if (isAdminUser()) {
-    openAdminDialog(ev);
+    await openAdminDialog(ev);
   } else {
-    openMemberDialog(ev);
+    await openMemberDialog(ev);
   }
 }
+
 window.openEventDialog = openEventDialog;
 
 function renderAdminLeft(e) {
