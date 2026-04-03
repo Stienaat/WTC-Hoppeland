@@ -43,16 +43,26 @@ async function apiJson(url, options = {}) {
 
 async function loadCurrentUser() {
   const data = await apiJson("/api/me");
+  console.log("API /api/me response:", data);
+
   if (!data?.ok) {
     throw new Error(data?.error || "Niet ingelogd");
   }
 
+  const user = data.user || {};
+
   CURRENT_USER = {
-    id: data.user?.id ?? null,
-    email: data.user?.email ?? null,
-    isAdmin: !!data.is_admin,
-    name: data.user?.naam ?? ""
+    id: user.id ?? null,
+    email: user.email ?? null,
+    isAdmin:
+      data.is_admin === true ||
+      user.is_admin === true ||
+      user.isAdmin === true ||
+      user.role === "admin",
+    name: user.naam ?? user.name ?? ""
   };
+
+  console.log("CURRENT_USER mapped:", CURRENT_USER);
 
   return CURRENT_USER;
 }
