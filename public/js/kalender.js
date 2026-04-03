@@ -124,13 +124,6 @@ function scrollToDefault() {
   sc.scrollTop = Math.max(0, offsetSlots * 28);
 }
 
-function updateHeader() {
-  const name = getUser()?.name || "";
-  const naamEl = document.getElementById("naam");
-  const headerUserName = document.getElementById("headerUserName");
-  if (naamEl) naamEl.textContent = name;
-  if (headerUserName) headerUserName.textContent = `Welkom allerbeste, ${name}`;
-}
 
 async function loadEvents() {
   const data = await apiJson(API_EVENTS_URL, { method: "GET" });
@@ -702,7 +695,7 @@ if (btnCloseTop) {
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     await loadCurrentUser();
-    updateHeader();
+ 
     bindToolbar();
     await loadEvents();
     render();
