@@ -529,41 +529,42 @@ function render() {
   eventLayer.className = "eventLayer";
   gridEl.appendChild(eventLayer);
 
-  if (isAdminUser()) {
-    eventLayer.addEventListener("contextmenu", (ev) => {
-      if (ev.ctrlKey) return;
-      ev.preventDefault();
+if (isAdminUser()) {
+  eventLayer.addEventListener("contextmenu", async (ev) => {
+    if (ev.ctrlKey) return;
 
-      const prev = eventLayer.style.pointerEvents;
-      eventLayer.style.pointerEvents = "none";
-      eventLayer.querySelectorAll(".event").forEach((x) => (x.style.pointerEvents = "none"));
+    ev.preventDefault();
+    ev.stopPropagation();
 
-      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+    const prev = eventLayer.style.pointerEvents;
+    eventLayer.style.pointerEvents = "none";
 
-      eventLayer.style.pointerEvents = prev;
-      eventLayer.querySelectorAll(".event").forEach((x) => (x.style.pointerEvents = ""));
+    const eventEls = eventLayer.querySelectorAll(".event");
+    eventEls.forEach((x) => (x.style.pointerEvents = "none"));
 
-      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
-      if (!cell) return;
+    const el = document.elementFromPoint(ev.clientX, ev.clientY);
 
-      const startD = new Date(cell.dataset.slotStart);
-      const endD = new Date(cell.dataset.slotEnd);
+    eventLayer.style.pointerEvents = prev;
+    eventEls.forEach((x) => (x.style.pointerEvents = ""));
 
-      openEventDialog({
-        id: null,
-        title: "",
-        start: cell.dataset.slotStart,
-        end: cell.dataset.slotEnd,
-        info: "",
-        requires_signup: false,
-        mandatory: false,
-        paid: false,
-        price: 0,
-        startD,
-        endD
-      });
+    const cell = el?.closest?.("[data-slot-start][data-slot-end]");
+    if (!cell) return;
+
+    await openAdminDialog({
+      id: null,
+      title: "",
+      start: cell.dataset.slotStart,
+      end: cell.dataset.slotEnd,
+      info: "",
+      requires_signup: false,
+      mandatory: false,
+      paid: false,
+      price: 0,
+      startD: parseLocalISO(cell.dataset.slotStart),
+      endD: parseLocalISO(cell.dataset.slotEnd)
     });
-  }
+  });
+}
 
   renderEvents(eventLayer);
   scrollToDefault();
@@ -577,13 +578,13 @@ function renderEvents(eventLayer) {
   const end = addDays(start, 7);
 
   const weekEvents = events.filter((ev) => {
-    const d = new Date(ev.start);
+    const d = parseLocalISO(ev.start);
     return d >= start && d < end;
   });
 
   for (const ev of weekEvents) {
-    const startD = new Date(ev.start);
-    const endD = new Date(ev.end);
+    const startD = parseLocalISO(ev.start);
+    const endD = parseLocalISO(ev.end);
     const dayIndex = (startD.getDay() + 6) % 7;
     const startMinEv = startD.getHours() * 60 + startD.getMinutes();
     const endMinEv = endD.getHours() * 60 + endD.getMinutes();
@@ -593,10 +594,22 @@ function renderEvents(eventLayer) {
 
     const div = document.createElement("div");
     div.className = "event";
+    div.dataset.eventId = ev.id;
     div.style.gridColumn = col;
     div.style.gridRow = `${rowStart} / ${rowEnd}`;
     div.innerHTML = `<div class="title">${escapeHtml(ev.title)}</div>`;
-    div.onclick = () => openEventDialog(ev);
+
+    div.addEventListener("click", async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      await openEventDialog({
+        ...ev,
+        startD,
+        endD
+      });
+    });
+
     eventLayer.appendChild(div);
   }
 }
