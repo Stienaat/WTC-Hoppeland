@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>Leden Dashboard</title>
-  <link href="WTC.css" rel="stylesheet">
+  <link href="/css/WTC.css" rel="stylesheet">
 </head>
 
 <body style="text-indent: 1em;font-family:Arial;background:#D1FED5;">
@@ -21,8 +21,11 @@ if (!email && !isAdmin) {
 
 // 2) Lidgegevens ophalen via server
 async function loadLid() {
-  const res = await fetch(`/me?email=${encodeURIComponent(email)}`);
-  const data = await res.json();
+  const res = await fetch("/api/me", {
+  credentials: "include"
+});
+const data = await res.json();
+ 
 
   if (!data.ok) {
     alert("Kon gegevens niet laden.");
@@ -39,6 +42,7 @@ async function loadLid() {
 }
 
 loadLid();
+
 </script>
 
 <!-- LINKERKOLOM -->
