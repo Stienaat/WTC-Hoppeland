@@ -153,7 +153,7 @@ async function doCancel(eventId) {
 // ============================================================
 
 function openEventDialog(ev) {
-  if (isAdmin()) {
+  if (isAdminUser()) {
     openAdminDialog(ev);
   } else {
     openMemberDialog(ev);
@@ -601,7 +601,7 @@ function render() {
   gridEl.appendChild(eventLayer);
 
   // Admin rechtsklik
-  if (isAdmin()) {
+  if (isAdminUser()) {
     eventLayer.addEventListener("contextmenu", (ev) => {
       if (ev.ctrlKey) return;
       ev.preventDefault();
