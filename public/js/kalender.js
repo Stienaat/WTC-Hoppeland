@@ -456,6 +456,50 @@ async function openMemberDialog(eventData) {
   dialog.showModal();
 }
 
+async function doSignup(eventId) {
+  return await apiJson("./api_signups.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "signup",
+      event_id: eventId
+    })
+  });
+}
+
+async function doCancel(eventId) {
+  return await apiJson("./api_signups.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "cancel",
+      event_id: eventId
+    })
+  });
+}
+
+async function doCommit(eventId) {
+  return await apiJson("./api_signups.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "commit",
+      event_id: eventId
+    })
+  });
+}
+
+
+function generateQR(e) {
+    const qrDiv = document.getElementById("qrCode");
+    qrDiv.innerHTML = ""; // alleen de QR zelf wissen
+
+    new QRCode(qrDiv, {
+        text: e.qr_text,
+        width: 180,
+        height: 180
+    });
+}
 
 function renderMemberRight(eventData, status) {
   if (status === "confirmed") {
