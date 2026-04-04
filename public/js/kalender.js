@@ -316,7 +316,15 @@ async function openAdminDialog(eventData) {
   const endD = eventData.endD ? new Date(eventData.endD) : new Date(eventData.end);
   const signups = eventData.id ? await loadSignupsForEvent(eventData.id) : [];
   const e = { ...eventData, startD, endD, signups };
+	const dialog = document.getElementById("eventDialog");
+	const dialogContent = dialog.querySelector(".dialog-content");
+	const form = dialog.querySelector("form");
+	
+	dialogContent.classList.add("admin-mode");
 
+	dialog.classList.add("admin-mode");
+	form.classList.add("admin-mode");
+	
   dialogBody.innerHTML = renderAdminLeft(e);
   memberActions.innerHTML = renderAdminRight(e);
 
@@ -386,6 +394,11 @@ function renderMemberRight(e, status) {
 }
 
 async function openMemberDialog(eventData) {
+	
+	dialogContent.classList.remove("admin-mode");
+	dialog.classList.remove("admin-mode");
+	form.classList.remove("admin-mode");
+	
   signupDownloaded = false;
 
   if (btnSave) btnSave.style.display = "none";
