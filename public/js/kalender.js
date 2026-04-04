@@ -559,42 +559,69 @@ function render() {
   const eventLayer = document.createElement("div");
   eventLayer.className = "eventLayer";
   gridEl.appendChild(eventLayer);
+if (isAdminUser()) {
+  gridEl.addEventListener("contextmenu", (ev) => {
+    if (ev.ctrlKey) return;
 
-  if (isAdminUser()) {
-    eventLayer.addEventListener("contextmenu", (ev) => {
-      if (ev.ctrlKey) return;
-      ev.preventDefault();
+    const eventEl = ev.target.closest(".event");
+    const cellEl = ev.target.closest("[data-slot-start][data-slot-end]");
 
-      const prev = eventLayer.style.pointerEvents;
+    // browsermenu blokkeren voor admin in kalender
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    let startIso = null;
+    let endIso = null;
+
+    if (cellEl) {
+      startIso = cellEl.dataset.slotStart;
+      endIso = cellEl.dataset.slotEnd;
+    } else if (eventEl) {
+      // als je event-element data meegeeft, kan je ook boven event nieuw event maken
+      startIso = eventEl.dataset.slotStart || null;
+      endIso = eventEl.dataset.slotEnd || null;
+    }
+
+    // fallback: zoek onderliggende cel
+    if (!startIso || !endIso) {
+      const prevGridPointer = gridEl.style.pointerEvents;
+      const prevLayerPointer = eventLayer.style.pointerEvents;
+
+      gridEl.style.pointerEvents = "auto";
       eventLayer.style.pointerEvents = "none";
       eventLayer.querySelectorAll(".event").forEach((x) => (x.style.pointerEvents = "none"));
 
-      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      const under = document.elementFromPoint(ev.clientX, ev.clientY);
 
-      eventLayer.style.pointerEvents = prev;
+      eventLayer.style.pointerEvents = prevLayerPointer;
+      gridEl.style.pointerEvents = prevGridPointer;
       eventLayer.querySelectorAll(".event").forEach((x) => (x.style.pointerEvents = ""));
 
-      const cell = el?.closest?.("[data-slot-start][data-slot-end]");
+      const cell = under?.closest?.("[data-slot-start][data-slot-end]");
       if (!cell) return;
 
-      const startD = new Date(cell.dataset.slotStart);
-      const endD = new Date(cell.dataset.slotEnd);
+      startIso = cell.dataset.slotStart;
+      endIso = cell.dataset.slotEnd;
+    }
 
-      openEventDialog({
+    openAdminDialog(
+      {
         id: null,
         title: "",
-        start: cell.dataset.slotStart,
-        end: cell.dataset.slotEnd,
+        start: startIso,
+        end: endIso,
         info: "",
         requires_signup: false,
         mandatory: false,
         paid: false,
         price: 0,
-        startD,
-        endD
-      });
-    });
-  }
+        startD: new Date(startIso),
+        endD: new Date(endIso)
+      },
+      { isNew: true }
+    );
+  });
+}
 
   renderEvents(eventLayer);
   scrollToDefault();
