@@ -393,7 +393,7 @@ function normalizeDialogEvent(eventData) {
   };
 }
 
-aasync function openMemberDialog(eventData) {
+async function openMemberDialog(eventData) {
   const dialog = document.getElementById("eventDialog");
   const dialogContent = dialog?.querySelector(".dialog-content");
   const memberLeft = document.getElementById("eventDialogBody");
