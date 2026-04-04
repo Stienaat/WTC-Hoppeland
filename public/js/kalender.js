@@ -451,7 +451,6 @@ async function openMemberDialog(eventData) {
 
   // Dialoog openen
   dialog.showModal();
-}
 
 
 async function doSignup(eventId) {
@@ -497,6 +496,7 @@ function generateQR(e) {
         width: 180,
         height: 180
     });
+}
 }
 
 function renderMemberRight(eventData, status) {
