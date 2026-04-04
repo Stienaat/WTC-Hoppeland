@@ -395,10 +395,14 @@ function normalizeDialogEvent(eventData) {
 
 async function openMemberDialog(eventData) {
 
+  // Admin knoppen verbergen
+  btnSave?.classList.add("hidden");
+  btnDelete?.classList.add("hidden");
+
   const dialog = document.getElementById("eventDialog");
   const form = document.getElementById("eventForm");
   const dialogContent = dialog?.querySelector(".dialog-content");
-  const memberLeft = document.getElementById("eventDialogBody");
+  const memberLeft = document.getElementById("eventDialogBody");   // nieuwe naam
   const memberActions = document.getElementById("memberActions");
   const adminActions = document.getElementById("adminActions");
 
@@ -410,13 +414,15 @@ async function openMemberDialog(eventData) {
     form.dataset.memberSubmitBound = "1";
   }
 
+  // Reset flags
   signupDownloaded = false;
 
-  // Member mode
+  // Reset admin mode
   dialog.classList.remove("admin-mode");
   dialogContent.classList.remove("admin-mode");
   if (adminActions) adminActions.style.display = "none";
 
+  // Member mode
   dialog.classList.add("member-mode");
   dialogContent.classList.add("member-mode");
 
@@ -432,6 +438,7 @@ async function openMemberDialog(eventData) {
     console.error("getSignupStatus failed", err);
   }
 
+  // STATUS NORMALISEREN
   let status = null;
   if (statusJson?.signed_up) {
     status = (statusJson.status || "").toLowerCase().trim();
@@ -440,17 +447,18 @@ async function openMemberDialog(eventData) {
     }
   }
 
-  // Linker paneel (zoals vroeger)
+  // LINKERKANT (identiek aan vroeger)
   memberLeft.innerHTML = renderMemberLeft(eventData);
 
-  // Rechter paneel (zoals vroeger)
+  // RECHTERKANT (identiek aan vroeger)
   memberActions.innerHTML = renderMemberRight(eventData, status);
 
-  // Events koppelen (zoals vroeger)
+  // EVENTS (identiek aan vroeger)
   attachMemberEvents(eventData, status);
 
   // Dialoog openen
   dialog.showModal();
+}
 
 
 async function doSignup(eventId) {
@@ -496,7 +504,6 @@ function generateQR(e) {
         width: 180,
         height: 180
     });
-}
 }
 
 function renderMemberRight(eventData, status) {
