@@ -650,61 +650,35 @@ if (isAdminUser()) {
   scrollToDefault();
 }
 
-function renderEvents(layer) {
-  if (!layer) return;
-  layer.innerHTML = "";
+function renderEvents(eventLayer) {
+  if (!eventLayer) return;
+  eventLayer.innerHTML = "";
 
-  const ws = new Date(currentWeekStart);
-  const we = addDays(ws, 7);
-  const byDay = new Map();
+  const start = currentWeekStart;
+  const end = addDays(start, 7);
 
-  events
-    .filter((ev) => {
-      const startD = new Date(ev.start);
-      const endD = new Date(ev.end);
-      return startD < we && endD > ws;
-    })
-    .forEach((ev) => {
-      const startD = new Date(ev.start);
-      const endD = new Date(ev.end);
+  const weekEvents = events.filter((ev) => {
+    const d = new Date(ev.start);
+    return d >= start && d < end;
+  });
 
-      const day = dayIndexFromWeekStart(startD, ws);
-      if (day < 0 || day > 6) return;
+  for (const ev of weekEvents) {
+    const startD = new Date(ev.start);
+    const endD = new Date(ev.end);
+    const dayIndex = (startD.getDay() + 6) % 7;
+    const startMinEv = startD.getHours() * 60 + startD.getMinutes();
+    const endMinEv = endD.getHours() * 60 + endD.getMinutes();
+    const rowStart = Math.floor((startMinEv - startMin) / slotMinutes) + 2;
+    const rowEnd = Math.floor((endMinEv - startMin) / slotMinutes) + 2;
+    const col = dayIndex + 2;
 
-      const startM = startD.getHours() * 60 + startD.getMinutes();
-      const endM = endD.getHours() * 60 + endD.getMinutes();
-
-      const rs = 2 + Math.floor((startM - startMin) / slotMinutes);
-      const re = 2 + Math.ceil((endM - startMin) / slotMinutes);
-
-      const evEl = document.createElement("div");
-      evEl.className = "event";
-      evEl.style.gridColumn = String(2 + day);
-      evEl.style.gridRow = `${rs}/${re}`;
-      evEl.dataset.slotStart = ev.start;
-      evEl.dataset.slotEnd = ev.end;
-      evEl.innerHTML = `
-        <div class="title">${escapeHtml(ev.title || "")}</div>
-        <div class="time">${pad2(startD.getHours())}:${pad2(startD.getMinutes())}–${pad2(endD.getHours())}:${pad2(endD.getMinutes())}</div>
-      `;
-
-      evEl.onclick = (evt) => {
-        evt.stopPropagation();
-        openEventDialog(ev);
-      };
-
-      layer.appendChild(evEl);
-
-      if (!byDay.has(day)) byDay.set(day, []);
-      byDay.get(day).push({
-        startM,
-        endM,
-        el: evEl
-      });
-    });
-
-  for (const dayEvents of byDay.values()) {
-    layoutOverlaps(dayEvents);
+    const div = document.createElement("div");
+    div.className = "event";
+    div.style.gridColumn = col;
+    div.style.gridRow = `${rowStart} / ${rowEnd}`;
+    div.innerHTML = `<div class="title">${escapeHtml(ev.title)}</div>`;
+    div.onclick = () => openEventDialog(ev);
+    eventLayer.appendChild(div);
   }
 }
 
@@ -824,8 +798,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindToolbar();
     await loadEvents();
     render();
-catch (e) {
-  console.error("INIT ERROR", e);
-  throw e;
-}
+  } catch (err) {
+    console.error("Init mislukt:", err);
+    window.location.href = "/leden.html?msg=notknown";
+  }
 });
