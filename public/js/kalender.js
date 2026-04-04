@@ -437,34 +437,47 @@ function renderMemberRight(e, status) {
 
 async function openMemberDialog(eventData) {
 	
-	dialogContent.classList.remove("admin-mode");
-	dialog.classList.remove("admin-mode");
-	form.classList.remove("admin-mode");
-	
-  signupDownloaded = false;
+	btnSave?.classList.add("hidden");
+	btnDelete?.classList.add("hidden");
 
-  if (btnSave) btnSave.style.display = "none";
-  if (btnDelete) btnDelete.style.display = "none";
-
-  const statusJson = await getSignupStatus(eventData.id);
-  let status = null;
-
-  if (statusJson?.signed_up) {
-    status = (statusJson.status || "").toLowerCase().trim();
-    if (status !== "pending" && status !== "confirmed") {
-      status = "pending";
+    // Form mag de dialog NIET sluiten
+    const form = document.querySelector("#eventDialog form");
+    if (form) {
+        form.addEventListener("submit", e => e.preventDefault());
     }
-  }
 
-  const startD = new Date(eventData.start);
-  const endD = new Date(eventData.end);
-  const e = { ...eventData, startD, endD };
+    // RESET FLAGS
+    signupDownloaded = false;
 
-  dialogBody.innerHTML = renderMemberLeft(e);
-  memberActions.innerHTML = renderMemberRight(e, status);
+    // RESET ADMIN MODE
+    document.querySelector(".dialog-content")?.classList.remove("admin-mode");
+    document.querySelector("#eventDialog form")?.classList.remove("admin-mode");
+    document.getElementById("eventDialog")?.classList.remove("admin-mode");
 
-  attachMemberEvents(e, status);
-  eventDialog.showModal();
+    // RECHTERPANEEL LEEGMAKEN
+    memberActions.innerHTML = "";
+
+    // STATUS OPHALEN
+    const statusJson = await getSignupStatus(eventData.id, memberEmail);
+
+    // STATUS NORMALISEREN
+    let status = null;
+	if (statusJson?.signed_up) {
+
+        status = (statusJson.status || "").toLowerCase().trim();
+        if (status !== "pending" && status !== "confirmed") {
+            status = "pending";
+        }
+    }
+
+    // LINKERKANT
+    memberLeft.innerHTML = renderMemberLeft(eventData);
+
+    // RECHTERKANT
+    memberActions.innerHTML = renderMemberRight(eventData, status);
+
+    // EVENTS
+    attachMemberEvents(eventData, status);
 }
 
 function attachMemberEvents(e, status) {
