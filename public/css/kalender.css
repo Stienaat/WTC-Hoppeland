@@ -350,15 +350,10 @@ dialog .chk.readonly {
     flex-shrink: 0;
 }
 
-#eventDialog.admin-mode #adminActions {
+.dialog-content.admin-mode #adminActions {
     display: flex;
 }
-#eventDialog:not(.admin-mode) #adminActions {
-    display: none;
-}
-.dialog-content:not(.admin-mode) #adminActions {
-    display: none;
-}
+
 
 .admin-mode #adminActions {
     display: flex;
