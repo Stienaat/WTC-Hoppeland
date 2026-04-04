@@ -551,73 +551,31 @@ function renderMemberLeft(eventData) {
   `;
 }
 
-function attachMemberEvents(e, status) {
-  const chk = document.getElementById("mDoSignup");
-  const qrWrap = document.getElementById("qrWrap");
-  const qrText = document.getElementById("qrText");
-  const btn = document.getElementById("btnDownload");
-  const signupText = document.querySelector(".signupText");
+function attachMemberEvents(eventData, status) {
+  const btnSignup = document.getElementById("btnMemberSignup");
+  const btnCancel = document.getElementById("btnMemberCancel");
 
-  let lastSignup = null;
-  if (!chk) return;
-
-  function showQR() {
-    if (qrWrap) qrWrap.style.display = "block";
-    if (qrText) qrText.style.display = "block";
-    generateQR(e);
-  }
-
-  function hideQR() {
-    if (qrWrap) qrWrap.style.display = "none";
-    if (qrText) qrText.style.display = "none";
-  }
-
-  if (status === "pending" || status === "confirmed") {
-    chk.checked = true;
-    chk.disabled = true;
-    showQR();
-    if (btn) btn.style.display = "block";
-    lastSignup = { event_id: e.id, name: getUser()?.name || "", status, paid: false };
-    return;
-  }
-
-  chk.onchange = async () => {
-    if (signupDownloaded) return;
-
-    if (chk.checked) {
-      const r = await doSignup(e.id);
-      if (!r || !r.ok) {
-        alert("Inschrijving mislukt");
-        chk.checked = false;
-        return;
+  if (btnSignup) {
+    btnSignup.onclick = async () => {
+      try {
+        const res = await doSignup(eventData.id);
+        console.log("signup result", res);
+        await openMemberDialog(eventData);
+      } catch (err) {
+        console.error("signup failed", err);
       }
+    };
+  }
 
-      lastSignup = r.signup;
-      if (signupText) signupText.textContent = "Scan de code met uw bankapp.";
-      showQR();
-      if (btn) btn.style.display = "block";
-      return;
-    }
-
-    const r = await doCancel(e.id);
-    if (!r || !r.ok) {
-      alert("Annuleren mislukt");
-      chk.checked = true;
-      return;
-    }
-
-    if (signupText) signupText.textContent = "Ik schrijf mij in.";
-    hideQR();
-    if (btn) btn.style.display = "none";
-    lastSignup = null;
-  };
-
-  if (btn) {
-    btn.onclick = () => {
-      if (!lastSignup) return;
-      signupDownloaded = true;
-      if (signupText) signupText.textContent = "✔️ U bent ingeschreven";
-      downloadConfirmation(e, lastSignup);
+  if (btnCancel) {
+    btnCancel.onclick = async () => {
+      try {
+        const res = await doCancel(eventData.id);
+        console.log("cancel result", res);
+        await openMemberDialog(eventData);
+      } catch (err) {
+        console.error("cancel failed", err);
+      }
     };
   }
 }
