@@ -527,7 +527,7 @@ async function openMemberDialog(eventData) {
       status = "pending";
     }
   }
-
+}
   // links
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
