@@ -385,44 +385,6 @@ function layoutOverlaps(dayEvents){
   flush();
 }
 
-function renderMemberLeft(eventData) {
-  const startD = eventData?.startD ?? new Date(eventData.start);
-  const endD = eventData?.endD ?? new Date(eventData.end);
-
-  return `
-    <h3>${escapeHtml(eventData.title || "")}</h3>
-    <p>${startD.toLocaleDateString("nl-BE")} ${startD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}</p>
-    <p>${endD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}</p>
-    <div>${escapeHtml(eventData.info || "")}</div>
-  `;
-}
-
-function renderMemberRight(e, status) {
-  if (!e.requires_signup) {
-    return `<div class="signupStatus info">Geen inschrijving nodig.</div>`;
-  }
-
-  if (status === "pending" || status === "confirmed") {
-    return `<div class="statusok">✔️ U bent ingeschreven!</div>`;
-  }
-
-  return `
-    <label class="signupLabel">
-      <input type="checkbox" id="mDoSignup">
-      <span class="signupText">Ik schrijf mij in.</span>
-    </label>
-    <div id="qrWrap" style="display:none;">
-      <div id="qrCode" style="margin:20px 60px;"></div>
-      <div id="qrText" style="font-size:16px;font-weight:700;margin:20px;color:#6450E1;">
-        Druk download bevestiging en U bent ingeschreven!
-      </div>
-    </div>
-    <button id="btnDownload" class="wtc-button" style="display:none;margin:20px;">
-      Download bevestiging
-    </button>
-  `;
-}
-
 function normalizeDialogEvent(eventData) {
   return {
     ...eventData,
@@ -435,32 +397,42 @@ async function openMemberDialog(eventData) {
   const dialog = document.getElementById("eventDialog");
   const form = document.getElementById("eventForm");
   const dialogContent = dialog?.querySelector(".dialog-content");
-  const eventDialogBody = document.getElementById("eventDialogBody");
+  const memberLeft = document.getElementById("eventDialogBody");
   const memberActions = document.getElementById("memberActions");
   const adminActions = document.getElementById("adminActions");
+  const btnSave = document.getElementById("btnSave");
+  const btnDelete = document.getElementById("btnDelete");
 
-  if (!dialog || !dialogContent || !eventDialogBody || !memberActions) return;
+  if (!dialog || !dialogContent || !memberLeft || !memberActions) return;
 
   const ev = normalizeDialogEvent(eventData);
 
-  if (form && !form.dataset.memberSubmitBound) {
+  // admin knoppen weg
+  btnSave?.classList.add("hidden");
+  btnDelete?.classList.add("hidden");
+  if (adminActions) adminActions.style.display = "none";
+
+  // form mag dialog niet sluiten
+  if (form && !form.dataset.preventSubmitBound) {
     form.addEventListener("submit", (e) => e.preventDefault());
-    form.dataset.memberSubmitBound = "1";
+    form.dataset.preventSubmitBound = "1";
   }
 
+  // reset flags
   signupDownloaded = false;
 
+  // reset admin mode / zet member mode
   dialog.classList.remove("admin-mode");
   dialog.classList.add("member-mode");
 
   dialogContent.classList.remove("admin-mode");
   dialogContent.classList.add("member-mode");
 
-  if (adminActions) adminActions.style.display = "none";
-
+  // rechterpaneel leegmaken
   memberActions.innerHTML = "";
   memberActions.style.display = "";
 
+  // status ophalen
   let statusJson = null;
   let status = null;
 
@@ -470,6 +442,7 @@ async function openMemberDialog(eventData) {
     console.error("getSignupStatus failed", err);
   }
 
+  // status normaliseren
   if (statusJson?.signed_up) {
     status = (statusJson.status || "").toLowerCase().trim();
     if (status !== "pending" && status !== "confirmed") {
@@ -477,12 +450,20 @@ async function openMemberDialog(eventData) {
     }
   }
 
-  eventDialogBody.innerHTML = renderMemberLeft(ev);
-  memberActions.innerHTML = renderMemberRight(ev, status);
-  attachMemberEvents(ev, status);
+  // links
+  memberLeft.innerHTML = renderMemberLeft(ev);
 
-  if (!dialog.open) dialog.showModal();
+  // rechts
+  memberActions.innerHTML = renderMemberRight(ev, status, statusJson);
+
+  // events
+  attachMemberEvents(ev, status, statusJson);
+
+  if (!dialog.open) {
+    dialog.showModal();
+  }
 }
+
 function attachMemberEvents(e, status) {
   const chk = document.getElementById("mDoSignup");
   const qrWrap = document.getElementById("qrWrap");
