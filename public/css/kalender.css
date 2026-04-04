@@ -353,7 +353,9 @@ dialog .chk.readonly {
 .dialog-content.admin-mode #adminActions {
     display: flex;
 }
-
+.dialog-content:not(.admin-mode) #adminActions {
+    display: none;
+}
 
 .admin-mode #adminActions {
     display: flex;
