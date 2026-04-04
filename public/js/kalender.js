@@ -400,17 +400,10 @@ async function openMemberDialog(eventData) {
   const memberLeft = document.getElementById("eventDialogBody");
   const memberActions = document.getElementById("memberActions");
   const adminActions = document.getElementById("adminActions");
-  const btnSave = document.getElementById("btnSave");
-  const btnDelete = document.getElementById("btnDelete");
 
   if (!dialog || !dialogContent || !memberLeft || !memberActions) return;
 
   const ev = normalizeDialogEvent(eventData);
-
-  // admin knoppen weg
-  btnSave?.classList.add("hidden");
-  btnDelete?.classList.add("hidden");
-  if (adminActions) adminActions.style.display = "none";
 
   // form mag dialog niet sluiten
   if (form && !form.dataset.preventSubmitBound) {
@@ -421,14 +414,19 @@ async function openMemberDialog(eventData) {
   // reset flags
   signupDownloaded = false;
 
-  // reset admin mode / zet member mode
+  // member mode
   dialog.classList.remove("admin-mode");
   dialog.classList.add("member-mode");
 
   dialogContent.classList.remove("admin-mode");
   dialogContent.classList.add("member-mode");
 
-  // rechterpaneel leegmaken
+  // admin headeracties weg
+  if (adminActions) {
+    adminActions.style.display = "none";
+  }
+
+  // reset rechterpaneel
   memberActions.innerHTML = "";
   memberActions.style.display = "";
 
@@ -442,6 +440,104 @@ async function openMemberDialog(eventData) {
     console.error("getSignupStatus failed", err);
   }
 
+  if (statusJson?.signed_up) {
+    status = (statusJson.status || "").toLowerCase().trim();
+    if (status !== "pending" && status !== "confirmed") {
+      status = "pending";
+    }
+  }
+
+  // links en rechts renderen zoals vroeger
+  memberLeft.innerHTML = renderMemberLeft(ev);
+  memberActions.innerHTML = renderMemberRight(ev, status);
+
+  // knoppen koppelen
+  attachMemberEvents(ev, status);
+
+  if (!dialog.open) {
+    dialog.showModal();
+  }
+}
+
+function renderMemberRight(e, status) {
+  if (!e.requires_signup) {
+    return `<div class="signupStatus info">Geen inschrijving nodig.</div>`;
+  }
+
+  if (status === "pending" || status === "confirmed") {
+    return `<div class="statusok">✔️ U bent ingeschreven!</div>`;
+  }
+
+  return `
+    <label class="signupLabel">
+      <input type="checkbox" id="mDoSignup">
+      <span class="signupText">Ik schrijf mij in.</span>
+    </label>
+    <div id="qrWrap" style="display:none;">
+      <div id="qrCode" style="margin:20px 60px;"></div>
+      <div id="qrText" style="font-size:16px;font-weight:700;margin:20px;color:#6450E1;">
+        Druk download bevestiging en U bent ingeschreven!
+      </div>
+    </div>
+    <button id="btnDownload" class="wtc-button" style="display:none;margin:20px;">
+      Download bevestiging
+    </button>
+  `;
+}
+
+function normalizeDialogEvent(eventData) {
+  return {
+    ...eventData,
+    startD: eventData?.startD ?? new Date(eventData.start),
+    endD: eventData?.endD ?? new Date(eventData.end)
+  };
+}
+
+async function openMemberDialog(eventData) {
+  const dialog = document.getElementById("eventDialog");
+  const form = document.getElementById("eventForm");
+  const dialogContent = dialog?.querySelector(".dialog-content");
+  const eventDialogBody = document.getElementById("eventDialogBody");
+  const memberActions = document.getElementById("memberActions");
+  const adminActions = document.getElementById("adminActions");
+
+  if (!dialog || !dialogContent || !eventDialogBody || !memberActions) return;
+
+  // Form mag dialog niet sluiten
+  if (form && !form.dataset.memberSubmitBound) {
+    form.addEventListener("submit", (e) => e.preventDefault());
+    form.dataset.memberSubmitBound = "1";
+  }
+
+  // reset flags
+  signupDownloaded = false;
+
+  // MEMBER MODE zetten
+  dialog.classList.remove("admin-mode");
+  dialog.classList.add("member-mode");
+
+  dialogContent.classList.remove("admin-mode");
+  dialogContent.classList.add("member-mode");
+
+  // header adminacties verbergen
+  if (adminActions) {
+    adminActions.style.display = "none";
+  }
+
+  // rechterpaneel resetten en tonen
+  memberActions.innerHTML = "";
+  memberActions.style.display = "";
+
+  // status ophalen
+  let statusJson = null;
+  let status = null;
+
+  try {
+    statusJson = await getSignupStatus(eventData.id, CURRENT_USER?.email);
+  } catch (err) {
+    console.error("getSignupStatus failed", err);
+  }
+
   // status normaliseren
   if (statusJson?.signed_up) {
     status = (statusJson.status || "").toLowerCase().trim();
@@ -451,13 +547,13 @@ async function openMemberDialog(eventData) {
   }
 
   // links
-  memberLeft.innerHTML = renderMemberLeft(ev);
+  eventDialogBody.innerHTML = renderMemberLeft(eventData);
 
   // rechts
-  memberActions.innerHTML = renderMemberRight(ev, status, statusJson);
+  memberActions.innerHTML = renderMemberRight(eventData, status);
 
   // events
-  attachMemberEvents(ev, status, statusJson);
+  attachMemberEvents(eventData, status);
 
   if (!dialog.open) {
     dialog.showModal();
