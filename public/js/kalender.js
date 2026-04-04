@@ -361,6 +361,29 @@ async function openAdminDialog(eventData) {
 
   eventDialog.showModal();
 }
+function overlaps(a,b){ return a.startM < b.endM && b.startM < a.endM; }
+
+function layoutOverlaps(dayEvents){
+  dayEvents.sort((a,b)=>a.startM-b.startM||b.endM-a.endM);
+  let group=[];
+  function flush(){
+    const n=group.length;
+    if(n<=1){
+      group.forEach(ev=>{ ev.el.style.width="100%"; ev.el.style.transform=""; });
+      group=[]; return;
+    }
+    const w=100/n;
+    group.forEach((ev,i)=>{ ev.el.style.width=`${w}%`; ev.el.style.transform=`translateX(${i*w}%)`; });
+    group=[];
+  }
+  for(const ev of dayEvents){
+    if(!group.length){ group=[ev]; continue; }
+    const last = group[group.length-1];
+    if(overlaps(last, ev)){ group.push(ev); }
+    else { flush(); group=[ev]; }
+  }
+  flush();
+}
 
 function renderMemberLeft(e) {
   return `
@@ -627,36 +650,51 @@ if (isAdminUser()) {
   scrollToDefault();
 }
 
-function renderEvents(eventLayer) {
-  if (!eventLayer) return;
-  eventLayer.innerHTML = "";
+function renderEvents(layer){
+  layer.innerHTML = "";
+  const ws = new Date(currentWeekStart);
+  const we = addDays(ws, 7);
 
-  const start = currentWeekStart;
-  const end = addDays(start, 7);
+  const byDay = new Map();
 
-  const weekEvents = events.filter((ev) => {
-    const d = new Date(ev.start);
-    return d >= start && d < end;
-  });
+  events
+    .map(e => ({
+      ...e,
+      startD: new Date(e.start),
+      endD: new Date(e.end)
+    }))
+    .filter(e => e.startD < we && e.endD > ws)
+    .forEach(e => {
+      const day = dayIndexFromWeekStart(e.startD, ws);
+      if (day < 0 || day > 6) return;
 
-  for (const ev of weekEvents) {
-    const startD = new Date(ev.start);
-    const endD = new Date(ev.end);
-    const dayIndex = (startD.getDay() + 6) % 7;
-    const startMinEv = startD.getHours() * 60 + startD.getMinutes();
-    const endMinEv = endD.getHours() * 60 + endD.getMinutes();
-    const rowStart = Math.floor((startMinEv - startMin) / slotMinutes) + 2;
-    const rowEnd = Math.floor((endMinEv - startMin) / slotMinutes) + 2;
-    const col = dayIndex + 2;
+      const startM = e.startD.getHours()*60 + e.startD.getMinutes();
+      const endM   = e.endD.getHours()*60 + e.endD.getMinutes();
 
-    const div = document.createElement("div");
-    div.className = "event";
-    div.style.gridColumn = col;
-    div.style.gridRow = `${rowStart} / ${rowEnd}`;
-    div.innerHTML = `<div class="title">${escapeHtml(ev.title)}</div>`;
-    div.onclick = () => openEventDialog(ev);
-    eventLayer.appendChild(div);
-  }
+      const rs = 2 + Math.floor((startM - startMin) / slotMinutes);
+      const re = 2 + Math.ceil((endM - startMin) / slotMinutes);
+
+      const evEl = document.createElement("div");
+      evEl.className = "event";
+      evEl.style.gridColumn = String(2 + day);
+      evEl.style.gridRow = `${rs}/${re}`;
+      evEl.innerHTML = `
+        <div class="title">${escapeHtml(e.title)}</div>
+        <div class="time">${pad2(e.startD.getHours())}:${pad2(e.startD.getMinutes())}–${pad2(e.endD.getHours())}:${pad2(e.endD.getMinutes())}</div>
+      `;
+
+      evEl.onclick = (evt) => {
+        evt.stopPropagation();
+        window.openEventDialog(e);
+      };
+
+      layer.appendChild(evEl);
+
+      if (!byDay.has(day)) byDay.set(day, []);
+      byDay.get(day).push({ startM, endM, el: evEl });
+    });
+
+  for (const dayEvents of byDay.values()) layoutOverlaps(dayEvents);
 }
 
 async function handleSaveEvent() {
