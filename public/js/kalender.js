@@ -385,27 +385,15 @@ function layoutOverlaps(dayEvents){
   flush();
 }
 
-function renderMemberLeft(e) {
+function renderMemberLeft(eventData) {
+  const startD = eventData?.startD ?? new Date(eventData.start);
+  const endD = eventData?.endD ?? new Date(eventData.end);
+
   return `
-    <h3>${escapeHtml(e.title)}</h3>
-    <div class="eventDate">
-      ${e.startD.toLocaleDateString("nl-BE", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric"
-      })}
-    </div>
-    <p><strong>Van:</strong> ${pad2(e.startD.getHours())}:${pad2(e.startD.getMinutes())}
-       &nbsp;&nbsp;
-       <strong>Tot:</strong> ${pad2(e.endD.getHours())}:${pad2(e.endD.getMinutes())}</p>
-    <hr>
-    <p>${escapeHtml(e.info)}</p>
-    <p>
-      ${e.requires_signup ? "Inschrijving verplicht<br>" : ""}
-      ${e.mandatory ? "Deelname verplicht<br>" : ""}
-      ${e.paid ? `Prijs: ${e.price} €` : ""}
-    </p>
+    <h3>${escapeHtml(eventData.title || "")}</h3>
+    <p>${startD.toLocaleDateString("nl-BE")} ${startD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}</p>
+    <p>${endD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}</p>
+    <div>${escapeHtml(eventData.info || "")}</div>
   `;
 }
 
@@ -435,6 +423,14 @@ function renderMemberRight(e, status) {
   `;
 }
 
+function normalizeDialogEvent(eventData) {
+  return {
+    ...eventData,
+    startD: eventData?.startD ?? new Date(eventData.start),
+    endD: eventData?.endD ?? new Date(eventData.end)
+  };
+}
+
 async function openMemberDialog(eventData) {
   const dialog = document.getElementById("eventDialog");
   const form = document.getElementById("eventForm");
@@ -445,42 +441,35 @@ async function openMemberDialog(eventData) {
 
   if (!dialog || !dialogContent || !eventDialogBody || !memberActions) return;
 
-  // Form mag dialog niet sluiten
+  const ev = normalizeDialogEvent(eventData);
+
   if (form && !form.dataset.memberSubmitBound) {
     form.addEventListener("submit", (e) => e.preventDefault());
     form.dataset.memberSubmitBound = "1";
   }
 
-  // reset flags
   signupDownloaded = false;
 
-  // MEMBER MODE zetten
   dialog.classList.remove("admin-mode");
   dialog.classList.add("member-mode");
 
   dialogContent.classList.remove("admin-mode");
   dialogContent.classList.add("member-mode");
 
-  // header adminacties verbergen
-  if (adminActions) {
-    adminActions.style.display = "none";
-  }
+  if (adminActions) adminActions.style.display = "none";
 
-  // rechterpaneel resetten en tonen
   memberActions.innerHTML = "";
   memberActions.style.display = "";
 
-  // status ophalen
   let statusJson = null;
   let status = null;
 
   try {
-    statusJson = await getSignupStatus(eventData.id, CURRENT_USER?.email);
+    statusJson = await getSignupStatus(ev.id, CURRENT_USER?.email);
   } catch (err) {
     console.error("getSignupStatus failed", err);
   }
 
-  // status normaliseren
   if (statusJson?.signed_up) {
     status = (statusJson.status || "").toLowerCase().trim();
     if (status !== "pending" && status !== "confirmed") {
@@ -488,20 +477,12 @@ async function openMemberDialog(eventData) {
     }
   }
 
-  // links
-  eventDialogBody.innerHTML = renderMemberLeft(eventData);
+  eventDialogBody.innerHTML = renderMemberLeft(ev);
+  memberActions.innerHTML = renderMemberRight(ev, status);
+  attachMemberEvents(ev, status);
 
-  // rechts
-  memberActions.innerHTML = renderMemberRight(eventData, status);
-
-  // events
-  attachMemberEvents(eventData, status);
-
-  if (!dialog.open) {
-    dialog.showModal();
-  }
+  if (!dialog.open) dialog.showModal();
 }
-
 function attachMemberEvents(e, status) {
   const chk = document.getElementById("mDoSignup");
   const qrWrap = document.getElementById("qrWrap");
