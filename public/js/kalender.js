@@ -393,70 +393,52 @@ function normalizeDialogEvent(eventData) {
   };
 }
 
-async function openMemberDialog(eventData) {
+aasync function openMemberDialog(eventData) {
   const dialog = document.getElementById("eventDialog");
-  const form = document.getElementById("eventForm");
   const dialogContent = dialog?.querySelector(".dialog-content");
   const memberLeft = document.getElementById("eventDialogBody");
   const memberActions = document.getElementById("memberActions");
   const adminActions = document.getElementById("adminActions");
 
-  if (!dialog || !dialogContent || !memberLeft || !memberActions) return;
+  console.log("openMemberDialog called", eventData);
 
-  const ev = normalizeDialogEvent(eventData);
-
-  // form mag dialog niet sluiten
-  if (form && !form.dataset.preventSubmitBound) {
-    form.addEventListener("submit", (e) => e.preventDefault());
-    form.dataset.preventSubmitBound = "1";
+  if (!dialog || !dialogContent || !memberLeft || !memberActions) {
+    console.error("Member dialog refs missing", {
+      dialog,
+      dialogContent,
+      memberLeft,
+      memberActions
+    });
+    return;
   }
 
-  // reset flags
-  signupDownloaded = false;
+  const ev = {
+    ...eventData,
+    startD: eventData?.startD ?? new Date(eventData.start),
+    endD: eventData?.endD ?? new Date(eventData.end)
+  };
 
-  // member mode
   dialog.classList.remove("admin-mode");
   dialog.classList.add("member-mode");
 
   dialogContent.classList.remove("admin-mode");
   dialogContent.classList.add("member-mode");
 
-  // admin headeracties weg
-  if (adminActions) {
-    adminActions.style.display = "none";
-  }
+  if (adminActions) adminActions.style.display = "none";
 
-  // reset rechterpaneel
-  memberActions.innerHTML = "";
+  memberLeft.innerHTML = `
+    <h3>${escapeHtml(ev.title || "")}</h3>
+    <p>${ev.startD.toLocaleDateString("nl-BE")} ${ev.startD.toLocaleTimeString("nl-BE", {
+      hour: "2-digit",
+      minute: "2-digit"
+    })}</p>
+    <p>${escapeHtml(ev.info || "")}</p>
+  `;
+
   memberActions.style.display = "";
+  memberActions.innerHTML = `<p>Member acties test</p>`;
 
-  // status ophalen
-  let statusJson = null;
-  let status = null;
-
-  try {
-    statusJson = await getSignupStatus(ev.id, CURRENT_USER?.email);
-  } catch (err) {
-    console.error("getSignupStatus failed", err);
-  }
-
-  if (statusJson?.signed_up) {
-    status = (statusJson.status || "").toLowerCase().trim();
-    if (status !== "pending" && status !== "confirmed") {
-      status = "pending";
-    }
-  }
-
-  // links en rechts renderen zoals vroeger
-  memberLeft.innerHTML = renderMemberLeft(ev);
-  memberActions.innerHTML = renderMemberRight(ev, status);
-
-  // knoppen koppelen
-  attachMemberEvents(ev, status);
-
-  if (!dialog.open) {
-    dialog.showModal();
-  }
+  if (!dialog.open) dialog.showModal();
 }
 
 function renderMemberRight(e, status) {
