@@ -435,49 +435,35 @@ function renderMemberRight(e, status) {
   `;
 }
 
-async function openMemberDialog(eventData) {
-	
-	btnSave?.classList.add("hidden");
-	btnDelete?.classList.add("hidden");
+async function openMemberDialog(ev) {
+  const dialog = document.getElementById("eventDialog");
+  const dialogContent = dialog?.querySelector(".dialog-content");
+  const memberActions = document.getElementById("memberActions");
+  const body = document.getElementById("eventDialogBody");
 
-    // Form mag de dialog NIET sluiten
-    const form = document.querySelector("#eventDialog form");
-    if (form) {
-        form.addEventListener("submit", e => e.preventDefault());
-    }
+  if (!dialog || !dialogContent) return;
 
-    // RESET FLAGS
-    signupDownloaded = false;
+  // mode zetten
+  dialog.classList.remove("admin-mode");
+  dialog.classList.add("member-mode");
 
-    // RESET ADMIN MODE
-    document.querySelector(".dialog-content")?.classList.remove("admin-mode");
-    document.querySelector("#eventDialog form")?.classList.remove("admin-mode");
-    document.getElementById("eventDialog")?.classList.remove("admin-mode");
+  dialogContent.classList.remove("admin-mode");
 
-    // RECHTERPANEEL LEEGMAKEN
-    memberActions.innerHTML = "";
+  // body (links)
+  body.innerHTML = `
+    <h3>${escapeHtml(ev.title || "")}</h3>
+    <p>${escapeHtml(ev.info || "")}</p>
+  `;
 
-    // STATUS OPHALEN
-    const statusJson = await getSignupStatus(eventData.id, memberEmail);
+  // rechts paneel
+  if (memberActions) {
+    memberActions.style.display = "";
+    memberActions.innerHTML = `
+      <button class="wtc-button">Inschrijven</button>
+    `;
+  }
 
-    // STATUS NORMALISEREN
-    let status = null;
-	if (statusJson?.signed_up) {
-
-        status = (statusJson.status || "").toLowerCase().trim();
-        if (status !== "pending" && status !== "confirmed") {
-            status = "pending";
-        }
-    }
-
-    // LINKERKANT
-    memberLeft.innerHTML = renderMemberLeft(eventData);
-
-    // RECHTERKANT
-    memberActions.innerHTML = renderMemberRight(eventData, status);
-
-    // EVENTS
-    attachMemberEvents(eventData, status);
+  if (!dialog.open) dialog.showModal();
 }
 
 function attachMemberEvents(e, status) {
