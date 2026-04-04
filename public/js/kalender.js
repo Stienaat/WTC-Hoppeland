@@ -441,29 +441,29 @@ async function openMemberDialog(eventData) {
   if (!dialog.open) dialog.showModal();
 }
 
-function renderMemberRight(e, status) {
-  if (!e.requires_signup) {
-    return `<div class="signupStatus info">Geen inschrijving nodig.</div>`;
+function renderMemberRight(eventData, status) {
+  if (status === "confirmed") {
+    return `
+      <div class="member-right">
+        <p>Je bent ingeschreven.</p>
+        <button id="btnMemberCancel" type="button" class="wtc-button">Annuleren</button>
+      </div>
+    `;
   }
 
-  if (status === "pending" || status === "confirmed") {
-    return `<div class="statusok">✔️ U bent ingeschreven!</div>`;
+  if (status === "pending") {
+    return `
+      <div class="member-right">
+        <p>Je inschrijving is in behandeling.</p>
+        <button id="btnMemberCancel" type="button" class="wtc-button">Annuleren</button>
+      </div>
+    `;
   }
 
   return `
-    <label class="signupLabel">
-      <input type="checkbox" id="mDoSignup">
-      <span class="signupText">Ik schrijf mij in.</span>
-    </label>
-    <div id="qrWrap" style="display:none;">
-      <div id="qrCode" style="margin:20px 60px;"></div>
-      <div id="qrText" style="font-size:16px;font-weight:700;margin:20px;color:#6450E1;">
-        Druk download bevestiging en U bent ingeschreven!
-      </div>
+    <div class="member-right">
+      <button id="btnMemberSignup" type="button" class="wtc-button">Inschrijven</button>
     </div>
-    <button id="btnDownload" class="wtc-button" style="display:none;margin:20px;">
-      Download bevestiging
-    </button>
   `;
 }
 
@@ -529,17 +529,26 @@ async function openMemberDialog(eventData) {
   }
 
   // links
-  eventDialogBody.innerHTML = renderMemberLeft(eventData);
+function renderMemberLeft(eventData) {
+  const startD = eventData?.startD ?? new Date(eventData.start);
+  const endD = eventData?.endD ?? new Date(eventData.end);
 
-  // rechts
-  memberActions.innerHTML = renderMemberRight(eventData, status);
-
-  // events
-  attachMemberEvents(eventData, status);
-
-  if (!dialog.open) {
-    dialog.showModal();
-  }
+  return `
+    <div class="member-left">
+      <h3>${escapeHtml(eventData.title || "")}</h3>
+      <p>
+        <strong>Datum:</strong>
+        ${startD.toLocaleDateString("nl-BE")}
+      </p>
+      <p>
+        <strong>Tijd:</strong>
+        ${startD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
+        –
+        ${endD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
+      </p>
+      <div class="event-info">${escapeHtml(eventData.info || "")}</div>
+    </div>
+  `;
 }
 
 function attachMemberEvents(e, status) {
