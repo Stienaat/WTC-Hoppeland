@@ -824,8 +824,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindToolbar();
     await loadEvents();
     render();
-  } catch (err) {
-    console.error("Init mislukt:", err);
-    window.location.href = "/leden.html?msg=notknown";
-  }
+catch (e) {
+  console.error("INIT ERROR", e);
+  throw e;
+}
 });
