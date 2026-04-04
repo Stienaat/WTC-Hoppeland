@@ -258,36 +258,55 @@ async function openEventDialog(ev) {
 window.openEventDialog = openEventDialog;
 
 function renderAdminLeft(e) {
-  return `
-    <h3>Event bewerken</h3>
+    return `
+        <label>Titel<br>
+            <input id="fTitle" type="text" value="${escapeHtml(e.title)}">
+        </label>
+	
+        <div class="row">
+            <label>
+                Van<br>
+                <input id="fStart" type="time" value="${pad2(e.startD.getHours())}:${pad2(e.startD.getMinutes())}">
+            </label>
+            <label>
+                Tot<br>
+                <input id="fEnd" type="time" value="${pad2(e.endD.getHours())}:${pad2(e.endD.getMinutes())}">
+            </label>
+        </div>
 
-    <label>Titel<br>
-      <input id="fTitle" type="text" value="${escapeHtml(e.title || "")}">
-    </label>
+        <label>
+            Info<br>
+            <textarea id="fInfo" rows="5">${escapeHtml(e.info)}</textarea>
+        </label>
 
-    <div class="row">
-      <label>Van<br>
-        <input id="fStart" type="time" value="${pad2(e.startD.getHours())}:${pad2(e.startD.getMinutes())}">
-      </label>
-      <label>Tot<br>
-        <input id="fEnd" type="time" value="${pad2(e.endD.getHours())}:${pad2(e.endD.getMinutes())}">
-      </label>
-    </div>
+        	<hr style="background:blue; height: 2px;">
 
-    <label>Info<br>
-      <textarea id="fInfo" rows="5">${escapeHtml(e.info || "")}</textarea>
-    </label>
+        <div class="row" style="align-items:center; gap:12px;">
+            <label class="chk" style="margin:0;">
+                <input type="checkbox" id="fSignup" ${e.requires_signup ? "checked" : ""}>
+                Inschrijving vereist
+            </label>
 
-    <hr>
+            <label class="chk" style="margin:0;">
+                <input type="checkbox" id="fMandatory" ${e.mandatory ? "checked" : ""}>
+                Verplicht
+            </label>
 
-    <label><input type="checkbox" id="fSignup" ${e.requires_signup ? "checked" : ""}> Inschrijving vereist</label>
-    <label><input type="checkbox" id="fMandatory" ${e.mandatory ? "checked" : ""}> Verplicht</label>
-    <label><input type="checkbox" id="fPaid" ${e.paid ? "checked" : ""}> Betalend</label>
+            <label class="chk" style="margin:0;">
+                <input type="checkbox" id="fPaid" ${e.paid ? "checked" : ""}>
+                Betalend
+            </label>
 
-    <div id="priceWrap" style="${e.paid ? "" : "display:none"}">
-      <input id="fPrice" type="number" min="0" step="1" value="${Number(e.price || 0)}"> €
-    </div>
-  `;
+            <span id="priceWrap" style="${e.paid ? "" : "display:none"}; display:flex; align-items:center; gap:4px;">
+                <input id="fPrice" type="number" min="0" step="1" 
+                       value="${Number(e.price || 0)}" 
+                       style="width:70px;">
+                €
+            </span>
+        </div>
+
+        	<hr style="background:blue; height: 2px;">
+    `;
 }
 
 function renderAdminRight(e) {
