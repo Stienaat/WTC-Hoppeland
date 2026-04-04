@@ -436,48 +436,70 @@ function renderMemberRight(e, status) {
 }
 
 async function openMemberDialog(eventData) {
-	
-	btnSave?.classList.add("hidden");
-	btnDelete?.classList.add("hidden");
+  const dialog = document.getElementById("eventDialog");
+  const form = document.getElementById("eventForm");
+  const dialogContent = dialog?.querySelector(".dialog-content");
+  const eventDialogBody = document.getElementById("eventDialogBody");
+  const memberActions = document.getElementById("memberActions");
+  const adminActions = document.getElementById("adminActions");
 
-    // Form mag de dialog NIET sluiten
-    const form = document.querySelector("#eventDialog form");
-    if (form) {
-        form.addEventListener("submit", e => e.preventDefault());
+  if (!dialog || !dialogContent || !eventDialogBody || !memberActions) return;
+
+  // Form mag dialog niet sluiten
+  if (form && !form.dataset.memberSubmitBound) {
+    form.addEventListener("submit", (e) => e.preventDefault());
+    form.dataset.memberSubmitBound = "1";
+  }
+
+  // reset flags
+  signupDownloaded = false;
+
+  // MEMBER MODE zetten
+  dialog.classList.remove("admin-mode");
+  dialog.classList.add("member-mode");
+
+  dialogContent.classList.remove("admin-mode");
+  dialogContent.classList.add("member-mode");
+
+  // header adminacties verbergen
+  if (adminActions) {
+    adminActions.style.display = "none";
+  }
+
+  // rechterpaneel resetten en tonen
+  memberActions.innerHTML = "";
+  memberActions.style.display = "";
+
+  // status ophalen
+  let statusJson = null;
+  let status = null;
+
+  try {
+    statusJson = await getSignupStatus(eventData.id, CURRENT_USER?.email);
+  } catch (err) {
+    console.error("getSignupStatus failed", err);
+  }
+
+  // status normaliseren
+  if (statusJson?.signed_up) {
+    status = (statusJson.status || "").toLowerCase().trim();
+    if (status !== "pending" && status !== "confirmed") {
+      status = "pending";
     }
+  }
 
-    // RESET FLAGS
-    signupDownloaded = false;
+  // links
+  eventDialogBody.innerHTML = renderMemberLeft(eventData);
 
-    // RESET ADMIN MODE
-    document.querySelector(".dialog-content")?.classList.remove("admin-mode");
-    document.querySelector("#eventDialog form")?.classList.remove("admin-mode");
-    document.getElementById("eventDialog")?.classList.remove("admin-mode");
+  // rechts
+  memberActions.innerHTML = renderMemberRight(eventData, status);
 
-    // RECHTERPANEEL LEEGMAKEN
-    memberActions.innerHTML = "";
+  // events
+  attachMemberEvents(eventData, status);
 
-    // STATUS OPHALEN
-    const statusJson = await getSignupStatus(eventData.id, memberEmail);
-
-    // STATUS NORMALISEREN
-    let status = null;
-	if (statusJson?.signed_up) {
-
-        status = (statusJson.status || "").toLowerCase().trim();
-        if (status !== "pending" && status !== "confirmed") {
-            status = "pending";
-        }
-    }
-
-    // LINKERKANT
-    memberLeft.innerHTML = renderMemberLeft(eventData);
-
-    // RECHTERKANT
-    memberActions.innerHTML = renderMemberRight(eventData, status);
-
-    // EVENTS
-    attachMemberEvents(eventData, status);
+  if (!dialog.open) {
+    dialog.showModal();
+  }
 }
 
 function attachMemberEvents(e, status) {
