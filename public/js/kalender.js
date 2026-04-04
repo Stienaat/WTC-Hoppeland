@@ -395,10 +395,6 @@ function normalizeDialogEvent(eventData) {
 
 async function openMemberDialog(eventData) {
 
-  // Admin knoppen verbergen
-  btnSave?.classList.add("hidden");
-  btnDelete?.classList.add("hidden");
-
   const dialog = document.getElementById("eventDialog");
   const form = document.getElementById("eventForm");
   const dialogContent = dialog?.querySelector(".dialog-content");
@@ -414,7 +410,6 @@ async function openMemberDialog(eventData) {
     form.dataset.memberSubmitBound = "1";
   }
 
-  // Reset flags
   signupDownloaded = false;
 
   // Member mode
@@ -422,20 +417,22 @@ async function openMemberDialog(eventData) {
   dialogContent.classList.remove("admin-mode");
   if (adminActions) adminActions.style.display = "none";
 
+  dialog.classList.add("member-mode");
+  dialogContent.classList.add("member-mode");
+
   // Rechterpaneel leegmaken
   memberActions.innerHTML = "";
   memberActions.style.display = "";
 
-  // Status ophalen
+  // STATUS OPHALEN (veilig)
   let statusJson = null;
-  let status = null;
-
   try {
     statusJson = await getSignupStatus(eventData.id, CURRENT_USER?.email);
   } catch (err) {
     console.error("getSignupStatus failed", err);
   }
 
+  let status = null;
   if (statusJson?.signed_up) {
     status = (statusJson.status || "").toLowerCase().trim();
     if (status !== "pending" && status !== "confirmed") {
@@ -443,18 +440,19 @@ async function openMemberDialog(eventData) {
     }
   }
 
-  // Linker paneel
+  // Linker paneel (zoals vroeger)
   memberLeft.innerHTML = renderMemberLeft(eventData);
 
-  // Rechter paneel
+  // Rechter paneel (zoals vroeger)
   memberActions.innerHTML = renderMemberRight(eventData, status);
 
-  // Events koppelen
+  // Events koppelen (zoals vroeger)
   attachMemberEvents(eventData, status);
 
   // Dialoog openen
   dialog.showModal();
 }
+
 
 async function doSignup(eventId) {
   return await apiJson("./api_signups.php", {
