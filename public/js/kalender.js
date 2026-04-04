@@ -394,52 +394,68 @@ function normalizeDialogEvent(eventData) {
 }
 
 async function openMemberDialog(eventData) {
+
+  // Admin knoppen verbergen
+  btnSave?.classList.add("hidden");
+  btnDelete?.classList.add("hidden");
+
   const dialog = document.getElementById("eventDialog");
+  const form = document.getElementById("eventForm");
   const dialogContent = dialog?.querySelector(".dialog-content");
   const memberLeft = document.getElementById("eventDialogBody");
   const memberActions = document.getElementById("memberActions");
   const adminActions = document.getElementById("adminActions");
 
-  console.log("openMemberDialog called", eventData);
+  if (!dialog || !dialogContent || !memberLeft || !memberActions) return;
 
-  if (!dialog || !dialogContent || !memberLeft || !memberActions) {
-    console.error("Member dialog refs missing", {
-      dialog,
-      dialogContent,
-      memberLeft,
-      memberActions
-    });
-    return;
+  // Form mag dialog niet sluiten
+  if (form && !form.dataset.memberSubmitBound) {
+    form.addEventListener("submit", e => e.preventDefault());
+    form.dataset.memberSubmitBound = "1";
   }
 
-  const ev = {
-    ...eventData,
-    startD: eventData?.startD ?? new Date(eventData.start),
-    endD: eventData?.endD ?? new Date(eventData.end)
-  };
+  // Reset flags
+  signupDownloaded = false;
 
+  // Member mode
   dialog.classList.remove("admin-mode");
-  dialog.classList.add("member-mode");
-
   dialogContent.classList.remove("admin-mode");
-  dialogContent.classList.add("member-mode");
-
   if (adminActions) adminActions.style.display = "none";
 
-  memberLeft.innerHTML = `
-    <h3>${escapeHtml(ev.title || "")}</h3>
-    <p>${ev.startD.toLocaleDateString("nl-BE")} ${ev.startD.toLocaleTimeString("nl-BE", {
-      hour: "2-digit",
-      minute: "2-digit"
-    })}</p>
-    <p>${escapeHtml(ev.info || "")}</p>
-  `;
-
+  // Rechterpaneel leegmaken
+  memberActions.innerHTML = "";
   memberActions.style.display = "";
-  memberActions.innerHTML = `<p>Member acties test</p>`;
 
-  if (!dialog.open) dialog.showModal();
+  // Status ophalen
+  let statusJson = null;
+  let status = null;
+
+  try {
+    statusJson = await getSignupStatus(eventData.id, CURRENT_USER?.email);
+  } catch (err) {
+    console.error("getSignupStatus failed", err);
+  }
+
+  if (statusJson?.signed_up) {
+    status = (statusJson.status || "").toLowerCase().trim();
+    if (status !== "pending" && status !== "confirmed") {
+      status = "pending";
+    }
+  }
+
+  // Linker paneel
+  memberLeft.innerHTML = renderMemberLeft(eventData);
+
+  // Rechter paneel
+  memberActions.innerHTML = renderMemberRight(eventData, status);
+
+  // Events koppelen
+  attachMemberEvents(eventData, status);
+
+  // Dialoog openen
+  dialog.showModal();
 }
+
 
 function renderMemberRight(eventData, status) {
   if (status === "confirmed") {
