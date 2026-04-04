@@ -441,6 +441,25 @@ async function openMemberDialog(eventData) {
   if (!dialog.open) dialog.showModal();
 }
 
+function renderMemberLeft(eventData) {
+  const startD = eventData?.startD ?? new Date(eventData.start);
+  const endD = eventData?.endD ?? new Date(eventData.end);
+
+  return `
+    <div class="member-left">
+      <h3>${escapeHtml(eventData.title || "")}</h3>
+      <p><strong>Datum:</strong> ${startD.toLocaleDateString("nl-BE")}</p>
+      <p>
+        <strong>Tijd:</strong>
+        ${startD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
+        –
+        ${endD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
+      </p>
+      <div class="event-info">${escapeHtml(eventData.info || "")}</div>
+    </div>
+  `;
+}
+
 function renderMemberRight(eventData, status) {
   if (status === "confirmed") {
     return `
@@ -455,101 +474,7 @@ function renderMemberRight(eventData, status) {
     return `
       <div class="member-right">
         <p>Je inschrijving is in behandeling.</p>
-        <button id="btnMemberCancel" type="button" class="wtc-button">Annuleren</button>
-      </div>
-    `;
-  }
-
-  return `
-    <div class="member-right">
-      <button id="btnMemberSignup" type="button" class="wtc-button">Inschrijven</button>
-    </div>
-  `;
-}
-
-function normalizeDialogEvent(eventData) {
-  return {
-    ...eventData,
-    startD: eventData?.startD ?? new Date(eventData.start),
-    endD: eventData?.endD ?? new Date(eventData.end)
-  };
-}
-
-async function openMemberDialog(eventData) {
-  const dialog = document.getElementById("eventDialog");
-  const form = document.getElementById("eventForm");
-  const dialogContent = dialog?.querySelector(".dialog-content");
-  const eventDialogBody = document.getElementById("eventDialogBody");
-  const memberActions = document.getElementById("memberActions");
-  const adminActions = document.getElementById("adminActions");
-
-  if (!dialog || !dialogContent || !eventDialogBody || !memberActions) return;
-
-  // Form mag dialog niet sluiten
-  if (form && !form.dataset.memberSubmitBound) {
-    form.addEventListener("submit", (e) => e.preventDefault());
-    form.dataset.memberSubmitBound = "1";
-  }
-
-  // reset flags
-  signupDownloaded = false;
-
-  // MEMBER MODE zetten
-  dialog.classList.remove("admin-mode");
-  dialog.classList.add("member-mode");
-
-  dialogContent.classList.remove("admin-mode");
-  dialogContent.classList.add("member-mode");
-
-  // header adminacties verbergen
-  if (adminActions) {
-    adminActions.style.display = "none";
-  }
-
-  // rechterpaneel resetten en tonen
-  memberActions.innerHTML = "";
-  memberActions.style.display = "";
-
-  // status ophalen
-  let statusJson = null;
-  let status = null;
-
-  try {
-    statusJson = await getSignupStatus(eventData.id, CURRENT_USER?.email);
-  } catch (err) {
-    console.error("getSignupStatus failed", err);
-  }
-
-  // status normaliseren
-  if (statusJson?.signed_up) {
-    status = (statusJson.status || "").toLowerCase().trim();
-    if (status !== "pending" && status !== "confirmed") {
-      status = "pending";
-    }
-  }
-
-  // links
-function renderMemberLeft(eventData) {
-  const startD = eventData?.startD ?? new Date(eventData.start);
-  const endD = eventData?.endD ?? new Date(eventData.end);
-
-  return `
-    <div class="member-left">
-      <h3>${escapeHtml(eventData.title || "")}</h3>
-      <p>
-        <strong>Datum:</strong>
-        ${startD.toLocaleDateString("nl-BE")}
-      </p>
-      <p>
-        <strong>Tijd:</strong>
-        ${startD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
-        –
-        ${endD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
-      </p>
-      <div class="event-info">${escapeHtml(eventData.info || "")}</div>
-    </div>
-  `;
-}
+        <button id="btnMemberCancel" type="button" class="wtc-button">
 
 function attachMemberEvents(eventData, status) {
   const btnSignup = document.getElementById("btnMemberSignup");
