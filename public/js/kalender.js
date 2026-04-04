@@ -656,29 +656,51 @@ function renderEvents(eventLayer) {
 
   const start = currentWeekStart;
   const end = addDays(start, 7);
+  const byDay = new Map();
 
   const weekEvents = events.filter((ev) => {
-    const d = new Date(ev.start);
-    return d >= start && d < end;
+    const startD = new Date(ev.start);
+    const endD = new Date(ev.end);
+    return startD < end && endD > start;
   });
 
   for (const ev of weekEvents) {
     const startD = new Date(ev.start);
     const endD = new Date(ev.end);
+
     const dayIndex = (startD.getDay() + 6) % 7;
     const startMinEv = startD.getHours() * 60 + startD.getMinutes();
     const endMinEv = endD.getHours() * 60 + endD.getMinutes();
+
     const rowStart = Math.floor((startMinEv - startMin) / slotMinutes) + 2;
-    const rowEnd = Math.floor((endMinEv - startMin) / slotMinutes) + 2;
+    const rowEnd = Math.ceil((endMinEv - startMin) / slotMinutes) + 2;
     const col = dayIndex + 2;
 
     const div = document.createElement("div");
     div.className = "event";
     div.style.gridColumn = col;
     div.style.gridRow = `${rowStart} / ${rowEnd}`;
-    div.innerHTML = `<div class="title">${escapeHtml(ev.title)}</div>`;
-    div.onclick = () => openEventDialog(ev);
+    div.innerHTML = `
+      <div class="title">${escapeHtml(ev.title || "")}</div>
+      <div class="time">${pad2(startD.getHours())}:${pad2(startD.getMinutes())}–${pad2(endD.getHours())}:${pad2(endD.getMinutes())}</div>
+    `;
+    div.onclick = (evt) => {
+      evt.stopPropagation();
+      openEventDialog(ev);
+    };
+
     eventLayer.appendChild(div);
+
+    if (!byDay.has(dayIndex)) byDay.set(dayIndex, []);
+    byDay.get(dayIndex).push({
+      startM: startMinEv,
+      endM: endMinEv,
+      el: div
+    });
+  }
+
+  for (const dayEvents of byDay.values()) {
+    layoutOverlaps(dayEvents);
   }
 }
 
