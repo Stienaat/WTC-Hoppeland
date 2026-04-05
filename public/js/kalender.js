@@ -514,9 +514,9 @@ function renderMemberRight(eventData, status) {
         <label for="mDoSignup" class="signupText">Ik schrijf mij in.</label>
       </div>
 
-      <div id="qrText" style="display:none;">
-        Om te betalen, scan de code met Uw bankapp.
-      </div>
+    <div id="qrText" style="display:none;">
+       Om te betalen, scan de code met Uw bankapp.
+    </div>
 
       <div id="qrWrap" style="display:none;">
         <div id="qrCode"></div>
@@ -667,9 +667,9 @@ chk.onchange = async () => {
 
     lastSignup = r.signup || r.data || null;
 
-//    if (signupText) {
-//      signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
-//    }
+    if (signupText) {
+    signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
+    }
 
     showQR();
     if (btn) btn.style.display = "block";
