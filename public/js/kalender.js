@@ -651,8 +651,6 @@ function attachMemberEvents(e, status) {
 
       if (!r || !r.ok) {
         alert("Inschrijving mislukt");
-		showModal("error", "Fout!", "Er ging iets mis bij het opslaan.");
-
         chk.checked = false;
         return;
       }
@@ -691,12 +689,10 @@ function attachMemberEvents(e, status) {
 
       signupDownloaded = true;
       if (signupText) signupText.textContent = "✔️ U bent ingeschreven";
-
       downloadConfirmation(e, lastSignup);
     };
   }
 }
-
 function render() {
   labelEl.textContent = formatWeekLabel(currentWeekStart);
   gridEl.innerHTML = "";
