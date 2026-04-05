@@ -393,54 +393,44 @@ function normalizeDialogEvent(eventData) {
   };
 }
 
-/*
-
 async function openMemberDialog(eventData) {
-
-  // Admin knoppen verbergen
   btnSave?.classList.add("hidden");
   btnDelete?.classList.add("hidden");
 
   const dialog = document.getElementById("eventDialog");
   const form = document.getElementById("eventForm");
   const dialogContent = dialog?.querySelector(".dialog-content");
-  const memberLeft = document.getElementById("eventDialogBody");   // nieuwe naam
+  const memberLeft = document.getElementById("eventDialogBody");
   const memberActions = document.getElementById("memberActions");
   const adminActions = document.getElementById("adminActions");
 
   if (!dialog || !dialogContent || !memberLeft || !memberActions) return;
 
-  // Form mag dialog niet sluiten
   if (form && !form.dataset.memberSubmitBound) {
     form.addEventListener("submit", e => e.preventDefault());
     form.dataset.memberSubmitBound = "1";
   }
 
-  // Reset flags
   signupDownloaded = false;
 
-  // Reset admin mode
   dialog.classList.remove("admin-mode");
   dialogContent.classList.remove("admin-mode");
+  form?.classList.remove("admin-mode");
   if (adminActions) adminActions.style.display = "none";
 
-  // Member mode
-  dialog.classList.add("member-mode");
-  dialogContent.classList.add("member-mode");
-
-  // Rechterpaneel leegmaken
   memberActions.innerHTML = "";
   memberActions.style.display = "";
 
-  // STATUS OPHALEN (veilig)
   let statusJson = null;
   try {
-    statusJson = await getSignupStatus(eventData.id, CURRENT_USER?.email);
+    statusJson = await getSignupStatus(
+      eventData.id,
+      typeof memberEmail !== "undefined" ? memberEmail : CURRENT_USER?.email
+    );
   } catch (err) {
     console.error("getSignupStatus failed", err);
   }
 
-  // STATUS NORMALISEREN
   let status = null;
   if (statusJson?.signed_up) {
     status = (statusJson.status || "").toLowerCase().trim();
@@ -449,19 +439,13 @@ async function openMemberDialog(eventData) {
     }
   }
 
-  // LINKERKANT (identiek aan vroeger)
   memberLeft.innerHTML = renderMemberLeft(eventData);
-
-  // RECHTERKANT (identiek aan vroeger)
   memberActions.innerHTML = renderMemberRight(eventData, status);
 
-  // EVENTS (identiek aan vroeger)
   attachMemberEvents(eventData, status);
 
-  // Dialoog openen
-  //dialog.showModal();
+  dialog.showModal();
 }
-*/
 
 async function doSignup(eventId) {
   return await apiJson("./api_signups.php", {
@@ -496,133 +480,106 @@ async function doCommit(eventId) {
   });
 }
 
-
 function generateQR(e) {
-    const qrDiv = document.getElementById("qrCode");
-    qrDiv.innerHTML = ""; // alleen de QR zelf wissen
+  const qrDiv = document.getElementById("qrCode");
+  if (!qrDiv) return;
 
-    new QRCode(qrDiv, {
-        text: e.qr_text,
-        width: 180,
-        height: 180
-    });
+  qrDiv.innerHTML = "";
+
+  new QRCode(qrDiv, {
+    text: e.qr_text,
+    width: 180,
+    height: 180
+  });
 }
 
 function renderMemberRight(eventData, status) {
-  if (status === "confirmed") {
-    return `
-      <div class="member-right">
-        <p>Je bent ingeschreven.</p>
-        <button id="btnMemberCancel" type="button" class="wtc-button">Annuleren</button>
-      </div>
-    `;
-  }
-
-  if (status === "pending") {
-    return `
-      <div class="member-right">
-        <p>Je inschrijving is in behandeling.</p>
-        <button id="btnMemberCancel" type="button" class="wtc-button">Annuleren</button>
-      </div>
-    `;
-  }
+  const checked = status === "pending" || status === "confirmed" ? "checked" : "";
+  const disabled = status === "pending" || status === "confirmed" ? "disabled" : "";
 
   return `
     <div class="member-right">
-      <button id="btnMemberSignup" type="button" class="wtc-button">Inschrijven</button>
+      <label class="signup-row">
+        <input id="mDoSignup" type="checkbox" ${checked} ${disabled}>
+        <span class="signupText">Ik schrijf mij in.</span>
+      </label>
+
+      <div id="qrText" style="display:none;">
+        Om te betalen, scan de code met Uw bankapp.
+      </div>
+
+      <div id="qrWrap" style="display:none;">
+        <div id="qrCode"></div>
+      </div>
+
+      <button id="btnDownload" type="button" class="wtc-button" style="display:none;">
+        Download bevestiging
+      </button>
     </div>
   `;
 }
-
-/*
-function normalizeDialogEvent(eventData) {
-  return {
-    ...eventData,
-    startD: eventData?.startD ?? new Date(eventData.start),
-    endD: eventData?.endD ?? new Date(eventData.end)
-  };
-}
-*/
-
-
-async function openMemberDialog(eventData) {
-
-  // Admin knoppen verbergen
-  btnSave?.classList.add("hidden");
-  btnDelete?.classList.add("hidden");
-
-  const dialog = document.getElementById("eventDialog");
-  const form = document.getElementById("eventForm");
-  const dialogContent = dialog?.querySelector(".dialog-content");
-  const memberLeft = document.getElementById("eventDialogBody");
-  const memberActions = document.getElementById("memberActions");
-  const adminActions = document.getElementById("adminActions");
-
-  if (!dialog || !dialogContent || !memberLeft || !memberActions) return;
-
-  // Form mag dialog niet sluiten
-  if (form && !form.dataset.memberSubmitBound) {
-    form.addEventListener("submit", e => e.preventDefault());
-    form.dataset.memberSubmitBound = "1";
-  }
-
-  signupDownloaded = false;
-
-  dialog.classList.remove("admin-mode");
-  dialogContent.classList.remove("admin-mode");
-  if (adminActions) adminActions.style.display = "none";
-
-  memberActions.innerHTML = "";
-  memberActions.style.display = "";
-
-  // STATUS OPHALEN (veilig)
-  let statusJson = null;
-  try {
-    statusJson = await getSignupStatus(eventData.id, CURRENT_USER?.email);
-  } catch (err) {
-    console.error("getSignupStatus failed", err);
-  }
-
-  let status = null;
-  if (statusJson?.signed_up) {
-    status = (statusJson.status || "").toLowerCase().trim();
-    if (status !== "pending" && status !== "confirmed") {
-      status = "pending";
-    }
-  }
-
-  // Linker paneel
-  memberLeft.innerHTML = renderMemberLeft(eventData);
-
-  // Rechter paneel
-  memberActions.innerHTML = renderMemberRight(eventData, status);
-
-  // Events koppelen
-  attachMemberEvents(eventData, status);
-
-  // Dialoog openen — ALTIJD
-  dialog.showModal();
-}
-
 
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
   const endD = eventData?.endD ?? new Date(eventData.end);
 
+  const datum = !isNaN(startD) ? startD.toLocaleDateString("nl-BE") : "";
+  const startTijd = !isNaN(startD)
+    ? startD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })
+    : "";
+  const eindTijd = !isNaN(endD)
+    ? endD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })
+    : "";
+
   return `
     <div class="member-left">
       <h3>${escapeHtml(eventData.title || "")}</h3>
-      <p>
-        <strong>Datum:</strong>
-        ${startD.toLocaleDateString("nl-BE")}
-      </p>
-      <p>
-        <strong>Tijd:</strong>
-        ${startD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
-        –
-        ${endD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}
-      </p>
-      <div class="event-info">${escapeHtml(eventData.info || "")}</div>
+
+      ${datum ? `
+        <p>
+          <strong>Datum:</strong>
+          ${datum}
+        </p>
+      ` : ""}
+
+      ${(startTijd || eindTijd) ? `
+        <p>
+          <strong>Tijd:</strong>
+          ${startTijd}${startTijd && eindTijd ? " – " : ""}${eindTijd}
+        </p>
+      ` : ""}
+
+      ${eventData.location ? `
+        <p>
+          <strong>Locatie:</strong>
+          ${escapeHtml(eventData.location)}
+        </p>
+      ` : ""}
+
+      ${eventData.organizer ? `
+        <p>
+          <strong>Organisator:</strong>
+          ${escapeHtml(eventData.organizer)}
+        </p>
+      ` : ""}
+
+      ${eventData.price ? `
+        <p>
+          <strong>Prijs:</strong>
+          ${escapeHtml(String(eventData.price))}
+        </p>
+      ` : ""}
+
+      ${eventData.capacity ? `
+        <p>
+          <strong>Aantal plaatsen:</strong>
+          ${escapeHtml(String(eventData.capacity))}
+        </p>
+      ` : ""}
+
+      ${eventData.info ? `
+        <div class="event-info">${escapeHtml(eventData.info)}</div>
+      ` : ""}
     </div>
   `;
 }
@@ -635,7 +592,14 @@ function attachMemberEvents(e, status) {
   const signupText = document.querySelector(".signupText");
 
   let lastSignup = null;
-  if (!chk) return;
+
+  signupDownloaded = false;
+  if (signupText) signupText.textContent = "Ik schrijf mij in.";
+
+  if (!chk) {
+    console.warn("Geen checkbox gevonden → event vereist geen inschrijving.");
+    return;
+  }
 
   function showQR() {
     if (qrWrap) qrWrap.style.display = "block";
@@ -651,9 +615,23 @@ function attachMemberEvents(e, status) {
   if (status === "pending" || status === "confirmed") {
     chk.checked = true;
     chk.disabled = true;
+
     showQR();
     if (btn) btn.style.display = "block";
-    lastSignup = { event_id: e.id, name: getUser()?.name || "", status, paid: false };
+
+    lastSignup = {
+      event_id: e.id,
+      email: typeof memberEmail !== "undefined" ? memberEmail : CURRENT_USER?.email,
+      status: status
+    };
+
+    if (signupText) {
+      signupText.textContent =
+        status === "confirmed"
+          ? "U bent ingeschreven."
+          : "Uw inschrijving is in behandeling.";
+    }
+
     return;
   }
 
@@ -662,6 +640,7 @@ function attachMemberEvents(e, status) {
 
     if (chk.checked) {
       const r = await doSignup(e.id);
+
       if (!r || !r.ok) {
         alert("Inschrijving mislukt");
         chk.checked = false;
@@ -669,13 +648,18 @@ function attachMemberEvents(e, status) {
       }
 
       lastSignup = r.signup;
-      if (signupText) signupText.textContent = "Scan de code met uw bankapp.";
+
+      if (signupText) {
+        signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
+      }
+
       showQR();
       if (btn) btn.style.display = "block";
       return;
     }
 
     const r = await doCancel(e.id);
+
     if (!r || !r.ok) {
       alert("Annuleren mislukt");
       chk.checked = true;
@@ -690,9 +674,14 @@ function attachMemberEvents(e, status) {
 
   if (btn) {
     btn.onclick = () => {
-      if (!lastSignup) return;
+      if (!lastSignup) {
+        console.warn("Geen signup info beschikbaar voor download.");
+        return;
+      }
+
       signupDownloaded = true;
       if (signupText) signupText.textContent = "✔️ U bent ingeschreven";
+
       downloadConfirmation(e, lastSignup);
     };
   }
