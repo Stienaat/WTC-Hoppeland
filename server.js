@@ -514,6 +514,7 @@ app.delete("/api/events/:id", requireAdmin, async (req, res) => {
 /* =====================================
    SIGNUPS API
    ===================================== */
+
 app.get("/api/signups/status", requireAuth, async (req, res) => {
   try {
     if (isAdmin(req)) {
@@ -556,7 +557,7 @@ app.get("/api/signups", requireAdmin, async (req, res) => {
 
     const { data: signups, error: signupsError } = await supabase
       .from("signups")
-      .select("id, created_at, member_id, event_id, paid, status, confirmed_at, payment_method, payment_reference")
+      .select("id, created_at, member_id, event_id, paid, status, payment_method, payment_reference")
       .eq("event_id", eventId)
       .order("created_at", { ascending: true });
 
@@ -587,7 +588,6 @@ app.get("/api/signups", requireAdmin, async (req, res) => {
         phone: lid.telefoon || "",
         status: s.status || "pending",
         paid: !!s.paid,
-        confirmed_at: s.confirmed_at,
         payment_method: s.payment_method,
         payment_reference: s.payment_reference,
         created_at: s.created_at
@@ -603,34 +603,21 @@ app.get("/api/signups", requireAdmin, async (req, res) => {
 
 app.post("/api/signups", requireAuth, async (req, res) => {
   try {
-    console.log("POST /api/signups hit");
-    console.log("req.body:", req.body);
-    console.log("req.session:", req.session);
-
     if (isAdmin(req)) {
-      console.log("Blocked: admin user");
       return res.status(403).json({ ok: false, error: "NOT_ALLOWED_FOR_ADMIN" });
     }
 
     const eventId = req.body?.event_id;
-    console.log("eventId:", eventId);
-
     if (!eventId) {
-      console.log("Blocked: invalid event id");
       return res.status(400).json({ ok: false, error: "INVALID_EVENT_ID" });
     }
 
     const member = await getCurrentMember(req);
-    console.log("member:", member);
-
     if (!member) {
-      console.log("Blocked: member not found");
       return res.status(404).json({ ok: false, error: "MEMBER_NOT_FOUND" });
     }
 
     const existing = await getSignupByMemberAndEvent(member.id, eventId);
-    console.log("existing signup:", existing);
-
     if (existing) {
       return res.json({
         ok: true,
@@ -646,7 +633,6 @@ app.post("/api/signups", requireAuth, async (req, res) => {
           paid: !!existing.paid,
           payment_method: existing.payment_method,
           payment_reference: existing.payment_reference,
-          confirmed_at: existing.confirmed_at,
           created_at: existing.created_at
         }
       });
@@ -657,21 +643,15 @@ app.post("/api/signups", requireAuth, async (req, res) => {
       event_id: eventId,
       paid: false,
       status: "pending",
-      confirmed_at: null,
       payment_method: null,
       payment_reference: null
     };
 
-    console.log("insertPayload:", insertPayload);
-
     const { data, error } = await supabase
       .from("signups")
       .insert(insertPayload)
-      .select("id, created_at, member_id, event_id, paid, status, confirmed_at, payment_method, payment_reference")
+      .select("id, created_at, member_id, event_id, paid, status, payment_method, payment_reference")
       .single();
-
-    console.log("supabase insert data:", data);
-    console.log("supabase insert error:", error);
 
     if (error) throw error;
 
@@ -689,14 +669,11 @@ app.post("/api/signups", requireAuth, async (req, res) => {
         paid: !!data.paid,
         payment_method: data.payment_method,
         payment_reference: data.payment_reference,
-        confirmed_at: data.confirmed_at,
         created_at: data.created_at
       }
     });
   } catch (err) {
-    console.error("POST /api/signups ERROR full:", err);
-    console.error("POST /api/signups ERROR message:", err?.message);
-    console.error("POST /api/signups ERROR stack:", err?.stack);
+    console.error("POST /api/signups ERROR:", err);
     res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
   }
 });
@@ -707,7 +684,7 @@ app.delete("/api/signups", requireAuth, async (req, res) => {
       return res.status(403).json({ ok: false, error: "NOT_ALLOWED_FOR_ADMIN" });
     }
 
-    const eventId = req.body.event_id;
+    const eventId = req.body?.event_id;
     if (!eventId) {
       return res.status(400).json({ ok: false, error: "INVALID_EVENT_ID" });
     }
@@ -728,6 +705,93 @@ app.delete("/api/signups", requireAuth, async (req, res) => {
     res.json({ ok: true, msg: "deleted" });
   } catch (err) {
     console.error("DELETE /api/signups ERROR:", err);
+    res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
+  }
+});
+
+app.post("/api/signups/commit", requireAuth, async (req, res) => {
+  try {
+    if (isAdmin(req)) {
+      return res.status(403).json({ ok: false, error: "NOT_ALLOWED_FOR_ADMIN" });
+    }
+
+    const eventId = req.body?.event_id;
+    if (!eventId) {
+      return res.status(400).json({ ok: false, error: "INVALID_EVENT_ID" });
+    }
+
+    const member = await getCurrentMember(req);
+    if (!member) {
+      return res.status(404).json({ ok: false, error: "MEMBER_NOT_FOUND" });
+    }
+
+    const existing = await getSignupByMemberAndEvent(member.id, eventId);
+    if (!existing) {
+      return res.status(404).json({ ok: false, error: "SIGNUP_NOT_FOUND" });
+    }
+
+    if (existing.status === "confirmed") {
+      return res.json({ ok: true, data: existing, note: "ALREADY_CONFIRMED" });
+    }
+
+    if (existing.status !== "pending") {
+      return res.status(400).json({ ok: false, error: "NOT_PENDING", current: existing });
+    }
+
+    const { data, error } = await supabase
+      .from("signups")
+      .update({ status: "confirmed" })
+      .eq("id", existing.id)
+      .select("*")
+      .single();
+
+    if (error) throw error;
+
+    res.json({ ok: true, data });
+  } catch (err) {
+    console.error("POST /api/signups/commit ERROR:", err);
+    res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
+  }
+});
+
+app.patch("/api/signups/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const payload = {};
+
+    if ("status" in req.body) payload.status = req.body.status;
+    if ("paid" in req.body) payload.paid = normalizeBoolean(req.body.paid);
+    if ("payment_method" in req.body) payload.payment_method = req.body.payment_method || null;
+    if ("payment_reference" in req.body) payload.payment_reference = req.body.payment_reference || null;
+
+    if (Object.keys(payload).length === 0) {
+      return res.status(400).json({ ok: false, error: "NO_FIELDS_TO_UPDATE" });
+    }
+
+    const { data, error } = await supabase
+      .from("signups")
+      .update(payload)
+      .eq("id", id)
+      .select("*")
+      .single();
+
+    if (error) throw error;
+
+    res.json({ ok: true, signup: data });
+  } catch (err) {
+    console.error("PATCH /api/signups/:id ERROR:", err);
+    res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
+  }
+});
+
+app.delete("/api/signups/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { error } = await supabase.from("signups").delete().eq("id", id);
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("DELETE /api/signups/:id ERROR:", err);
     res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
   }
 });
