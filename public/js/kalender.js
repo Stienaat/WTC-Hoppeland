@@ -393,6 +393,8 @@ function normalizeDialogEvent(eventData) {
   };
 }
 
+/*
+
 async function openMemberDialog(eventData) {
 
   // Admin knoppen verbergen
@@ -459,7 +461,7 @@ async function openMemberDialog(eventData) {
   // Dialoog openen
   //dialog.showModal();
 }
-
+*/
 
 async function doSignup(eventId) {
   return await apiJson("./api_signups.php", {
@@ -540,7 +542,7 @@ function normalizeDialogEvent(eventData) {
   };
 }
 
-/*
+
 
 async function openMemberDialog(eventData) {
 
@@ -600,7 +602,7 @@ async function openMemberDialog(eventData) {
   // Dialoog openen — ALTIJD
   dialog.showModal();
 }
-*/
+
   // links
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
