@@ -464,44 +464,30 @@ async function openMemberDialog(eventData) {
 }
 
 async function doSignup(eventId) {
-  const body = new URLSearchParams({
-    action: "signup",
-    event_id: String(eventId)
-  });
-
-  const response = await fetch("./api_signups.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: body.toString()
-  });
-
-  const text = await response.text();
-  console.log("Signup response text:", text);
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { ok: false, raw: text };
-  }
-}
-
-async function doCancel(eventId) {
-  return await apiJson("./api_signups.php", {
+  return await apiJson("/api/signups", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      action: "cancel",
+      event_id: eventId
+    })
+  });
+}
+
+async function doCancel(eventId) {
+  return await apiJson("/api/signups", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       event_id: eventId
     })
   });
 }
 
 async function doCommit(eventId) {
-  return await apiJson("./api_signups.php", {
+  return await apiJson("/api/signups/commit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      action: "commit",
       event_id: eventId
     })
   });
