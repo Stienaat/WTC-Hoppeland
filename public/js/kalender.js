@@ -534,6 +534,7 @@ function renderMemberRight(eventData, status) {
   `;
 }
 
+/*
 function normalizeDialogEvent(eventData) {
   return {
     ...eventData,
@@ -541,7 +542,7 @@ function normalizeDialogEvent(eventData) {
     endD: eventData?.endD ?? new Date(eventData.end)
   };
 }
-
+*/
 
 
 async function openMemberDialog(eventData) {
@@ -603,7 +604,7 @@ async function openMemberDialog(eventData) {
   dialog.showModal();
 }
 
-  // links
+
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
   const endD = eventData?.endD ?? new Date(eventData.end);
