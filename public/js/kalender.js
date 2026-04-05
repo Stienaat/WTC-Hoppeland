@@ -464,13 +464,26 @@ async function openMemberDialog(eventData) {
 }
 
 async function doSignup(eventId) {
-  return await apiJson("/api/signups", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event_id: eventId
-    })
-  });
+  try {
+    const response = await fetch("/api/signups", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event_id: eventId })
+    });
+
+    const text = await response.text();
+    console.log("POST /api/signups status:", response.status);
+    console.log("POST /api/signups body:", text);
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { ok: false, error: text };
+    }
+  } catch (err) {
+    console.error("doSignup fetch error:", err);
+    return { ok: false, error: err.message || "FETCH_ERROR" };
+  }
 }
 
 async function doCancel(eventId) {
@@ -657,45 +670,44 @@ function attachMemberEvents(e, status) {
     return;
   }
 
-  chk.onchange = async () => {
-    if (signupDownloaded) return;
+chk.onchange = async () => {
+  if (signupDownloaded) return;
 
-    if (chk.checked) {
-      const r = await doSignup(e.id);
-
-      if (!r || !r.ok) {
-		  
-       showModal("error", "Fout!", "Inschrijving mislukt.");
-	//   showModal("success", "OK!", "Je boeking is opgeslagen.");
-
-        chk.checked = false;
-        return;
-      }
-
-      lastSignup = r.signup;
-
-      if (signupText) {
-        signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
-      }
-
-      showQR();
-      if (btn) btn.style.display = "block";
-      return;
-    }
-
-    const r = await doCancel(e.id);
+  if (chk.checked) {
+    const r = await doSignup(e.id);
+    console.log("Signup parsed response:", r);
 
     if (!r || !r.ok) {
-      alert("Annuleren mislukt");
-      chk.checked = true;
+      alert("Inschrijving mislukt: " + (r?.error || "onbekende fout"));
+      chk.checked = false;
       return;
     }
 
-    if (signupText) signupText.textContent = "Ik schrijf mij in.";
-    hideQR();
-    if (btn) btn.style.display = "none";
-    lastSignup = null;
-  };
+    lastSignup = r.signup || r.data || null;
+
+    if (signupText) {
+      signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
+    }
+
+    showQR();
+    if (btn) btn.style.display = "block";
+    return;
+  }
+
+  const r = await doCancel(e.id);
+  console.log("Cancel parsed response:", r);
+
+  if (!r || !r.ok) {
+    alert("Annuleren mislukt: " + (r?.error || "onbekende fout"));
+    chk.checked = true;
+    return;
+  }
+
+  if (signupText) signupText.textContent = "Ik schrijf mij in.";
+  hideQR();
+  if (btn) btn.style.display = "none";
+  lastSignup = null;
+};
 
   if (btn) {
     btn.onclick = () => {
