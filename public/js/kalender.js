@@ -192,11 +192,28 @@ async function getSignupStatus(eventId) {
 }
 
 async function doSignup(eventId) {
-  return await apiJson("/api/signups", {
+  console.log("doSignup sending eventId:", eventId);
+
+  const response = await fetch("./api_signups.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ event_id: eventId })
+    body: JSON.stringify({
+      action: "signup",
+      event_id: eventId
+    })
   });
+
+  console.log("doSignup raw status:", response.status, response.statusText);
+
+  const text = await response.text();
+  console.log("doSignup raw body:", text);
+
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("Response is not valid JSON:", err);
+    return { ok: false, raw: text };
+  }
 }
 
 async function doCancel(eventId) {
@@ -652,11 +669,8 @@ function attachMemberEvents(e, status) {
 
       if (!r || !r.ok) {
 		  
-		  	console.log("signup event object:", e);
-	console.log("signup event id:", e?.id);
        showModal("error", "Fout!", "Inschrijving mislukt.");
 	//   showModal("success", "OK!", "Je boeking is opgeslagen.");
-
 
         chk.checked = false;
         return;
