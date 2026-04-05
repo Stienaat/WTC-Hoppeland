@@ -464,35 +464,18 @@ async function openMemberDialog(eventData) {
 }
 
 async function doSignup(eventId) {
-  try {
-    const response = await fetch("/api/signups", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event_id: eventId })
-    });
-
-    const text = await response.text();
-    console.log("POST /api/signups status:", response.status);
-    console.log("POST /api/signups body:", text);
-
-    try {
-      return JSON.parse(text);
-    } catch {
-      return { ok: false, error: text };
-    }
-  } catch (err) {
-    console.error("doSignup fetch error:", err);
-    return { ok: false, error: err.message || "FETCH_ERROR" };
-  }
+  return await apiJson("/api/signups", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ event_id: eventId })
+  });
 }
 
 async function doCancel(eventId) {
   return await apiJson("/api/signups", {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event_id: eventId
-    })
+    body: JSON.stringify({ event_id: eventId })
   });
 }
 
@@ -500,12 +483,9 @@ async function doCommit(eventId) {
   return await apiJson("/api/signups/commit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event_id: eventId
-    })
+    body: JSON.stringify({ event_id: eventId })
   });
 }
-
 function generateQR(e) {
   const qrDiv = document.getElementById("qrCode");
   if (!qrDiv) return;
