@@ -503,7 +503,6 @@ function renderMemberRight(eventData, status) {
   const isExistingSignup = status === "pending" || status === "confirmed";
 
   return `
-    
     <div class="member-right">
       <div class="signup-row">
         <input
@@ -514,9 +513,9 @@ function renderMemberRight(eventData, status) {
         <label for="mDoSignup" class="signupText">Ik schrijf mij in.</label>
       </div>
 
-    <div id="qrText" style="display:none;">
-       Om te betalen, scan de code met Uw bankapp.
-    </div>
+      <div id="qrText" style="display:none;" class="qr-help-text">
+        Om te betalen, scan de code met Uw bankapp.
+      </div>
 
       <div id="qrWrap" style="display:none;">
         <div id="qrCode"></div>
@@ -533,7 +532,6 @@ function renderMemberRight(eventData, status) {
     </div>
   `;
 }
-
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
   const endD = eventData?.endD ?? new Date(eventData.end);
@@ -641,55 +639,44 @@ function attachMemberEvents(e, status) {
     };
 
     if (signupText) {
-      signupText.textContent =
-        status === "confirmed"
-          ? "U bent ingeschreven."
-          : "Uw inschrijving is in behandeling.";
+      signupText.textContent = "Ik schrijf mij in.";
     }
 
     return;
   }
 
-chk.onchange = async () => {
-  if (signupDownloaded) return;
+  chk.onchange = async () => {
+    if (signupDownloaded) return;
 
-  if (chk.checked) {
-    const r = await doSignup(e.id);
-    console.log("Signup parsed response:", r);
+    if (chk.checked) {
+      const r = await doSignup(e.id);
 
-    if (!r || !r.ok) {
-      showModal("success", "OK!", "Je boeking is opgeslagen.");
-//  showModal("error", "Fout!", "Inschrijving mislukt.");
+      if (!r || !r.ok) {
+        alert("Inschrijving mislukt");
+        chk.checked = false;
+        return;
+      }
 
-      chk.checked = false;
+      lastSignup = r.signup || r.data || null;
+
+      showQR();
+      if (btn) btn.style.display = "block";
       return;
     }
 
-    lastSignup = r.signup || r.data || null;
+    const r = await doCancel(e.id);
 
-    if (signupText) {
-    signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
+    if (!r || !r.ok) {
+      alert("Annuleren mislukt");
+      chk.checked = true;
+      return;
     }
 
-    showQR();
-    if (btn) btn.style.display = "block";
-    return;
-  }
-
-  const r = await doCancel(e.id);
-  console.log("Cancel parsed response:", r);
-
-  if (!r || !r.ok) {
-    alert("Annuleren mislukt: " + (r?.error || "onbekende fout"));
-    chk.checked = true;
-    return;
-  }
-
-  if (signupText) signupText.textContent = "Ik schrijf mij in.";
-  hideQR();
-  if (btn) btn.style.display = "none";
-  lastSignup = null;
-};
+    if (signupText) signupText.textContent = "Ik schrijf mij in.";
+    hideQR();
+    if (btn) btn.style.display = "none";
+    lastSignup = null;
+  };
 
   if (btn) {
     btn.onclick = () => {
@@ -699,7 +686,6 @@ chk.onchange = async () => {
       }
 
       signupDownloaded = true;
-      if (signupText) signupText.textContent = "✔️ U bent ingeschreven";
       downloadConfirmation(e, lastSignup);
     };
   }
