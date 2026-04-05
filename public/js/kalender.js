@@ -658,16 +658,18 @@ chk.onchange = async () => {
     console.log("Signup parsed response:", r);
 
     if (!r || !r.ok) {
-      alert("Inschrijving mislukt: " + (r?.error || "onbekende fout"));
+      showModal("success", "OK!", "Je boeking is opgeslagen.");
+//  showModal("error", "Fout!", "Inschrijving mislukt.");
+
       chk.checked = false;
       return;
     }
 
     lastSignup = r.signup || r.data || null;
 
-    if (signupText) {
-      signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
-    }
+//    if (signupText) {
+//      signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
+//    }
 
     showQR();
     if (btn) btn.style.display = "block";
