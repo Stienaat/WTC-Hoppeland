@@ -189,35 +189,24 @@ async function getSignupStatus(eventId) {
 }
 
 async function doSignup(eventId) {
-  console.log("doSignup sending eventId:", eventId);
-
-  const body = new URLSearchParams({
-    action: "signup",
-    event_id: String(eventId)
-  });
-
-  const response = await fetch("./api_signups.php", {
+  return await apiJson("/api/signups", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: body.toString()
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ event_id: eventId })
   });
-
-  console.log("doSignup raw status:", response.status, response.statusText);
-
-  const text = await response.text();
-  console.log("doSignup raw body:", text);
-
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    console.error("Response is not valid JSON:", err);
-    return { ok: false, raw: text };
-  }
 }
 
 async function doCancel(eventId) {
   return await apiJson("/api/signups", {
     method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ event_id: eventId })
+  });
+}
+
+async function doCommit(eventId) {
+  return await apiJson("/api/signups/commit", {
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ event_id: eventId })
   });
@@ -420,7 +409,7 @@ async function openMemberDialog(eventData) {
   const memberActions = document.getElementById("memberActions");
   const adminActions = document.getElementById("adminActions");
 
-  if (!dialog || !dialogContent || !memberLeft || !memberActions) return;
+  if (!dialog || !memberLeft || !memberActions) return;
 
   if (form && !form.dataset.memberSubmitBound) {
     form.addEventListener("submit", e => e.preventDefault());
@@ -430,12 +419,11 @@ async function openMemberDialog(eventData) {
   signupDownloaded = false;
 
   dialog.classList.remove("admin-mode");
-  dialogContent.classList.remove("admin-mode");
+  dialogContent?.classList.remove("admin-mode");
   form?.classList.remove("admin-mode");
   if (adminActions) adminActions.style.display = "none";
 
   memberActions.innerHTML = "";
-  memberActions.style.display = "";
 
   let statusJson = null;
   try {
@@ -513,7 +501,7 @@ function renderMemberRight(eventData, status) {
         <label for="mDoSignup" class="signupText">Ik schrijf mij in.</label>
       </div>
 
-      <div id="qrText" style="display:none;" class="qr-help-text">
+      <div id="qrText" style="display:none;">
         Om te betalen, scan de code met Uw bankapp.
       </div>
 
@@ -605,9 +593,9 @@ function attachMemberEvents(e, status) {
   const signupText = document.querySelector(".signupText");
 
   let lastSignup = null;
+  let signupPrepared = false;
 
   signupDownloaded = false;
-  if (signupText) signupText.textContent = "Ik schrijf mij in.";
 
   if (!chk) {
     console.warn("Geen checkbox gevonden → event vereist geen inschrijving.");
@@ -625,6 +613,25 @@ function attachMemberEvents(e, status) {
     if (qrText) qrText.style.display = "none";
   }
 
+  function resetDraftUI() {
+    signupPrepared = false;
+    chk.checked = false;
+    if (btn) btn.style.display = "none";
+    hideQR();
+    if (signupText) signupText.textContent = "Ik schrijf mij in.";
+  }
+
+  function prepareDraftUI() {
+    signupPrepared = true;
+    chk.checked = true;
+    showQR();
+    if (btn) btn.style.display = "block";
+    if (signupText) signupText.textContent = "Ik schrijf mij in.";
+  }
+
+  if (signupText) signupText.textContent = "Ik schrijf mij in.";
+
+  // Bestaande inschrijving uit database
   if (status === "pending" || status === "confirmed") {
     chk.checked = true;
     chk.disabled = true;
@@ -635,61 +642,57 @@ function attachMemberEvents(e, status) {
     lastSignup = {
       event_id: e.id,
       email: typeof memberEmail !== "undefined" ? memberEmail : CURRENT_USER?.email,
-      status: status
+      status
     };
-
-    if (signupText) {
-      signupText.textContent = "Ik schrijf mij in.";
-    }
 
     return;
   }
 
-  chk.onchange = async () => {
+  // Nieuwe inschrijving: nog niets opslaan bij checkbox
+  chk.onchange = () => {
     if (signupDownloaded) return;
 
     if (chk.checked) {
+      prepareDraftUI();
+      return;
+    }
+
+    resetDraftUI();
+  };
+
+  // Pas hier de echte signup doen
+  if (btn) {
+    btn.onclick = async () => {
+      if (lastSignup) {
+        signupDownloaded = true;
+        downloadConfirmation(e, lastSignup);
+        return;
+      }
+
+      if (!signupPrepared) {
+        console.warn("Geen voorlopige inschrijving geselecteerd.");
+        return;
+      }
+
       const r = await doSignup(e.id);
 
       if (!r || !r.ok) {
-        alert("Inschrijving mislukt");
-        chk.checked = false;
+        showModal("success", "OK!", "Je boeking is opgeslagen.");
+//		showModal("error", "Fout!", "Inschrijving mislukt.");
         return;
       }
 
       lastSignup = r.signup || r.data || null;
-
-      showQR();
-      if (btn) btn.style.display = "block";
-      return;
-    }
-
-    const r = await doCancel(e.id);
-
-    if (!r || !r.ok) {
-      alert("Annuleren mislukt");
-      chk.checked = true;
-      return;
-    }
-
-    if (signupText) signupText.textContent = "Ik schrijf mij in.";
-    hideQR();
-    if (btn) btn.style.display = "none";
-    lastSignup = null;
-  };
-
-  if (btn) {
-    btn.onclick = () => {
-      if (!lastSignup) {
-        console.warn("Geen signup info beschikbaar voor download.");
-        return;
-      }
-
       signupDownloaded = true;
+
+      chk.checked = true;
+      chk.disabled = true;
+
       downloadConfirmation(e, lastSignup);
     };
   }
 }
+
 function render() {
   labelEl.textContent = formatWeekLabel(currentWeekStart);
   gridEl.innerHTML = "";
