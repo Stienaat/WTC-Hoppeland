@@ -457,7 +457,7 @@ async function openMemberDialog(eventData) {
   attachMemberEvents(eventData, status);
 
   // Dialoog openen
-  dialog.showModal();
+  //dialog.showModal();
 }
 
 
