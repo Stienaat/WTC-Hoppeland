@@ -494,15 +494,18 @@ function generateQR(e) {
 }
 
 function renderMemberRight(eventData, status) {
-  const checked = status === "pending" || status === "confirmed" ? "checked" : "";
-  const disabled = status === "pending" || status === "confirmed" ? "disabled" : "";
+  const isExistingSignup = status === "pending" || status === "confirmed";
 
   return `
     <div class="member-right">
-      <label class="signup-row">
-        <input id="mDoSignup" type="checkbox" ${checked} ${disabled}>
-        <span class="signupText">Ik schrijf mij in.</span>
-      </label>
+      <div class="signup-row">
+        <input
+          id="mDoSignup"
+          type="checkbox"
+          ${isExistingSignup ? "checked disabled" : ""}
+        >
+        <label for="mDoSignup" class="signupText">Ik schrijf mij in.</label>
+      </div>
 
       <div id="qrText" style="display:none;">
         Om te betalen, scan de code met Uw bankapp.
@@ -512,7 +515,12 @@ function renderMemberRight(eventData, status) {
         <div id="qrCode"></div>
       </div>
 
-      <button id="btnDownload" type="button" class="wtc-button" style="display:none;">
+      <button
+        id="btnDownload"
+        type="button"
+        class="wtc-button"
+        style="display:none;"
+      >
         Download bevestiging
       </button>
     </div>
