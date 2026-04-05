@@ -497,6 +497,10 @@ function renderMemberRight(eventData, status) {
   const isExistingSignup = status === "pending" || status === "confirmed";
 
   return `
+  
+  console.log("signup event object:", e);
+console.log("signup event id:", e?.id);
+  
     <div class="member-right">
       <div class="signup-row">
         <input
@@ -650,7 +654,10 @@ function attachMemberEvents(e, status) {
       const r = await doSignup(e.id);
 
       if (!r || !r.ok) {
-        alert("Inschrijving mislukt");
+       showModal("error", "Fout!", "Inschrijving mislukt.");
+	//   showModal("success", "OK!", "Je boeking is opgeslagen.");
+
+
         chk.checked = false;
         return;
       }
