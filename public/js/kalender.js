@@ -585,120 +585,106 @@ function renderMemberLeft(eventData) {
 }
 
 function attachMemberEvents(e, status) {
+  const chk = document.getElementById("mDoSignup");
+  const qrWrap = document.getElementById("qrWrap");
+  const qrText = document.getElementById("qrText");
+  const btn = document.getElementById("btnDownload");
+  const signupText = document.querySelector(".signupText");
 
-    const chk        = document.getElementById("mDoSignup");
-    const qrWrap     = document.getElementById("qrWrap");
-    const qrText     = document.getElementById("qrText");
-    const btn        = document.getElementById("btnDownload");
-    const signupText = document.querySelector(".signupText");
+  let lastSignup = null;
 
-    let lastSignup = null;   // ⭐ centraal opslagpunt voor signup-info
+  signupDownloaded = false;
+  if (signupText) signupText.textContent = "Ik schrijf mij in.";
 
-    // Reset
-    signupDownloaded = false;
-    signupText.textContent = "Ik schrijf mij in.";
+  if (!chk) {
+    console.warn("Geen checkbox gevonden → event vereist geen inschrijving.");
+    return;
+  }
 
-    // ADMIN MODE
-    if (isAdmin) {
-        document.getElementById("eventDialog")?.classList.add("admin-mode");
-    } else {
-        document.getElementById("eventDialog")?.classList.remove("admin-mode");
-    }
+  function showQR() {
+    if (qrWrap) qrWrap.style.display = "block";
+    if (qrText) qrText.style.display = "block";
+    generateQR(e);
+  }
 
-    if (!chk) {
-        console.warn("Geen checkbox gevonden → event vereist geen inschrijving.");
-        return;
-    }
+  function hideQR() {
+    if (qrWrap) qrWrap.style.display = "none";
+    if (qrText) qrText.style.display = "none";
+  }
 
-    function showQR() {
-        if (qrWrap) qrWrap.style.display = "block";
-        if (qrText) qrText.style.display = "block";
-        generateQR(e);
-    }
+  if (status === "pending" || status === "confirmed") {
+    chk.checked = true;
+    chk.disabled = true;
 
-    function hideQR() {
-        if (qrWrap) qrWrap.style.display = "none";
-        if (qrText) qrText.style.display = "none";
-    }
+    showQR();
+    if (btn) btn.style.display = "block";
 
-    // ---------------------------------------------------------
-    // 1. BESTAANDE INSCHRIJVING
-    // ---------------------------------------------------------
-    if (status === "pending" || status === "confirmed") {
-
-        chk.checked  = true;
-        chk.disabled = true;
-
-        showQR();
-        btn.style.display = "block";
-
-        // ⭐ signup-info ophalen via status API
-        lastSignup = {
-            event_id: e.id,
-            email: memberEmail,
-            status: status
-        };
-
-        return;
-    }
-
-    // ---------------------------------------------------------
-    // 2. NIEUWE INSCHRIJVING
-    // ---------------------------------------------------------
-    chk.onchange = async () => {
-
-        if (signupDownloaded) return;
-
-        // INSCHRIJVEN
-        if (chk.checked) {
-
-            const r = await doSignup(e.id);
-
-            if (!r || !r.ok) {
-                alert("Inschrijving mislukt");
-                chk.checked = false;
-                return;
-            }
-
-            lastSignup = r.signup;   // ⭐ opslaan
-
-            signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
-			
-			showQR();
-            btn.style.display = "block";
-            return;
-        }
-
-        // ANNULEREN
-        const r = await doCancel(e.id);
-
-        if (!r || !r.ok) {
-            alert("Annuleren mislukt");
-            chk.checked = true;
-            return;
-        }
-
-        signupText.textContent = "Ik schrijf me in.";
-        hideQR();
-        btn.style.display = "none";
-        lastSignup = null;
+    lastSignup = {
+      event_id: e.id,
+      email: typeof memberEmail !== "undefined" ? memberEmail : CURRENT_USER?.email,
+      status: status
     };
 
-    // ---------------------------------------------------------
-    // 3. DOWNLOAD (altijd één listener)
-    // ---------------------------------------------------------
+    if (signupText) {
+      signupText.textContent =
+        status === "confirmed"
+          ? "U bent ingeschreven."
+          : "Uw inschrijving is in behandeling.";
+    }
+
+    return;
+  }
+
+  chk.onchange = async () => {
+    if (signupDownloaded) return;
+
+    if (chk.checked) {
+      const r = await doSignup(e.id);
+
+      if (!r || !r.ok) {
+        alert("Inschrijving mislukt");
+        chk.checked = false;
+        return;
+      }
+
+      lastSignup = r.signup;
+
+      if (signupText) {
+        signupText.textContent = "Om te betalen, scan de code met Uw bankapp.";
+      }
+
+      showQR();
+      if (btn) btn.style.display = "block";
+      return;
+    }
+
+    const r = await doCancel(e.id);
+
+    if (!r || !r.ok) {
+      alert("Annuleren mislukt");
+      chk.checked = true;
+      return;
+    }
+
+    if (signupText) signupText.textContent = "Ik schrijf mij in.";
+    hideQR();
+    if (btn) btn.style.display = "none";
+    lastSignup = null;
+  };
+
+  if (btn) {
     btn.onclick = () => {
+      if (!lastSignup) {
+        console.warn("Geen signup info beschikbaar voor download.");
+        return;
+      }
 
-        if (!lastSignup) {
-            console.warn("Geen signup info beschikbaar voor download.");
-            return;
-        }
+      signupDownloaded = true;
+      if (signupText) signupText.textContent = "✔️ U bent ingeschreven";
 
-        signupDownloaded = true;
-        signupText.textContent = "✔️ U bent ingeschreven";
-
-        downloadConfirmation(e, lastSignup);   // ⭐ werkt nu altijd
+      downloadConfirmation(e, lastSignup);
     };
+  }
 }
 
 function render() {
