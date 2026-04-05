@@ -43,8 +43,7 @@ async function apiJson(url, options = {}) {
 
 async function loadCurrentUser() {
   const data = await apiJson("/api/me");
-  console.log("API /api/me response:", data);
-
+  
   if (!data?.ok) {
     throw new Error(data?.error || "Niet ingelogd");
   }
@@ -61,8 +60,6 @@ async function loadCurrentUser() {
       user.role === "admin",
     name: user.naam ?? user.name ?? ""
   };
-
-  console.log("CURRENT_USER mapped:", CURRENT_USER);
 
   return CURRENT_USER;
 }
@@ -194,13 +191,15 @@ async function getSignupStatus(eventId) {
 async function doSignup(eventId) {
   console.log("doSignup sending eventId:", eventId);
 
+  const body = new URLSearchParams({
+    action: "signup",
+    event_id: String(eventId)
+  });
+
   const response = await fetch("./api_signups.php", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "signup",
-      event_id: eventId
-    })
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString()
   });
 
   console.log("doSignup raw status:", response.status, response.statusText);
