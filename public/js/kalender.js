@@ -642,7 +642,8 @@ function attachMemberEvents(e, status) {
       const r = await doSignup(e.id);
 
       if (!r || !r.ok) {
-        showModal( "OK!", "inschrijving mislukt.");
+        alert("Inschrijving mislukt");
+		showModal("error", "Fout!", "Er ging iets mis bij het opslaan.");
 
         chk.checked = false;
         return;
