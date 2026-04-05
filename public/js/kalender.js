@@ -642,7 +642,8 @@ function attachMemberEvents(e, status) {
       const r = await doSignup(e.id);
 
       if (!r || !r.ok) {
-        alert("Inschrijving mislukt");
+        showModal( "OK!", "inschrijving mislukt.");
+
         chk.checked = false;
         return;
       }
@@ -974,3 +975,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "/leden.html?msg=notknown";
   }
 });
+
+function showModal(type, title, message) {
+  const modal = document.getElementById("app-modal");
+  const modalTitle = document.getElementById("modal-title");
+  const modalMessage = document.getElementById("modal-message");
+
+  modal.classList.remove("modal-success", "modal-error");
+  modal.classList.add(type === "error" ? "modal-error" : "modal-success");
+
+  modalTitle.textContent = title;
+  modalMessage.textContent = message;
+
+  modal.classList.remove("hidden");
+}
+
+document.getElementById("modal-close").onclick = () => {
+  document.getElementById("app-modal").classList.add("hidden");
+};
+
+window.onclick = (e) => {
+  if (e.target.id === "app-modal") {
+    document.getElementById("app-modal").classList.add("hidden");
+  }
+};
