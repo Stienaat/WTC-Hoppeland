@@ -603,21 +603,34 @@ app.get("/api/signups", requireAdmin, async (req, res) => {
 
 app.post("/api/signups", requireAuth, async (req, res) => {
   try {
+    console.log("POST /api/signups hit");
+    console.log("req.body:", req.body);
+    console.log("req.session:", req.session);
+
     if (isAdmin(req)) {
+      console.log("Blocked: admin user");
       return res.status(403).json({ ok: false, error: "NOT_ALLOWED_FOR_ADMIN" });
     }
 
-    const eventId = req.body.event_id;
+    const eventId = req.body?.event_id;
+    console.log("eventId:", eventId);
+
     if (!eventId) {
+      console.log("Blocked: invalid event id");
       return res.status(400).json({ ok: false, error: "INVALID_EVENT_ID" });
     }
 
     const member = await getCurrentMember(req);
+    console.log("member:", member);
+
     if (!member) {
+      console.log("Blocked: member not found");
       return res.status(404).json({ ok: false, error: "MEMBER_NOT_FOUND" });
     }
 
     const existing = await getSignupByMemberAndEvent(member.id, eventId);
+    console.log("existing signup:", existing);
+
     if (existing) {
       return res.json({
         ok: true,
@@ -649,11 +662,16 @@ app.post("/api/signups", requireAuth, async (req, res) => {
       payment_reference: null
     };
 
+    console.log("insertPayload:", insertPayload);
+
     const { data, error } = await supabase
       .from("signups")
       .insert(insertPayload)
       .select("id, created_at, member_id, event_id, paid, status, confirmed_at, payment_method, payment_reference")
       .single();
+
+    console.log("supabase insert data:", data);
+    console.log("supabase insert error:", error);
 
     if (error) throw error;
 
@@ -676,7 +694,9 @@ app.post("/api/signups", requireAuth, async (req, res) => {
       }
     });
   } catch (err) {
-    console.error("POST /api/signups ERROR:", err);
+    console.error("POST /api/signups ERROR full:", err);
+    console.error("POST /api/signups ERROR message:", err?.message);
+    console.error("POST /api/signups ERROR stack:", err?.stack);
     res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
   }
 });
