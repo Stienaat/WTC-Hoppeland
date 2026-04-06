@@ -36,7 +36,7 @@
 </script>
 
 <link href="WTC.css" rel="stylesheet">
-<script src="messages.js"></script>
+<script src="/js/messages.js"></script>
 
 </head>
 
@@ -66,9 +66,9 @@
             <th>Naam</th><th>E-mail</th><th>Telefoon</th><th>Gemeente</th><th>Adres</th><th>Acties</th>
         </tr>
 
-        <?php foreach ($leden as $lid): $email = $lid['email'] ?? ''; $formId = 'f_' . md5($email); ?>
+   <!--          <?php foreach ($leden as $lid): $email = $lid['email'] ?? ''; $formId = 'f_' . md5($email); ?>
             <form method="post" id="<?= htmlspecialchars($formId) ?>"></form>
-            <tr>
+       <tr>
                 <input type="hidden" name="action" value="update" form="<?= htmlspecialchars($formId) ?>">
                 <input type="hidden" name="email"  value="<?= htmlspecialchars($email) ?>" form="<?= htmlspecialchars($formId) ?>">
 
@@ -88,7 +88,7 @@
                             data-naam="<?= htmlspecialchars($lid['naam'] ?? '') ?>">delete</button>
                 </td>
             </tr>
-        <?php endforeach; ?>
+        <?php endforeach; ?>   -->
     </table>
 </div>
 
@@ -97,8 +97,47 @@
     <input type="hidden" name="email" id="deleteEmail">
     <input type="hidden" name="naam"  id="deleteNaam">
 </form>
+<div id="ledenList"></div>
 
 <script>
+
+<script>
+async function loadLeden() {
+    const res = await fetch("/api/leden");
+    if (!res.ok) {
+        document.getElementById("ledenList").innerHTML = "Geen toegang of fout.";
+        return;
+    }
+
+    const leden = await res.json();
+    const list = document.getElementById("ledenList");
+    list.innerHTML = "";
+
+    leden.forEach(lid => {
+        const row = document.createElement("div");
+        row.className = "lid-row";
+        row.style.display = "grid";
+        row.style.gridTemplateColumns = "150px 200px 120px 120px 200px 100px 100px";
+        row.style.gap = "10px";
+        row.style.padding = "6px 0";
+        row.style.borderBottom = "1px solid #ddd";
+
+        row.innerHTML = `
+            <div>${lid.naam || ""}</div>
+            <div>${lid.email || ""}</div>
+            <div>${lid.telefoon || ""}</div>
+            <div>${lid.gemeente || ""}</div>
+            <div>${lid.adres || ""}</div>
+            <button class="wtc-button">Update</button>
+            <button class="wtc-button">Delete</button>
+        `;
+
+        list.appendChild(row);
+    });
+}
+
+loadLeden();
+</script>
 
 // ===============================
 //  CLICK HANDLERS LEDEN-ADMIN
