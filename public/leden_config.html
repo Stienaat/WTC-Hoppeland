@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Leden Configuratie</title>
+
+<style>
+    body {
+        font-family: Arial;
+        background: #D1FED5;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .wtc-button {
+        background: #3599E4;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .wtc-button:hover {
+        background: #1f7ec4;
+    }
+
+    .wtc-input {
+        padding: 6px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        width: 250px;
+    }
+
+    .row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        gap: 10px;
+    }
+
+    #ledenList {
+        margin-top: 20px;
+        padding: 10px;
+        background: #fff;
+        border-radius: 10px;
+    }
+</style>
+
+</head>
+<body>
+
+<div class="card">
+    <h2>Ledenbeheer</h2>
+    <p>Hier kan je alle leden bekijken en beheren.</p>
+
+    <div class="row">
+        <button class="wtc-button" onclick="window.location.href='/kalender'">Terug naar kalender</button>
+    </div>
+
+    <h3>Alle leden</h3>
+    <div id="ledenList">Leden worden geladen...</div>
+</div>
+
+<script>
+// Leden ophalen via Node → Supabase
+async function loadLeden() {
+    try {
+        const res = await fetch("/api/leden");
+        if (!res.ok) {
+            document.getElementById("ledenList").innerHTML = "Fout bij laden.";
+            return;
+        }
+
+        const leden = await res.json();
+        const list = document.getElementById("ledenList");
+
+        if (!leden.length) {
+            list.innerHTML = "Geen leden gevonden.";
+            return;
+        }
+
+        list.innerHTML = "";
+
+        leden.forEach(lid => {
+            const div = document.createElement("div");
+            div.style.padding = "6px 0";
+            div.textContent = `${lid.naam} — ${lid.email}`;
+            list.appendChild(div);
+        });
+
+    } catch (err) {
+        document.getElementById("ledenList").innerHTML = "Serverfout.";
+    }
+}
+
+loadLeden();
+</script>
+
+</body>
+</html>
