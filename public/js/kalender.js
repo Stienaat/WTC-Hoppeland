@@ -580,6 +580,10 @@ function renderMemberLeft(eventData) {
 }
 
 function attachMemberEvents(e, status) {
+console.log("attachMemberEvents gestart");
+console.log("chk", chk);
+console.log("QRCode", typeof QRCode);
+	
   const chk = document.getElementById("mDoSignup");
   const qrWrap = document.getElementById("qrWrap");
   const qrText = document.getElementById("qrText");
