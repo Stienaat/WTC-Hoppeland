@@ -1,7 +1,6 @@
 /************************************************************
  * CORE HELPERS
  ************************************************************/
-console.log("LEDEN.JS IS GELADEN");
  
 const noticeStatus = document.getElementById('loginStatus');
 
@@ -352,4 +351,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+ document.getElementById('btnCloseAdmin')
+  ?.addEventListener('click', closeAdminUI);
+
+ document.getElementById('btnCloseAdmin2')
+  ?.addEventListener('click', closeAdminPan);
+
+ document.getElementById('btnClosePinChange')
+  ?.addEventListener('click', closePinWijz);
+
+  btnPinChange && btnPinChange.addEventListener('click', openPinChangePopup);
+ 
+  btnChangeCode && btnC
 
