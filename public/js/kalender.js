@@ -536,66 +536,60 @@ function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
   const endD = eventData?.endD ?? new Date(eventData.end);
 
-  const datum = !isNaN(startD) ? startD.toLocaleDateString("nl-BE") : "";
-  const startTijd = !isNaN(startD)
-    ? startD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })
+  const langeDatum = !isNaN(startD)
+    ? startD.toLocaleDateString("nl-BE", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      })
     : "";
+
+  const startTijd = !isNaN(startD)
+    ? `${pad2(startD.getHours())}:${pad2(startD.getMinutes())}`
+    : "";
+
   const eindTijd = !isNaN(endD)
-    ? endD.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })
+    ? `${pad2(endD.getHours())}:${pad2(endD.getMinutes())}`
     : "";
 
   return `
     <div class="member-left">
       <h3>${escapeHtml(eventData.title || "")}</h3>
 
-      ${datum ? `
-        <p>
-          <strong>Datum:</strong>
-          ${datum}
-        </p>
-      ` : ""}
+      <div class="row">
+        <div>
+          <div class="eventDate">
+            ${langeDatum}
+          </div>
 
-      ${(startTijd || eindTijd) ? `
-        <p>
-          <strong>Tijd:</strong>
-          ${startTijd}${startTijd && eindTijd ? " – " : ""}${eindTijd}
-        </p>
-      ` : ""}
+          <strong>Van:</strong>
+          ${startTijd}
+          &nbsp;&nbsp;
+          <strong>Tot:</strong>
+          ${eindTijd}
+        </div>
+      </div>
 
-      ${eventData.location ? `
-        <p>
-          <strong>Locatie:</strong>
-          ${escapeHtml(eventData.location)}
-        </p>
-      ` : ""}
+      <hr style="background:blue; height:2px;">
 
-      ${eventData.organizer ? `
-        <p>
-          <strong>Organisator:</strong>
-          ${escapeHtml(eventData.organizer)}
-        </p>
-      ` : ""}
+      <p style="margin-top:10px;">
+        ${escapeHtml(eventData.info || "")}
+      </p>
 
-      ${eventData.price ? `
-        <p>
-          <strong>Prijs:</strong>
-          ${escapeHtml(String(eventData.price))}
-        </p>
-      ` : ""}
-
-      ${eventData.capacity ? `
-        <p>
-          <strong>Aantal plaatsen:</strong>
-          ${escapeHtml(String(eventData.capacity))}
-        </p>
-      ` : ""}
-
-      ${eventData.info ? `
-        <div class="event-info">${escapeHtml(eventData.info)}</div>
-      ` : ""}
+      <p style="margin-top:10px;">
+        ${eventData.requires_signup ? "Inschrijving verplicht<br>" : ""}
+        ${eventData.mandatory ? "Deelname verplicht<br>" : ""}
+        ${
+          eventData.requires_signup || eventData.mandatory
+            ? `Deelnameprijs: ${escapeHtml(eventData.price)} €`
+            : ""
+        }
+      </p>
     </div>
   `;
 }
+
 
 function attachMemberEvents(e, status) {
   const chk = document.getElementById("mDoSignup");
