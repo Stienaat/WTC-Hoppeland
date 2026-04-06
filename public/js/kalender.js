@@ -491,29 +491,35 @@ function renderMemberRight(eventData, status) {
   const isExistingSignup = status === "pending" || status === "confirmed";
 
   return `
-    <label class="signupLabel">
-      <input type="checkbox" id="chkSignup">
-      Ik schrijf mij in
-    </label>
+    <div class="member-right">
+      <div class="signup-row">
+        <input
+          id="mDoSignup"
+          type="checkbox"
+          ${isExistingSignup ? "checked disabled" : ""}
+        >
+        <label for="mDoSignup" class="signupText">Ik schrijf mij in.</label>
+      </div>
 
-    <div id="signupFlow" class="hidden">
-      <div class="signupText">
+      <div id="qrText" style="display:none;">
         Om te betalen, scan de code met Uw bankapp.
       </div>
 
-      <div id="qrCode"></div>
-
-      <div class="signupText">
-        Druk download bevestiging en U bent ingeschreven!
+      <div id="qrWrap" style="display:none;">
+        <div id="qrCode"></div>
       </div>
 
-      <button id="btnDownload" class="wtc-button">
+      <button
+        id="btnDownload"
+        type="button"
+        class="wtc-button"
+        style="display:none;"
+      >
         Download bevestiging
       </button>
     </div>
   `;
 }
-
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
   const endD = eventData?.endD ?? new Date(eventData.end);
@@ -580,7 +586,6 @@ function renderMemberLeft(eventData) {
 }
 
 function attachMemberEvents(e, status) {
-	
   const chk = document.getElementById("mDoSignup");
   const qrWrap = document.getElementById("qrWrap");
   const qrText = document.getElementById("qrText");
@@ -591,10 +596,6 @@ function attachMemberEvents(e, status) {
   let signupPrepared = false;
 
   signupDownloaded = false;
-  
-  console.log("attachMemberEvents gestart");
-console.log("chk", chk);
-console.log("QRCode", typeof QRCode);
 
   if (!chk) {
     console.warn("Geen checkbox gevonden → event vereist geen inschrijving.");
