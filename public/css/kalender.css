@@ -378,6 +378,11 @@ dialog .chk.readonly {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.22),
+    0 4px 12px rgba(0,0,0,0.18);
+
+  animation: fadeIn 0.2s ease-out;
   display: flex;
   justify-content: center;
   align-items: center;
