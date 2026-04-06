@@ -915,17 +915,6 @@ app.post("/cancel", upload.none(), requireAuth, async (req, res) => {
   return app._router.handle({ ...req, method: "DELETE", url: "/api/signups" }, res, () => {});
 });
 
-/* =====================================
-   SERVER START
-   ===================================== */
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log("Server draait op poort " + PORT);
-});
-
-import fs from "fs";
-import path from "path";
-import bcrypt from "bcrypt"; // of bcryptjs
 
 function readJson(pathname, fallback) {
   if (!fs.existsSync(pathname)) return fallback;
@@ -950,3 +939,13 @@ app.get("/api/leden", async (req, res) => {
 
   res.json(data);
 });
+
+/* =====================================
+   SERVER START
+   ===================================== */
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+  console.log("Server draait op poort " + PORT);
+});
+
+
