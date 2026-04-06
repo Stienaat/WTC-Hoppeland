@@ -1,110 +1,173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<title>Leden Configuratie</title>
-
-<style>
-    body {
-        font-family: Arial;
-        background: #D1FED5;
-        margin: 0;
-        padding: 20px;
-    }
-
-    .card {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        max-width: 700px;
-        margin: 0 auto;
-    }
-
-    .wtc-button {
-        background: #3599E4;
-        color: white;
-        border: none;
-        padding: 8px 14px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-    }
-
-    .wtc-button:hover {
-        background: #1f7ec4;
-    }
-
-    .wtc-input {
-        padding: 6px;
-        font-size: 14px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        width: 250px;
-    }
-
-    .row {
-        display: flex;
-        align-items: center;
-        margin-bottom: 12px;
-        gap: 10px;
-    }
-
-    #ledenList {
-        margin-top: 20px;
-        padding: 10px;
-        background: #fff;
-        border-radius: 10px;
-    }
-</style>
-
-</head>
-<body>
-
-<div class="card">
-    <h2>Ledenbeheer</h2>
-    <p>Hier kan je alle leden bekijken en beheren.</p>
-
-    <div class="row">
-        <button class="wtc-button" onclick="window.location.href='/kalender'">Terug naar kalender</button>
-    </div>
-
-    <h3>Alle leden</h3>
-    <div id="ledenList">Leden worden geladen...</div>
-</div>
+    <meta charset="utf-8">
+    <title>Leden beheer</title>
+    <style>
+        .toolbar{
+            display:flex;
+            justify-content:space-between;
+            gap:8px;
+            align-items:center;
+            flex-wrap:wrap;
+            margin: 4px 0 12px;
+        }
+        .toolbar .spacer{ flex:1; }
+        input[type="text"]{
+            border:0;
+            background:transparent;
+            outline:none;
+            width:100%;
+        }
+		
+    </style>
+	
+<!--   PLAATST DE ALERT QUESTION -->
 
 <script>
-// Leden ophalen via Node → Supabase
-async function loadLeden() {
-    try {
-        const res = await fetch("/api/leden");
-        if (!res.ok) {
-            document.getElementById("ledenList").innerHTML = "Fout bij laden.";
-            return;
-        }
+	window.wtcAlertPosition = { top: "8%", left: "60%" };
 
-        const leden = await res.json();
-        const list = document.getElementById("ledenList");
+	window.wtcAlertStyle = {
+		confirm: { color: "#333", background: "rgba(255, 209, 156, 0.8)" },
+		success: { color: "#0A0", background: "rgba(200, 255, 200, 0.8)" },
+		error:   { color: "#A00", background: "rgba(255, 200, 200, 0.8)" },
+		info:    { color: "#0044AA", background: "rgba(200, 220, 255, 0.8)" }
+	};
+</script>
 
-        if (!leden.length) {
-            list.innerHTML = "Geen leden gevonden.";
-            return;
-        }
+<link href="WTC.css" rel="stylesheet">
+<script src="messages.js"></script>
 
-        list.innerHTML = "";
+</head>
 
-        leden.forEach(lid => {
-            const div = document.createElement("div");
-            div.style.padding = "6px 0";
-            div.textContent = `${lid.naam} — ${lid.email}`;
-            list.appendChild(div);
-        });
+<body style="font-family:Arial;background:#3599E4;">
 
-    } catch (err) {
-        document.getElementById("ledenList").innerHTML = "Serverfout.";
-    }
+<div style="max-width:1120px;margin:30px auto;background:#fff;padding:18px;border-radius:14px;">
+	
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+	<h2 style="margin:0;">Leden Beheer</h2>
+		<img src="images/Logo.png" id="hoplogo" alt="" width="40" height="40">
+    </div>
+
+    <div class="toolbar" style="margin-top:20px;">
+	
+<!-- CORRECTE EXPORT KNOP -->
+        <button type="button" id="exportBtn" class="wtc-button" style="margin-left:5px;">Export</button>
+
+      
+        <div class="spacer"></div>
+        <a href="/WTC/leden.html?overlay=1" class="wtc-button" style="padding:2px 4px 2px 4px;">⏪Terug</a>
+        <a href="/WTC/index.html" class="wtc-button" style="padding:2px 4px 2px 4px;">🏡Home</a>
+		<a href="logout.php" class="wtc-button" style="padding:2px 4px 2px 4px;">Uitloggen</a>
+    </div>
+
+    <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
+        <tr style="background:#e2e8f0;">
+            <th>Naam</th><th>E-mail</th><th>Telefoon</th><th>Gemeente</th><th>Adres</th><th>Acties</th>
+        </tr>
+
+        <?php foreach ($leden as $lid): $email = $lid['email'] ?? ''; $formId = 'f_' . md5($email); ?>
+            <form method="post" id="<?= htmlspecialchars($formId) ?>"></form>
+            <tr>
+                <input type="hidden" name="action" value="update" form="<?= htmlspecialchars($formId) ?>">
+                <input type="hidden" name="email"  value="<?= htmlspecialchars($email) ?>" form="<?= htmlspecialchars($formId) ?>">
+
+                <td><input type="text" name="naam"     form="<?= $formId ?>" value="<?= htmlspecialchars($lid['naam'] ?? '') ?>"></td>
+                <td><?= htmlspecialchars($email) ?></td>
+                <td><input type="text" name="telefoon" form="<?= $formId ?>" value="<?= htmlspecialchars($lid['telefoon'] ?? '') ?>"></td>
+                <td><input type="text" name="gemeente" form="<?= $formId ?>" value="<?= htmlspecialchars($lid['gemeente'] ?? '') ?>"></td>
+                <td><input type="text" name="adres"    form="<?= $formId ?>" value="<?= htmlspecialchars($lid['adres'] ?? '') ?>"></td>
+
+                <td style="width:120px;">
+                    <button type="button" class="wtc-button changeMember"
+							data-formid="<?= $formId ?>"
+                            data-naam="<?= htmlspecialchars($lid['naam'] ?? '') ?>">Update</button>
+
+                    <button type="button" class="wtc-button deleteMember"
+                            data-email="<?= htmlspecialchars($email) ?>"
+                            data-naam="<?= htmlspecialchars($lid['naam'] ?? '') ?>">delete</button>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </table>
+</div>
+
+<form id="deleteForm" method="post" style="display:none;">
+    <input type="hidden" name="action" value="delete">
+    <input type="hidden" name="email" id="deleteEmail">
+    <input type="hidden" name="naam"  id="deleteNaam">
+</form>
+
+<script>
+
+// ===============================
+//  CLICK HANDLERS LEDEN-ADMIN
+// ===============================
+
+function resetContainer() {
+    const el = getContainer();
+    el.className = "";        // verwijder ALLE styles
+    el.style = "";            // verwijder inline styles
+    el.innerHTML = "";        // leegmaken
+    return el;
 }
 
-loadLeden();
+
+document.addEventListener('click', async (e) => {
+
+// UPDATE 
+    if (e.target.classList.contains('changeMember')) {
+        const naam = e.target.dataset.naam || '';
+
+        const ok = await showConfirm(`${naam} Wijzigen ❓`);
+		if (!ok) return;
+		
+	    const formId = e.target.dataset.formid;
+        const form = document.getElementById(formId);
+        if (form) form.submit();
+    }
+
+// DELETE 
+	if (e.target.classList.contains('deleteMember')) {
+		const naam = e.target.dataset.naam;
+		const email = e.target.dataset.email;
+
+		const ok = await showConfirm(`${naam} verwijderen?`);
+		if (!ok) return;
+
+		// Vul het verborgen formulier
+		document.getElementById('deleteNaam').value = naam;
+		document.getElementById('deleteEmail').value = email;
+
+		// Verstuur het formulier
+		document.getElementById('deleteForm').submit();
+	}
+
+});
+
+
+//  EXPORT
+
+document.getElementById('exportBtn').onclick = () => {
+    const link = document.createElement('a');
+    link.href = "leden_export.php";
+    link.download = "leden.xlsx";
+    link.click();
+
+    setTimeout(() => {
+        showAlert("success", "xlsx is aangemaakt ✔️");     // SERVER-SIDE MESSAGE
+    }, 500);
+};
+
+</script>
+
+<script>
+	const params = new URLSearchParams(window.location.search);
+	const msg = params.get("msg");
+
+	if (msg) {
+		showAlert("success", msg);
+	}
 </script>
 
 </body>
