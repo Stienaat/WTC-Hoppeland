@@ -491,34 +491,28 @@ function renderMemberRight(eventData, status) {
   const isExistingSignup = status === "pending" || status === "confirmed";
 
   return `
-    <div class="member-right">
-      <div class="signup-row">
-        <input
-          id="mDoSignup"
-          type="checkbox"
-          ${isExistingSignup ? "checked disabled" : ""}
-        >
-        <label for="mDoSignup" class="signupText">Ik schrijf mij in.</label>
-      </div>
+    <label class="signupLabel">
+      <input type="checkbox" id="chkSignup">
+      Ik schrijf mij in
+    </label>
 
-      <div id="qrText" style="display:none;">
+    <div id="signupFlow" class="hidden">
+      <div class="signupText">
         Om te betalen, scan de code met Uw bankapp.
       </div>
 
-      <div id="qrWrap" style="display:none;">
-        <div id="qrCode"></div>
+      <div id="qrCode"></div>
+
+      <div class="signupText">
+        Druk download bevestiging en U bent ingeschreven!
       </div>
 
-      <button
-        id="btnDownload"
-        type="button"
-        class="wtc-button"
-        style="display:none;"
-      >
+      <button id="btnDownload" class="wtc-button">
         Download bevestiging
       </button>
     </div>
   `;
+}
 }
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
