@@ -158,7 +158,7 @@
 					
 		</div>	
 		<div class="overlay-row" >
-			<button type="button" class="wtc-button" onclick= "window.location.href='./leden-admin.php'">Leden-config</button>
+			<button type="button" class="wtc-button" onclick= "window.location.href='./leden-config.html'">Leden-config</button>
 			<button type="button" class="wtc-button" onclick= "window.location.href='./signups-admin.php'">Events-config</button>
 			<button type="button" class="wtc-button" onclick= "window.location.href='./routes/routes.html'">Fietsroutes</button>
 		</div>		
@@ -322,12 +322,7 @@ fetch("/notice")
 		  return;
 		}
 
-		// Succes → redirect
-		window.location.href = 'leden_home.html';
-	  } catch (err) {
-		console.error(err);
-		setStatus(status, 'Technische fout.', 'error');
-	  }
+
 	});
 </script>
 
@@ -336,8 +331,8 @@ fetch("/notice")
 
 <script src="/js/leden.js"></script>
 <script src="/js/login.js"></script>
-<link href="leden.css" rel="stylesheet">
-<link href="WTC.css" rel="stylesheet">
+<link href="/css/leden.css" rel="stylesheet">
+<link href="/css/WTC.css" rel="stylesheet">
 
 </body>
 </html>
