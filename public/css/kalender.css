@@ -280,7 +280,7 @@ dialog .chk.readonly {
 
 .dialog-content #eventDialogBody,
 .dialog-content #memberActions {
-	background: rgba(0, 255, 0, 0.O5);   /* GROEN */
+	background: rgba(0, 255, 0, 0.05);   /* GROEN */
     width: 50%;
 	margin: 10px;
 }
@@ -291,7 +291,7 @@ dialog .chk.readonly {
 }
 
 .dialog-content.admin-mode #eventDialogBody {
-    width: 92%;
+    width: 93%;
 	background: rgba(255, 0, 0, 0.05);   /* ROOD */
 }
 
