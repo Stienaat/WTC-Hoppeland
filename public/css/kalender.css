@@ -280,9 +280,9 @@ dialog .chk.readonly {
 
 .dialog-content #eventDialogBody,
 .dialog-content #memberActions {
-	background: rgba(0, 255, 0, 0.2);   /* GROEN */
+	background: rgba(0, 255, 0, 0.1);   /* GROEN */
     width: 50%;
-	margin: 15px;
+	margin: 10px;
 }
 
 /* ADMIN-mode → 1 kolom */
@@ -292,7 +292,7 @@ dialog .chk.readonly {
 
 .dialog-content.admin-mode #eventDialogBody {
     width: 95%;
-	background: rgba(255, 0, 0, 0.2);   /* ROOD */
+	background: rgba(255, 0, 0, 0.1);   /* ROOD */
 }
 
 .dialog-content.admin-mode #memberActions {
@@ -306,7 +306,7 @@ dialog .chk.readonly {
 }
 
 #eventDialog form.admin-mode {
-    width: 330px;        /* admin small */
+    width: 350px;       
     max-width: 100%;
 }
 
@@ -316,16 +316,8 @@ dialog .chk.readonly {
   max-width: 700px;
 }
 
-/* admin-mode: dialog krimpt */
-#eventDialog.admin-mode {
-  width: 350px;      /* of auto */
-  max-width: 365px;  /* kies wat mooi is */
-}
 
-#eventDialog.admin-mode {
-    width: 350px;
-    max-width: 365px;
-}
+
 .statusok {
 	color: GREEN;
 	font-size: 14px;
