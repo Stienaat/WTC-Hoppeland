@@ -278,12 +278,22 @@ dialog .chk.readonly {
     overflow: visible;
 }
 
-.dialog-content #eventDialogBody,
-.dialog-content #memberActions {
-	background: rgba(0, 255, 0, 0.2);   /* GROEN */
-    width: 50%;
-	margin: 15px;
+.dialog-content {
+    display: flex;
+    flex-direction: row;
+    gap: 0.2cm;              /* gewenste tussenruimte */
+    justify-content: center; /* centreert de twee kolommen in de dialog */
 }
+
+/* Linker- en rechterkolom */
+#eventDialogBody,
+#memberActions {
+    width: 7.5cm;            /* exacte breedte */
+    margin: 0;               /* marges verwijderen */
+    padding: 0;              /* optioneel, maar voorkomt breedteproblemen */
+    box-sizing: border-box;  /* voorkomt dat padding de breedte vergroot */
+}
+
 
 /* ADMIN-mode → 1 kolom */
 .dialog-content.admin-mode {
