@@ -278,6 +278,27 @@ function initAdminConfigCard(){
 });
 }
 
+  function closeAdminUI(){
+    adminLogin && (adminLogin.style.display = 'none');
+    adminFase2 && adminFase2.classList.remove('open');
+  }
+	function closeAdminPan() {
+
+		// 1. Overlay sluiten
+		if (adminFase2) {
+			adminFase2.style.display = 'none';
+		}
+
+		// 2. overlay=1 uit de URL verwijderen
+		const url = new URL(window.location);
+		url.searchParams.delete('overlay');
+		window.history.replaceState({}, '', url);
+	}
+
+  function closePinWijz(){
+    pinChangeOverlay && (pinChangeOverlay.style.display = 'none');
+  
+  }
 /************************************************************
  * 4) ROUTES
  ************************************************************/
