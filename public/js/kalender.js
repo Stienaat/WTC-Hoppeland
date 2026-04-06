@@ -513,7 +513,7 @@ function renderMemberRight(eventData, status) {
     </div>
   `;
 }
-}
+
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
   const endD = eventData?.endD ?? new Date(eventData.end);
