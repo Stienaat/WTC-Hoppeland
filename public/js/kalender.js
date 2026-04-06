@@ -488,38 +488,50 @@ function generateQR(e) {
 }
 
 function renderMemberRight(eventData, status) {
-  const isExistingSignup = status === "pending" || status === "confirmed";
+  // 1. Geen inschrijving nodig
+  if (!eventData.requires_signup) {
+    return `
+      <div class="signupStatus info">
+        Geen inschrijving nodig.
+      </div>
+    `;
+  }
 
+  // 2. Reeds ingeschreven
+  if (status === "pending" || status === "confirmed") {
+    return `
+      <div class="statusok">
+        ✔️ U bent ingeschreven!
+      </div>
+    `;
+  }
+
+  // 3. Nog niet ingeschreven → originele dialog
   return `
-    <div class="member-right">
-      <div class="signup-row">
-        <input
-          id="mDoSignup"
-          type="checkbox"
-          ${isExistingSignup ? "checked disabled" : ""}
-        >
-        <label for="mDoSignup" class="signupText">Ik schrijf mij in.</label>
-      </div>
+    <label class="signupLabel">
+      <input type="checkbox" id="mDoSignup">
+      <span class="signupText"></span>
+    </label>
 
-      <div id="qrText" style="display:none;">
-        Om te betalen, scan de code met Uw bankapp.
-      </div>
+    <div id="qrWrap" style="display:none;">
+      <div id="qrCode" style="margin: 20px 60px;"></div>
 
-      <div id="qrWrap" style="display:none;">
-        <div id="qrCode"></div>
+      <div id="qrText" style="
+        font-size:16px;
+        font-weight:700;
+        margin: 20px;
+        color:#6450E1;
+      ">
+        Druk download bevestiging en U bent ingeschreven!
       </div>
-
-      <button
-        id="btnDownload"
-        type="button"
-        class="wtc-button"
-        style="display:none;"
-      >
-        Download bevestiging
-      </button>
     </div>
+
+    <button id="btnDownload" class="wtc-button" style="display:none; margin:20px;">
+      Download bevestiging
+    </button>
   `;
 }
+
 function renderMemberLeft(eventData) {
   const startD = eventData?.startD ?? new Date(eventData.start);
   const endD = eventData?.endD ?? new Date(eventData.end);
