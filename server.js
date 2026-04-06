@@ -937,52 +937,15 @@ function readJson(pathname, fallback) {
   }
 }
 
-function fail(res, msg) {
-  // zelfde gedrag als PHP: redirect met msg
-  return res.redirect(`/leden.html?msg=${encodeURIComponent(msg)}`);
-}
+app.get("/api/leden", async (req, res) => {
+  if (!req.session?.is_admin) return res.status(403).send("Forbidden");
 
-app.post("/api/admin-login", async (req, res) => {
-  // 1) Alleen POST (Express garandeert dat al, maar voor de vorm)
-  // if (req.method !== "POST") return fail(res, "Ongeldige aanvraag.");
+  const { data, error } = await supabase
+    .from("leden")
+    .select("*")
+    .order("naam");
 
-  const email = (req.body.email || "").trim();
-  const pin   = (req.body.pin   || "").trim();
+  if (error) return res.status(500).send(error.message);
 
-  if (!email || !pin) {
-    return fail(res, "E-mail en pincode zijn verplicht.");
-  }
-
-  // 2) Config laden
-  const cfgPath = path.join(process.cwd(), "data", "config.json");
-  const cfg = readJson(cfgPath, null);
-
-  if (!cfg || !cfg.admin_email || !cfg.admin_pin_hash) {
-    return fail(res, "Admin is niet geconfigureerd.");
-  }
-
-  // 3) Controle e-mail
-  if (email.toLowerCase() !== String(cfg.admin_email).toLowerCase()) {
-    return fail(res, "Onbekende beheerder.");
-  }
-
-  // 4) Controle PIN (hash)
-  const ok = await bcrypt.compare(pin, String(cfg.admin_pin_hash));
-  if (!ok) {
-    return fail(res, "Verkeerde pincode.");
-  }
-
-  // 5) Login OK → sessie zetten
-  const adminId = "admin_1";
-
-  req.session.member_id = adminId;
-  req.session.is_admin  = true;
-  req.session.gebruiker = {
-    id: adminId,
-    email,
-    rol: "admin",
-  };
-
-  // 6) Doorsturen naar Node‑kalender
-  return res.redirect("/kalender"); // jouw nieuwe Node‑route, niet meer .php
+  res.json(data);
 });
