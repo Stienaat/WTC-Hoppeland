@@ -580,9 +580,6 @@ function renderMemberLeft(eventData) {
 }
 
 function attachMemberEvents(e, status) {
-console.log("attachMemberEvents gestart");
-console.log("chk", chk);
-console.log("QRCode", typeof QRCode);
 	
   const chk = document.getElementById("mDoSignup");
   const qrWrap = document.getElementById("qrWrap");
@@ -594,6 +591,10 @@ console.log("QRCode", typeof QRCode);
   let signupPrepared = false;
 
   signupDownloaded = false;
+  
+  console.log("attachMemberEvents gestart");
+console.log("chk", chk);
+console.log("QRCode", typeof QRCode);
 
   if (!chk) {
     console.warn("Geen checkbox gevonden → event vereist geen inschrijving.");
