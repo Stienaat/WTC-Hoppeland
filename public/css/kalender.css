@@ -307,7 +307,7 @@ dialog .chk.readonly {
 
 #eventDialog form.admin-mode {
     width: 350px;       
-    max-width: 100%;
+    max-width: 50%;
 }
 
 /* standaard: member */
