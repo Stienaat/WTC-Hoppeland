@@ -327,15 +327,23 @@ dialog .chk.readonly {
 }
 
 /* admin-mode: dialog krimpt */
-#eventDialog.admin-mode {
-  width: 350px;      /* of auto */
-  max-width: 365px;  /* kies wat mooi is */
+
+
+#eventDialog.admin-mode .modal-content {
+  width: 350px;
+  max-width: 365px;
+  display: block;       /* belangrijk: inline-block zou centrering breken */
+  margin: 0 auto;       /* forceert centrering */
 }
 
-#eventDialog.admin-mode {
-    width: 350px;
-    max-width: 365px;
+
+#eventDialog:not(.admin-mode) .modal-content {
+  width: auto;
+  max-width: none;
+  display: inline-block;
 }
+
+
 .statusok {
 	color: GREEN;
 	font-size: 14px;
