@@ -31,7 +31,6 @@
     };
 </script>
 
-<link href="WTC.css" rel="stylesheet">
 <script src="/js/messages.js"></script>
 
 </head>
@@ -88,7 +87,7 @@
 //  LADEN VAN LEDEN UIT SUPABASE VIA NODE
 // =====================================
 async function loadLeden() {
-    const res = await fetch("/api/leden");
+    const res = await fetch("/api/Leden");
     const tbody = document.getElementById("ledenRows");
 
     if (!res.ok) {
