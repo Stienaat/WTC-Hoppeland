@@ -921,3 +921,68 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Server draait op poort " + PORT);
 });
+
+import fs from "fs";
+import path from "path";
+import bcrypt from "bcrypt"; // of bcryptjs
+
+function readJson(pathname, fallback) {
+  if (!fs.existsSync(pathname)) return fallback;
+  try {
+    const raw = fs.readFileSync(pathname, "utf8");
+    const j = JSON.parse(raw);
+    return Array.isArray(j) || typeof j === "object" ? j : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function fail(res, msg) {
+  // zelfde gedrag als PHP: redirect met msg
+  return res.redirect(`/leden.html?msg=${encodeURIComponent(msg)}`);
+}
+
+app.post("/api/admin-login", async (req, res) => {
+  // 1) Alleen POST (Express garandeert dat al, maar voor de vorm)
+  // if (req.method !== "POST") return fail(res, "Ongeldige aanvraag.");
+
+  const email = (req.body.email || "").trim();
+  const pin   = (req.body.pin   || "").trim();
+
+  if (!email || !pin) {
+    return fail(res, "E-mail en pincode zijn verplicht.");
+  }
+
+  // 2) Config laden
+  const cfgPath = path.join(process.cwd(), "data", "config.json");
+  const cfg = readJson(cfgPath, null);
+
+  if (!cfg || !cfg.admin_email || !cfg.admin_pin_hash) {
+    return fail(res, "Admin is niet geconfigureerd.");
+  }
+
+  // 3) Controle e-mail
+  if (email.toLowerCase() !== String(cfg.admin_email).toLowerCase()) {
+    return fail(res, "Onbekende beheerder.");
+  }
+
+  // 4) Controle PIN (hash)
+  const ok = await bcrypt.compare(pin, String(cfg.admin_pin_hash));
+  if (!ok) {
+    return fail(res, "Verkeerde pincode.");
+  }
+
+  // 5) Login OK → sessie zetten
+  const adminId = "admin_1";
+
+  req.session.member_id = adminId;
+  req.session.is_admin  = true;
+  req.session.gebruiker = {
+    id: adminId,
+    email,
+    rol: "admin",
+  };
+
+  // 6) Doorsturen naar Node‑kalender
+  return res.redirect("/kalender"); // jouw nieuwe Node‑route, niet meer .php
+});
