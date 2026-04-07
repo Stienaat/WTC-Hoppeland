@@ -364,8 +364,7 @@ async function openAdminDialog(eventData) {
     btnDelete.onclick = () => handleDeleteEvent();
   }
 
-  eventDialog.showModal();
-}
+
 function overlaps(a,b){ return a.startM < b.endM && b.startM < a.endM; }
 
 function layoutOverlaps(dayEvents){
@@ -448,7 +447,6 @@ async function openMemberDialog(eventData) {
 
   attachMemberEvents(eventData, status);
 
-  dialog.showModal();
 }
 
 async function doSignup(eventId) {
