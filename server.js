@@ -6,6 +6,8 @@ import multer from "multer";
 import session from "express-session";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
+import ledenRoutes from "./routes/leden.js";
+
 
 
 const upload = multer();
@@ -255,16 +257,13 @@ app.post("/login", async (req, res) => {
     };
     req.session.is_admin = false;
 
-    res.json({
-      ok: true,
-      user: {
-        id: user.id,
+    res.json({ok: true, user: {d: user.id,
         email: user.email,
         naam: user.naam
       }
     });
   } catch (err) {
-    console.error("LOGIN ERROR:", err);
+ 
     res.json({ ok: false, error: "Technische fout" });
   }
 });
@@ -939,6 +938,8 @@ app.get("/api/leden", async (req, res) => {
 
   res.json(data);
 });
+
+app.use("/api/leden", ledenRoutes);
 
 /* =====================================
    SERVER START

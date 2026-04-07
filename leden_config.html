@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8">
+    <title>Leden beheer</title>
+	
+<style>
+    .toolbar{
+        display:flex;
+        justify-content:space-between;
+        gap:8px;
+        align-items:center;
+        flex-wrap:wrap;
+        margin: 4px 0 12px;
+    }
+   .toolbar .spacer{ flex:1; }
+    input[type="text"]{
+        border:0;
+        background:transparent;
+        outline:none;
+        width:100%;
+    }
+</style>
+
+</head>
+
+<body style="font-family:Arial;background:#3599E4;">
+
+<div style="max-width:1120px;margin:30px auto;background:#fff;padding:18px;border-radius:14px;">
+    
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <h2 style="margin:0;">Leden Beheer</h2>
+        <img src="images/Logo.png" id="hoplogo" alt="" width="40" height="40">
+    </div>
+
+    <div class="toolbar" style="margin-top:20px;">
+        <button type="button" id="exportBtn" class="wtc-button" style="margin-left:5px;">Export</button>
+    <	div class="spacer"></div>
+        <a href="/leden.html?overlay=1" class="wtc-button" style="padding:2px 4px;">⏪Terug</a>
+        <a href="/index.html" class="wtc-button" style="padding:2px 4px;">🏡Home</a>
+        <a href="logout.php" class="wtc-button" style="padding:2px 4px;">Uitloggen</a>
+    </div>
+
+    <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
+        <tr style="background:#e2e8f0;">
+            <th>Naam</th>
+            <th>E-mail</th>
+            <th>Telefoon</th>
+            <th>Gemeente</th>
+            <th>Adres</th>
+            <th>Acties</th>
+        </tr>
+
+        <!-- HIER KOMEN DE JS-RECORDS -->
+        <tbody id="ledenRows"></tbody>
+    </table>
+</div>
+
+<link href="/css/WTC.css" rel="stylesheet">
+
+</body>
+</html>
+
+<script>
+// =====================================
+//  LADEN VAN LEDEN UIT SUPABASE VIA NODE
+// =====================================
+async function loadLeden() {
+  const res = await fetch("/api/leden");
+  const leden = await res.json();
+
+  const tbody = document.querySelector("#ledenTable tbody");
+  tbody.innerHTML = "";
+
+  leden.forEach(lid => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td><input value="${lid.naam || ""}" data-field="naam"></td>
+      <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
+      <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
+      <td><input value="${lid.adres || ""}" data-field="adres"></td>
+      <td>
+        <button class="updateBtn">Update</button>
+        <button class="deleteBtn">Delete</button>
+      </td>
+    `;
+
+    // Update
+    tr.querySelector(".updateBtn").onclick = async () => {
+      const inputs = tr.querySelectorAll("input");
+      const updates = {};
+
+      inputs.forEach(inp => {
+        updates[inp.dataset.field] = inp.value;
+      });
+
+      await fetch(`/api/leden/${lid.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates)
+      });
+
+      alert("Lid bijgewerkt");
+    };
+
+    // Delete
+    tr.querySelector(".deleteBtn").onclick = async () => {
+      if (!confirm("Verwijderen?")) return;
+
+      await fetch(`/api/leden/${lid.id}`, { method: "DELETE" });
+      tr.remove();
+    };
+
+    tbody.appendChild(tr);
+  });
+}
+
+loadLeden();
+
+</script>
+
