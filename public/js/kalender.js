@@ -448,6 +448,8 @@ async function openMemberDialog(eventData) {
   memberActions.innerHTML = renderMemberRight(eventData, status);
 
   attachMemberEvents(eventData, status);
+  
+  eventDialog.showModal();
 
 }
 
