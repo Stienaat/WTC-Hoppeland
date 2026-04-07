@@ -6,9 +6,7 @@ import multer from "multer";
 import session from "express-session";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-import ledenRoutes from "./leden.js";
-
-
+import ledenRoutes from "./routes/leden.js";
 
 
 const upload = multer();
