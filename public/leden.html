@@ -115,6 +115,15 @@
 	</form>
 </div>
 
+<div id="app-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modal-title"></h3>
+        <p id="modal-message"></p>
+        <button class="wtc-button" onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+
 <!-- ========================= -->
 <!-- FASE 1 PIN   ✅ -->
 <!-- ========================= -->
@@ -328,7 +337,7 @@ fetch("/notice")
 
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
 
-
+<script src="/js/modal.js"></script>
 <script src="/js/leden.js"></script>
 <script src="/js/login.js"></script>
 <link href="/css/leden.css" rel="stylesheet">
