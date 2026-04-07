@@ -1,0 +1,15 @@
+[0402/143411.738:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143413.901:ERROR:third_party\crashpad\crashpad\client\crashpad_client_win.cc:869] not connected
+[0402/143415.607:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143418.099:ERROR:third_party\crashpad\crashpad\client\crashpad_client_win.cc:869] not connected
+[0402/143420.041:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143427.596:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143437.787:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143512.812:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143523.141:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143524.459:ERROR:third_party\crashpad\crashpad\client\crashpad_client_win.cc:869] not connected
+[0402/143526.064:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143554.364:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143607.881:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143618.739:ERROR:third_party\crashpad\crashpad\util\win\registration_protocol_win.cc:108] CreateFile: Het systeem kan het opgegeven bestand niet vinden. (0x2)
+[0402/143619.760:ERROR:third_party\crashpad\crashpad\client\crashpad_client_win.cc:869] not connected

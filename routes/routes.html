@@ -16,9 +16,10 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 
-<link rel="stylesheet" href="../WTC.css">
+<link rel="stylesheet" href="/css/WTC.css">
 
 <style>
+
 body {
   font-family: system-ui, Arial, sans-serif;
   margin: 0;
@@ -66,7 +67,6 @@ a.dl {
 }
 </style>
 
- <link rel="stylesheet" href="../WTC.css">
  
 </head>
 
@@ -86,7 +86,7 @@ a.dl {
   </label>	
 	<button type="button" id="wisBtn" class="wtc-button" onclick="wisRoute()">Wis route</button>
 
-	<a href="/WTC/leden.html?overlay=1" class="wtc-button" style="padding: 4px 5px 4px 5px">&larr; Terug</a>
+	<a href="/leden.html?overlay=1" class="wtc-button" style="padding: 4px 5px 4px 5px">&larr; Terug</a>
 </div>
 
 <div class="container">
@@ -107,7 +107,6 @@ ${canOverwrite ? `
 /* =====================================================
    A. CONFIG + HELPERS
 ===================================================== */
-console.log('script start');
 
 // Basispad waar routes.html staat (bv. /WTWouter/routes)
 const BASE_URL = new URL('.', window.location.href).pathname.replace(/\/$/, '');
@@ -823,6 +822,7 @@ groepSelect?.addEventListener('change', renderList);
 zoekInput?.addEventListener('input', renderList);
 
 reloadCatalog();
+
 </script>
 
 

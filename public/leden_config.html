@@ -3,34 +3,24 @@
 <head>
     <meta charset="utf-8">
     <title>Leden beheer</title>
-    <style>
-        .toolbar{
-            display:flex;
-            justify-content:space-between;
-            gap:8px;
-            align-items:center;
-            flex-wrap:wrap;
-            margin: 4px 0 12px;
-        }
-        .toolbar .spacer{ flex:1; }
-        input[type="text"]{
-            border:0;
-            background:transparent;
-            outline:none;
-            width:100%;
-        }
-    </style>
-
-<script>
-    window.wtcAlertPosition = { top: "8%", left: "60%" };
-    window.wtcAlertStyle = {
-        confirm: { color: "#333", background: "rgba(255, 209, 156, 0.8)" },
-        success: { color: "#0A0", background: "rgba(200, 255, 200, 0.8)" },
-        error:   { color: "#A00", background: "rgba(255, 200, 200, 0.8)" },
-        info:    { color: "#0044AA", background: "rgba(200, 220, 255, 0.8)" }
-    };
-</script>
-
+	
+<style>
+    .toolbar{
+        display:flex;
+        justify-content:space-between;
+        gap:8px;
+        align-items:center;
+        flex-wrap:wrap;
+        margin: 4px 0 12px;
+    }
+   .toolbar .spacer{ flex:1; }
+    input[type="text"]{
+        border:0;
+        background:transparent;
+        outline:none;
+        width:100%;
+    }
+</style>
 
 </head>
 
@@ -45,8 +35,7 @@
 
     <div class="toolbar" style="margin-top:20px;">
         <button type="button" id="exportBtn" class="wtc-button" style="margin-left:5px;">Export</button>
-
-        <div class="spacer"></div>
+    <	div class="spacer"></div>
         <a href="/leden.html?overlay=1" class="wtc-button" style="padding:2px 4px;">⏪Terug</a>
         <a href="/index.html" class="wtc-button" style="padding:2px 4px;">🏡Home</a>
         <a href="logout.php" class="wtc-button" style="padding:2px 4px;">Uitloggen</a>
@@ -62,81 +51,72 @@
             <th>Acties</th>
         </tr>
 
-        <!-- OUDE PHP (NIET VERWIJDEREN)
-        <?php foreach ($leden as $lid): ?>
-            <tr>
-                <td><?= htmlspecialchars($lid['naam']) ?></td>
-                <td><?= htmlspecialchars($lid['email']) ?></td>
-                <td><?= htmlspecialchars($lid['telefoon']) ?></td>
-                <td><?= htmlspecialchars($lid['gemeente']) ?></td>
-                <td><?= htmlspecialchars($lid['adres']) ?></td>
-                <td>Update / Delete</td>
-            </tr>
-        <?php endforeach; ?>
-        -->
-
         <!-- HIER KOMEN DE JS-RECORDS -->
         <tbody id="ledenRows"></tbody>
-
     </table>
 </div>
+
+<link href="/css/WTC.css" rel="stylesheet">
+
+</body>
+</html>
 
 <script>
 // =====================================
 //  LADEN VAN LEDEN UIT SUPABASE VIA NODE
 // =====================================
 async function loadLeden() {
-    const res = await fetch("/api/Leden");
-    const tbody = document.getElementById("ledenRows");
+  const res = await fetch("/api/leden");
+  const leden = await res.json();
 
-    if (!res.ok) {
-        tbody.innerHTML = "<tr><td colspan='6'>Geen toegang of fout.</td></tr>";
-        return;
-    }
+  const tbody = document.querySelector("#ledenTable tbody");
+  tbody.innerHTML = "";
 
-    const leden = await res.json();
-    tbody.innerHTML = "";
+  leden.forEach(lid => {
+    const tr = document.createElement("tr");
 
-    leden.forEach(lid => {
-        const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input value="${lid.naam || ""}" data-field="naam"></td>
+      <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
+      <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
+      <td><input value="${lid.adres || ""}" data-field="adres"></td>
+      <td>
+        <button class="updateBtn">Update</button>
+        <button class="deleteBtn">Delete</button>
+      </td>
+    `;
 
-        tr.innerHTML = `
-            <td>${lid.naam || ""}</td>
-            <td>${lid.email || ""}</td>
-            <td>${lid.telefoon || ""}</td>
-            <td>${lid.gemeente || ""}</td>
-            <td>${lid.adres || ""}</td>
-            <td></td>
-        `;
+    // Update
+    tr.querySelector(".updateBtn").onclick = async () => {
+      const inputs = tr.querySelectorAll("input");
+      const updates = {};
 
-        tbody.appendChild(tr);
-    });
+      inputs.forEach(inp => {
+        updates[inp.dataset.field] = inp.value;
+      });
+
+      await fetch(`/api/leden/${lid.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates)
+      });
+
+      alert("Lid bijgewerkt");
+    };
+
+    // Delete
+    tr.querySelector(".deleteBtn").onclick = async () => {
+      if (!confirm("Verwijderen?")) return;
+
+      await fetch(`/api/leden/${lid.id}`, { method: "DELETE" });
+      tr.remove();
+    };
+
+    tbody.appendChild(tr);
+  });
 }
 
 loadLeden();
+
 </script>
 
-<script>
-// EXPORT (laat zoals het was)
-document.getElementById('exportBtn').onclick = () => {
-    const link = document.createElement('a');
-    link.href = "leden_export.php";
-    link.download = "leden.xlsx";
-    link.click();
-
-    setTimeout(() => {
-        showAlert("success", "xlsx is aangemaakt ✔️");
-    }, 500);
-};
-</script>
-
-<script>
-    const params = new URLSearchParams(window.location.search);
-    const msg = params.get("msg");
-    if (msg) showAlert("success", msg);
-</script>
-
-<link href="/css/WTC.css" rel="stylesheet">
-
-</body>
-</html>
