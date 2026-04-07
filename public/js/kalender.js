@@ -363,7 +363,7 @@ async function openAdminDialog(eventData) {
     btnDelete.style.display = e.id ? "inline-block" : "none";
     btnDelete.onclick = () => handleDeleteEvent();
   }
-
+}
 
 function overlaps(a,b){ return a.startM < b.endM && b.startM < a.endM; }
 
