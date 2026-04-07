@@ -681,7 +681,7 @@ function attachMemberEvents(e, status) {
       const r = await doSignup(e.id);
 
       if (!r || !r.ok) {
-        showModal("success", "OK!", "Je boeking is opgeslagen.");
+        showModal("success", "OK!", "Je bent ingeschreven.");
 //		showModal("error", "Fout!", "Inschrijving mislukt.");
         return;
       }
