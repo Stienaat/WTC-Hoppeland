@@ -6,7 +6,7 @@ import multer from "multer";
 import session from "express-session";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-import ledenRoutes from "/js/leden.js";
+import ledenRoutes from "js/leden.js";
 
 
 
