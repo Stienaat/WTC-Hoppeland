@@ -219,7 +219,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   if (actie === "registreer") {
 
     if (password !== codeRepeat) {
-      alert("Paswoorden komen niet overeen");
+      showModal("error", "Fout", "Paswoorden komen niet overeen.");
       return;
     }
 
@@ -230,7 +230,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     });
 
     const data = await res.json();
-    alert(data.ok ? "Registratie gelukt!" : data.error);
+     showModal("success", "Welkom", "Je bent geregistreerd.");
     return;
   }
 
