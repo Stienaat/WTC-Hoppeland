@@ -879,19 +879,6 @@ function readJson(pathname, fallback) {
   }
 }
 
-app.get("/api/leden", async (req, res) => {
-  if (!req.session?.is_admin) return res.status(403).send("Forbidden");
-
-  const { data, error } = await supabase
-    .from("leden")
-    .select("*")
-    .order("naam");
-
-  if (error) return res.status(500).send(error.message);
-
-  res.json(data);
-});
-
 app.use("/api/leden", ledenRoutes);
 
 /* =====================================
