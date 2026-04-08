@@ -71,8 +71,8 @@
 async function loadLeden() {
   const res = await fetch("/api/leden");
   const leden = await res.json();
+  const tbody = document.getElementById("ledenRows");
 
-  const tbody = document.querySelector("#ledenTable tbody");
   tbody.innerHTML = "";
 
   leden.forEach(lid => {
@@ -80,6 +80,7 @@ async function loadLeden() {
 
     tr.innerHTML = `
       <td><input value="${lid.naam || ""}" data-field="naam"></td>
+	  <td><input value="${lid.email || ""}" data-field="email"></td>
       <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
       <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
       <td><input value="${lid.adres || ""}" data-field="adres"></td>
