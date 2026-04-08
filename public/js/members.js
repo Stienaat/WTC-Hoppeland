@@ -2,7 +2,8 @@
 
 async function loadMembers() {
   try {
-    const res = await fetch("/leden");
+   const res = await fetch("/api/leden");
+
     if (!res.ok) throw new Error("HTTP " + res.status);
 
     const leden = await res.json();
