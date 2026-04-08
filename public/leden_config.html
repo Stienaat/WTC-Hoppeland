@@ -45,7 +45,8 @@
     </div>
 
     <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
-        <tr style="background:#e2e8f0;">
+        <thead>
+		<tr style="background:#e2e8f0;">
             <th>Naam</th>
             <th>E-mail</th>
             <th>Telefoon</th>
@@ -53,7 +54,7 @@
             <th>Adres</th>
             <th>Acties</th>
         </tr>
-
+		</head>
         <!-- HIER KOMEN DE JS-RECORDS -->
         <tbody id="ledenRows"></tbody>
     </table>
@@ -80,7 +81,7 @@ async function loadLeden() {
 
     tr.innerHTML = `
       <td><input value="${lid.naam || ""}" data-field="naam"></td>
-	  <td><input value="${lid.email || ""}" data-field="email"></td>
+	  
       <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
       <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
       <td><input value="${lid.adres || ""}" data-field="adres"></td>
