@@ -842,52 +842,6 @@ app.post("/api/signups/commit", requireAuth, async (req, res) => {
   }
 });
 
-app.patch("/api/signups/:id", requireAdmin, async (req, res) => {
-  try {
-    const id = req.params.id;
-    const payload = {};
-
-    if ("status" in req.body) payload.status = req.body.status;
-    if ("paid" in req.body) payload.paid = normalizeBoolean(req.body.paid);
-    if ("payment_method" in req.body) payload.payment_method = req.body.payment_method || null;
-    if ("payment_reference" in req.body) payload.payment_reference = req.body.payment_reference || null;
-    if ("confirmed_at" in req.body) payload.confirmed_at = req.body.confirmed_at || null;
-
-    if (Object.keys(payload).length === 0) {
-      return res.status(400).json({ ok: false, error: "NO_FIELDS_TO_UPDATE" });
-    }
-
-    if (payload.status === "confirmed" && !("confirmed_at" in payload)) {
-      payload.confirmed_at = new Date().toISOString();
-    }
-
-    const { data, error } = await supabase
-      .from("signups")
-      .update(payload)
-      .eq("id", id)
-      .select("*")
-      .single();
-
-    if (error) throw error;
-
-    res.json({ ok: true, signup: data });
-  } catch (err) {
-    console.error("PATCH /api/signups/:id ERROR:", err);
-    res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
-  }
-});
-
-app.delete("/api/signups/:id", requireAdmin, async (req, res) => {
-  try {
-    const id = req.params.id;
-    const { error } = await supabase.from("signups").delete().eq("id", id);
-    if (error) throw error;
-    res.json({ ok: true });
-  } catch (err) {
-    console.error("DELETE /api/signups/:id ERROR:", err);
-    res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
-  }
-});
 
 /* =====================================
    LEGACY COMPATIBILITY ROUTES
