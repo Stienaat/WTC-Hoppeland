@@ -3,6 +3,14 @@ import { supabase } from "../supabaseClient.js";
 
 const router = express.Router();
 
+router.use((req, res, next) => {
+  if (!req.session?.is_admin) {
+    return res.status(403).json({ error: "NOT_ADMIN" });
+  }
+  next();
+});
+
+
 // GET all members
 router.get("/", async (req, res) => {
   const { data, error } = await supabase
