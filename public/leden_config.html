@@ -181,18 +181,58 @@ document.getElementById("exportBtn").onclick = async () => {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Leden");
 
-    ws.addRow(["Naam", "Email", "Telefoon", "Gemeente", "Adres"]);
+    // Kolombreedtes (20)
+    ws.columns = [
+        { header: "Naam", key: "naam", width: 20 },
+        { header: "Email", key: "email", width: 20 },
+        { header: "Telefoon", key: "telefoon", width: 20 },
+        { header: "Gemeente", key: "gemeente", width: 20 },
+        { header: "Adres", key: "adres", width: 20 }
+    ];
 
-    Leden.forEach(lid => {
-        ws.addRow([
-            lid.naam || "",
-            lid.email || "",
-            lid.telefoon || "",
-            lid.gemeente || "",
-            lid.adres || ""
-        ]);
+    // Header stijl
+    ws.getRow(1).eachCell(cell => {
+        cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFEFEFEF" } // lichtgrijs
+        };
+        cell.font = { bold: true };
+        cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" }
+        };
     });
 
+    // Sorteren op naam (voor de zekerheid)
+    Leden.sort((a, b) => a.naam.localeCompare(b.naam));
+
+    // Rijen toevoegen
+    Leden.forEach(lid => {
+        ws.addRow({
+            naam: lid.naam || "",
+            email: lid.email || "",
+            telefoon: lid.telefoon || "",
+            gemeente: lid.gemeente || "",
+            adres: lid.adres || ""
+        });
+    });
+
+    // Borders voor alle cellen
+    ws.eachRow((row, rowNumber) => {
+        row.eachCell(cell => {
+            cell.border = {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" }
+            };
+        });
+    });
+
+    // Download
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -203,6 +243,7 @@ document.getElementById("exportBtn").onclick = async () => {
     a.download = "Leden.xlsx";
     a.click();
 };
+
 
 loadLeden();
 
