@@ -110,7 +110,7 @@ async function loadLeden() {
         return;
     }
 
-    const tbody = document.getElementById("ledenRows");
+    const tbody = document.getElementById("LedenRows");
     tbody.innerHTML = "";
 
     Leden.forEach(lid => {
@@ -138,7 +138,7 @@ async function loadLeden() {
             });
 
             const { error } = await db
-                .from("leden")
+                .from("Leden")
                 .update(updates)
                 .eq("id", lid.id);
 
@@ -151,7 +151,7 @@ async function loadLeden() {
             if (!confirm("Verwijderen?")) return;
 
             const { error } = await db
-                .from("leden")
+                .from("Leden")
                 .delete()
                 .eq("id", lid.id);
 
@@ -167,8 +167,8 @@ async function loadLeden() {
 //  EXCEL EXPORT
 // =====================================
 document.getElementById("exportBtn").onclick = async () => {
-    const { data: leden, error } = await db
-        .from("leden")
+    const { data: Leden, error } = await db
+        .from("Leden")
         .select("*")
         .order("naam");
 
@@ -182,7 +182,7 @@ document.getElementById("exportBtn").onclick = async () => {
 
     ws.addRow(["Naam", "Email", "Telefoon", "Gemeente", "Adres"]);
 
-    leden.forEach(lid => {
+    Leden.forEach(lid => {
         ws.addRow([
             lid.naam || "",
             lid.email || "",
@@ -199,7 +199,7 @@ document.getElementById("exportBtn").onclick = async () => {
 
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "leden.xlsx";
+    a.download = "Leden.xlsx";
     a.click();
 };
 
