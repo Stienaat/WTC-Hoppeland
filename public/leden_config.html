@@ -101,12 +101,12 @@ import ExcelJS from "https://esm.sh/exceljs";
 // =====================================
 async function loadLeden() {
     const { data: Leden, error } = await db
-        .from("leden")
+        .from("Leden")
         .select("*")
         .order("naam");
 
     if (error) {
-        alert("Fout bij laden leden: " + error.message);
+        alert("Fout bij laden Leden: " + error.message);
         return;
     }
 
