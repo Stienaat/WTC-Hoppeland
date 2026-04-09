@@ -100,7 +100,7 @@ import ExcelJS from "https://esm.sh/exceljs";
 //  LADEN VAN LEDEN
 // =====================================
 async function loadLeden() {
-    const { data: leden, error } = await db
+    const { data: Leden, error } = await db
         .from("leden")
         .select("*")
         .order("naam");
