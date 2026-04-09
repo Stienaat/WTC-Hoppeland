@@ -67,7 +67,11 @@ body {
     <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
         <thead>
             <tr style="background:#e2e8f0;">
-                <th>Naam</th>
+                <th>
+					Naam 
+					<span id="sortNaam" style="cursor:pointer; font-size:12px; margin-left:4px;">▲▼</span>
+				</th>
+
                 <th>E-mail</th>
                 <th>Telefoon</th>
                 <th>Gemeente</th>
@@ -81,6 +85,9 @@ body {
 </div>
 
 <script type="module">
+
+let sortDirection = "asc"; // of "desc"
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const db = createClient(
