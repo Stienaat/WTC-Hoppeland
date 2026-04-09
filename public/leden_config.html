@@ -69,6 +69,7 @@
 </html>
 
 <script>
+
 // =====================================
 //  LADEN VAN LEDEN UIT SUPABASE VIA NODE
 // =====================================
@@ -94,7 +95,7 @@ async function loadLeden() {
       </td>
     `;
 
-    // Update
+// Update
     tr.querySelector(".updateBtn").onclick = async () => {
       const inputs = tr.querySelectorAll("input");
       const updates = {};
@@ -112,7 +113,7 @@ async function loadLeden() {
       alert("Lid bijgewerkt");
     };
 
-    // Delete
+// Delete
     tr.querySelector(".deleteBtn").onclick = async () => {
       if (!confirm("Verwijderen?")) return;
 
@@ -123,6 +124,17 @@ async function loadLeden() {
     tbody.appendChild(tr);
   });
 }
+
+// EXPORT
+	document.getElementById('exportBtn').onclick = () => {
+		const eventId = "<?= htmlspecialchars($eventId) ?>";
+		if (!eventId) return;
+		window.location = "leden_export.php?event_id=" + encodeURIComponent(eventId);
+		
+		setTimeout(() => { 
+			showAlert("success", "Bestand is aangemaakt ✔️");     // SERVER-SIDE MESSAGE
+		}, 500);
+};
 
 loadLeden();
 
