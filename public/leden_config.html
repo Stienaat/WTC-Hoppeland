@@ -111,8 +111,7 @@ async function loadLeden() {
     const { data: Leden, error } = await db
         .from("Leden")
         .select("*")
-        .order("naam");
-
+      
     if (error) {
         alert("Fout bij laden Leden: " + error.message);
         return;
@@ -214,7 +213,14 @@ document.getElementById("exportBtn").onclick = async () => {
     });
 
     // Sorteren op naam (voor de zekerheid)
-    Leden.sort((a, b) => a.naam.localeCompare(b.naam));
+   // Sorteren op naam met richting
+	Leden.sort((a, b) => {
+		if (!a.naam) return 1;
+		if (!b.naam) return -1;
+		return sortDirection === "asc"
+			? a.naam.localeCompare(b.naam)
+			: b.naam.localeCompare(a.naam);
+	});
 
     // Rijen toevoegen
     Leden.forEach(lid => {
@@ -238,6 +244,12 @@ document.getElementById("exportBtn").onclick = async () => {
             };
         });
     });
+	
+	ws.autoFilter = {
+    from: 'A1',
+    to: 'E1'
+};
+
 
     // Download
     const buffer = await wb.xlsx.writeBuffer();
