@@ -19,7 +19,7 @@ function renderLeden(leden) {
             <td><input type="text" name="adres"    form="${formId}" value="${lid.adres || ""}"></td>
 
             <td style="width:120px;">
-                <button type="button" class="wtc-button changeMember"
+                <button type="button" class="wtc-button wtc-update changeMember"
                         data-formid="${formId}"
                         data-naam="${lid.naam || ""}">Update</button>
 
