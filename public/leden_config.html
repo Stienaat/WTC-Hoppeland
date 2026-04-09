@@ -43,11 +43,6 @@ table input[type="text"] {
 .toolbar .spacer{ flex:1; }
 </style>
 
-<!-- ExcelJS voor export -->
-<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
-
-<!-- Supabase client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
 
@@ -85,16 +80,17 @@ table input[type="text"] {
 </div>
 
 <script type="module">
-
-// =====================================
-//  SUPABASE VIA ESM (NIET GEBLOKKEERD)
-// =====================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// jouw client
 const db = createClient(
-    "https://YOUR-PROJECT.supabase.co",
-    "YOUR-ANON-KEY"
+    "https://orvjhbtoxjqhedsgnxqp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
+);
+
+// ... rest van je code
+</script>
+
+
 );
 
 // =====================================
