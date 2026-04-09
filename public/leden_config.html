@@ -1,27 +1,25 @@
 <!doctype html>
 <html lang="nl">
 <head>
-    <meta charset="utf-8">
-    <title>Leden beheer</title>
-	
+<meta charset="utf-8">
+<title>Leden beheer</title>
+
+<link href="/css/WTC.css" rel="stylesheet">
+
 <style>
-    .toolbar{
-        display:flex;
-        justify-content:space-between;
-        gap:8px;
-        align-items:center;
-        flex-wrap:wrap;
-        margin: 4px 0 12px;
-    }
-   .toolbar .spacer{ flex:1; }
-		input[type="text"]{
-        border:0;
-        background:transparent;
-        outline:none;
-        width:100%;
-    }
-	
-/* Strakke, borderloze inputvelden in tabel */
+body {
+    font-family: Arial;
+    background:#C2D5F3;
+}
+
+.container {
+    max-width:1120px;
+    margin:30px auto;
+    background:#fff;
+    padding:18px;
+    border-radius:14px;
+}
+
 table input[type="text"] {
     border: none !important;
     background: transparent;
@@ -34,123 +32,176 @@ table input[type="text"] {
     box-sizing: border-box;
 }
 
-
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin: 4px 0 12px;
+}
+.toolbar .spacer{ flex:1; }
 </style>
 
-<script src="/js/members.js"></script>
+<!-- ExcelJS voor export -->
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
 
-<body style="font-family:Arial;background:#C2D5F3;">
+<body>
 
-<div style="max-width:1120px;margin:30px auto;background:#fff;padding:18px;border-radius:14px;">
-    
-    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+<div class="container">
+
+    <div style="display:flex; justify-content:space-between; align-items:center;">
         <h2 style="margin:0;">Leden Beheer</h2>
-        <img src="images/Logo.png" id="hoplogo" alt="" width="40" height="40">
+        <img src="images/Logo.png" width="40" height="40">
     </div>
 
     <div class="toolbar" style="margin-top:20px;">
-        <button type="button" id="exportBtn" class="wtc-button" style="margin-left:5px;">Export</button>
-    <div class="spacer"></div>
-        <a href="/leden.html?overlay=1" class="wtc-button" style="padding:2px 4px;">⏪Terug</a>
-        <a href="/index.html" class="wtc-button" style="padding:2px 4px;">🏡Home</a>
-        <a href="logout.php" class="wtc-button" style="padding:2px 4px;">Uitloggen</a>
+        <button type="button" id="exportBtn" class="wtc-button">Export</button>
+        <div class="spacer"></div>
+        <a href="/leden.html?overlay=1" class="wtc-button">⏪Terug</a>
+        <a href="/index.html" class="wtc-button">🏡Home</a>
+        <a href="/logout.html" class="wtc-button">Uitloggen</a>
     </div>
 
     <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
-    <thead>
-        <tr style="background:#e2e8f0;">
-            <th>Naam</th>
-            <th>E-mail</th>
-            <th>Telefoon</th>
-            <th>Gemeente</th>
-            <th>Adres</th>
-            <th>Acties</th>
-        </tr>
-    </thead>
-
-    <tbody id="ledenRows">
-        <!-- HIER KOMEN DE JS-RECORDS -->
-    </tbody>
-</table>
+        <thead>
+            <tr style="background:#e2e8f0;">
+                <th>Naam</th>
+                <th>E-mail</th>
+                <th>Telefoon</th>
+                <th>Gemeente</th>
+                <th>Adres</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody id="ledenRows"></tbody>
+    </table>
 
 </div>
 
-<link href="/css/WTC.css" rel="stylesheet">
-
-</body>
-</html>
-
 <script>
+// ===============================
+//  SUPABASE INITIALISATIE
+// ===============================
+const supabase = supabase.createClient(
+    "https://YOUR-PROJECT.supabase.co",
+    "YOUR-ANON-KEY"
+);
 
-// =====================================
-//  LADEN VAN LEDEN UIT SUPABASE VIA NODE
-// =====================================
+// ===============================
+//  LADEN VAN LEDEN
+// ===============================
 async function loadLeden() {
-  const res = await fetch("/api/leden");
-  const leden = await res.json();
-  const tbody = document.getElementById("ledenRows");
+    const { data: leden, error } = await supabase
+        .from("leden")
+        .select("*")
+        .order("naam");
 
-  tbody.innerHTML = "";
+    if (error) {
+        alert("Fout bij laden leden: " + error.message);
+        return;
+    }
 
-  leden.forEach(lid => {
-    const tr = document.createElement("tr");
+    const tbody = document.getElementById("ledenRows");
+    tbody.innerHTML = "";
 
-    tr.innerHTML = `
-      <td><input value="${lid.naam || ""}" data-field="naam"></td>
-	  
-      <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
-      <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
-      <td><input value="${lid.adres || ""}" data-field="adres"></td>
-      <td>
-        <button class="updateBtn">Update</button>
-        <button class="deleteBtn">Delete</button>
-      </td>
-    `;
+    leden.forEach(lid => {
+        const tr = document.createElement("tr");
 
-// Update
-    tr.querySelector(".updateBtn").onclick = async () => {
-      const inputs = tr.querySelectorAll("input");
-      const updates = {};
+        tr.innerHTML = `
+            <td><input value="${lid.naam || ""}" data-field="naam"></td>
+            <td>${lid.email}</td>
+            <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
+            <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
+            <td><input value="${lid.adres || ""}" data-field="adres"></td>
+            <td>
+                <button class="wtc-button updateBtn">Update</button>
+                <button class="wtc-button wtc-delete deleteBtn">Delete</button>
+            </td>
+        `;
 
-      inputs.forEach(inp => {
-        updates[inp.dataset.field] = inp.value;
-      });
+        // UPDATE
+        tr.querySelector(".updateBtn").onclick = async () => {
+            const inputs = tr.querySelectorAll("input");
+            const updates = {};
 
-      await fetch(`/api/leden/${lid.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updates)
-      });
+            inputs.forEach(inp => {
+                updates[inp.dataset.field] = inp.value;
+            });
 
-      alert("Lid bijgewerkt");
-    };
+            const { error } = await supabase
+                .from("leden")
+                .update(updates)
+                .eq("id", lid.id);
 
-// Delete
-    tr.querySelector(".deleteBtn").onclick = async () => {
-      if (!confirm("Verwijderen?")) return;
+            if (error) alert("Fout bij update: " + error.message);
+            else alert("Lid bijgewerkt ✔️");
+        };
 
-      await fetch(`/api/leden/${lid.id}`, { method: "DELETE" });
-      tr.remove();
-    };
+        // DELETE
+        tr.querySelector(".deleteBtn").onclick = async () => {
+            if (!confirm("Verwijderen?")) return;
 
-    tbody.appendChild(tr);
-  });
+            const { error } = await supabase
+                .from("leden")
+                .delete()
+                .eq("id", lid.id);
+
+            if (error) alert("Fout bij verwijderen: " + error.message);
+            else tr.remove();
+        };
+
+        tbody.appendChild(tr);
+    });
 }
 
-// EXPORT
-	document.getElementById('exportBtn').onclick = () => {
-		const eventId = "<?= htmlspecialchars($eventId) ?>";
-		if (!eventId) return;
-		window.location = "leden_export.php?event_id=" + encodeURIComponent(eventId);
-		
-		setTimeout(() => { 
-			showAlert("success", "Bestand is aangemaakt ✔️");     // SERVER-SIDE MESSAGE
-		}, 500);
+// ===============================
+//  EXCEL EXPORT (CLIENT-SIDE)
+// ===============================
+document.getElementById("exportBtn").onclick = async () => {
+    const { data: leden, error } = await supabase
+        .from("leden")
+        .select("*")
+        .order("naam");
+
+    if (error) {
+        alert("Fout bij export: " + error.message);
+        return;
+    }
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("Leden");
+
+    ws.addRow(["Naam", "Email", "Telefoon", "Gemeente", "Adres"]);
+
+    leden.forEach(lid => {
+        ws.addRow([
+            lid.naam || "",
+            lid.email || "",
+            lid.telefoon || "",
+            lid.gemeente || "",
+            lid.adres || ""
+        ]);
+    });
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "leden.xlsx";
+    a.click();
 };
 
 loadLeden();
-
 </script>
 
+</body>
+</html>
