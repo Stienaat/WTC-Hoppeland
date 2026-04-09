@@ -178,7 +178,7 @@ document.getElementById("exportBtn").onclick = async () => {
     const { data: Leden, error } = await db
         .from("Leden")
         .select("*")
-        .order("naam");
+        .order("naam", { ascending: sortDirection === "asc" });
 
     if (error) {
         alert("Fout bij export: " + error.message);
@@ -253,6 +253,10 @@ document.getElementById("exportBtn").onclick = async () => {
 
 
 loadLeden();
+document.getElementById("sortNaam").onclick = () => {
+    sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    loadLeden();
+};
 
 </script>
 
