@@ -653,7 +653,6 @@ app.post("/api/signups", requireAuth, async (req, res) => {
       .insert(insertPayload)
       .select(`id, paid, method, reference, created_at, Leden ( naam, email)`)
 	  .eq("event_id", eventId);
-      .single();
 
     if (error) throw error;
 
