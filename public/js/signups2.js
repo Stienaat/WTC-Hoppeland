@@ -34,7 +34,7 @@ async function loadPage() {
     exportBtn.disabled = false;
 
     const data = await fetch(`/api/signups?event_id=${currentEvent}`).then(r => r.json());
-    renderTable(data.signups || []);
+    renderTable(data.signups);
 }
 
 function renderTable(signups) {
@@ -49,15 +49,15 @@ function renderTable(signups) {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td>${su.name || ""}</td>
-            <td>${su.email || ""}</td>
+            <td>${su.Leden?.name || ""}</td>
+            <td>${su.Leden?.email || ""}</td>
             <td>${su.paid ? "Ja" : "Nee"}</td>
-            <td>${su.payment_method || ""}</td>
-            <td>${su.payment_reference || ""}</td>
+            <td>${su.method || ""}</td>
+            <td>${su.reference || ""}</td>
             <td>${new Date(su.created_at).toLocaleString()}</td>
             <td>
-                <button class="updateBtn" data-id="${su.id}" data-name="${su.name || ""}">update</button>
-                <button class="deleteBtn" data-id="${su.id}" data-name="${su.name || ""}">delete</button>
+                <button class="updateBtn" data-id="${su.id}" data-name="${su.Leden?.name || ""}">update</button>
+                <button class="deleteBtn" data-id="${su.id}" data-name="${su.Leden?.name || ""}">delete</button>
             </td>
         `;
 
@@ -68,7 +68,7 @@ function renderTable(signups) {
 // UPDATE
 document.addEventListener("click", async e => {
     if (e.target.classList.contains("updateBtn")) {
-        const name = e.target.dataset.name || "";
+        const name = e.target.dataset.name;
         const ok = await showConfirm(`Inschrijving van '${name}' bijwerken ❓`);
         if (!ok) return;
 
@@ -96,7 +96,7 @@ document.addEventListener("click", async e => {
 
     // DELETE
     if (e.target.classList.contains("deleteBtn")) {
-        const name = e.target.dataset.name || "";
+        const name = e.target.dataset.name;
         const ok = await showConfirm(`${name} verwijderen? ❓`);
         if (!ok) return;
 
