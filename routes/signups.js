@@ -39,7 +39,10 @@ router.get("/", async (req, res) => {
 
     const ledenMap = {};
     leden.forEach(l => {
-        ledenMap[l.id] = { name: l.naam, email: l.email };
+        ledenMap[l.id] = {
+            name: l.naam,
+            email: l.email
+        };
     });
 
     // 3. Bouw structuur die frontend verwacht
@@ -47,13 +50,14 @@ router.get("/", async (req, res) => {
         id: s.id,
         created_at: s.created_at,
         paid: s.paid,
-        method: s.payment_method,
-        reference: s.payment_reference,
+        method: s.payment_method || "",
+        reference: s.payment_reference || "",
         Leden: ledenMap[s.member_id] || { name: "", email: "" }
     }));
 
     res.json({ signups: result });
 });
+
 
 /* ============================
    POST – update / delete / cleanup
