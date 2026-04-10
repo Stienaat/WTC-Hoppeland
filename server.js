@@ -556,51 +556,53 @@ app.get("/api/signups", requireAdmin, async (req, res) => {
       return res.status(400).json({ ok: false, error: "event_id verplicht" });
     }
 
+    // 1. Haal signups op
     const { data: signups, error: signupsError } = await supabase
       .from("signups")
-      .select("id, created_at, member_id, event_id, paid, status, payment_method, payment_reference")
+      .select("id, created_at, member_id, event_id, paid, payment_method, payment_reference")
       .eq("event_id", eventId)
       .order("created_at", { ascending: true });
 
     if (signupsError) throw signupsError;
 
-    const memberIds = [...new Set((signups || []).map((s) => s.member_id).filter(Boolean))];
-    let ledenById = new Map();
+    // 2. Verzamel alle member_ids
+    const memberIds = [...new Set(signups.map(s => s.member_id).filter(Boolean))];
 
+    // 3. Haal leden op
+    let ledenById = {};
     if (memberIds.length) {
       const { data: leden, error: ledenError } = await supabase
         .from("Leden")
-        .select("id, naam, email, telefoon")
-        .in("id", memberIds);
+        .select("id, naam, email");
 
       if (ledenError) throw ledenError;
-      ledenById = new Map((leden || []).map((l) => [l.id, l]));
+
+      leden.forEach(l => {
+        ledenById[l.id] = {
+          name: l.naam,
+          email: l.email
+        };
+      });
     }
 
-    const result = (signups || []).map((s) => {
-      const lid = ledenById.get(s.member_id) || {};
-      return {
-        id: s.id,
-        signup_id: s.id,
-        member_id: s.member_id,
-        event_id: s.event_id,
-        name: lid.naam || "",
-        email: lid.email || "",
-        phone: lid.telefoon || "",
-        status: s.status || "pending",
-        paid: !!s.paid,
-        payment_method: s.payment_method,
-        payment_reference: s.payment_reference,
-        created_at: s.created_at
-      };
-    });
+    // 4. Bouw structuur die jouw frontend verwacht
+    const result = signups.map(s => ({
+      id: s.id,
+      created_at: s.created_at,
+      method: s.payment_method || "",
+      reference: s.payment_reference || "",
+      paid: !!s.paid,
+      Leden: ledenById[s.member_id] || { name: "", email: "" }
+    }));
 
     res.json({ ok: true, signups: result });
+
   } catch (err) {
     console.error("GET /api/signups ERROR:", err);
-    res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
+    res.status(500).json({ ok: false, error: err.message });
   }
 });
+
 
 app.post("/api/signups", requireAuth, async (req, res) => {
   try {
