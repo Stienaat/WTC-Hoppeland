@@ -34,7 +34,7 @@ async function loadPage() {
     exportBtn.disabled = false;
 
     const data = await fetch(`/api/signups?event_id=${currentEvent}`).then(r => r.json());
-    renderTable(data.signups);
+    renderTable(data.signups || []);
 }
 
 function renderTable(signups) {
@@ -49,17 +49,15 @@ function renderTable(signups) {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-		
-			<td>${su.name || ""}</td>
-			<td>${su.email || ""}</td>
-
+            <td>${su.name || ""}</td>
+            <td>${su.email || ""}</td>
             <td>${su.paid ? "Ja" : "Nee"}</td>
-            <td>${su.method || ""}</td>
-            <td>${su.reference || ""}</td>
+            <td>${su.payment_method || ""}</td>
+            <td>${su.payment_reference || ""}</td>
             <td>${new Date(su.created_at).toLocaleString()}</td>
             <td>
-                <button class="update" data-id="${su.id}">update</button>
-                <button class="delete" data-id="${su.id}">delete</button>
+                <button class="updateBtn" data-id="${su.id}" data-name="${su.name || ""}">update</button>
+                <button class="deleteBtn" data-id="${su.id}" data-name="${su.name || ""}">delete</button>
             </td>
         `;
 
@@ -67,11 +65,10 @@ function renderTable(signups) {
     });
 }
 
-
 // UPDATE
 document.addEventListener("click", async e => {
     if (e.target.classList.contains("updateBtn")) {
-        const name = e.target.dataset.name;
+        const name = e.target.dataset.name || "";
         const ok = await showConfirm(`Inschrijving van '${name}' bijwerken ❓`);
         if (!ok) return;
 
@@ -82,9 +79,9 @@ document.addEventListener("click", async e => {
             action: "update",
             event_id: currentEvent,
             signup_id: signupId,
-            paid: tr.querySelector('[data-field="paid"]').value,
-            payment_method: tr.querySelector('[data-field="payment_method"]').value,
-            payment_reference: tr.querySelector('[data-field="payment_reference"]').value
+            paid: tr.querySelector('[data-field="paid"]')?.value,
+            payment_method: tr.querySelector('[data-field="payment_method"]')?.value,
+            payment_reference: tr.querySelector('[data-field="payment_reference"]')?.value
         };
 
         await fetch("/api/signups", {
@@ -94,11 +91,12 @@ document.addEventListener("click", async e => {
         });
 
         showAlert("success", "Inschrijving bijgewerkt ✔️");
+        loadPage();
     }
 
     // DELETE
     if (e.target.classList.contains("deleteBtn")) {
-        const name = e.target.dataset.name;
+        const name = e.target.dataset.name || "";
         const ok = await showConfirm(`${name} verwijderen? ❓`);
         if (!ok) return;
 
@@ -112,7 +110,7 @@ document.addEventListener("click", async e => {
             })
         });
 
-        showModal("success", "Inschrijving verwijderd ✔️");
+        showAlert("success", "Inschrijving verwijderd ✔️");
         loadPage();
     }
 });
@@ -128,14 +126,14 @@ cleanupBtn.onclick = async () => {
         body: JSON.stringify({ action: "cleanup" })
     });
 
-    showModal("success", "Opruiming voltooid ✔️");
+    showAlert("success", "Opruiming voltooid ✔️");
     loadPage();
 };
 
 // EXPORT
 exportBtn.onclick = () => {
     window.location = `/api/signups/export?event_id=${currentEvent}`;
-    setTimeout(() => showModal("success", "Bestand is aangemaakt ✔️"), 500);
+    setTimeout(() => showAlert("success", "Bestand is aangemaakt ✔️"), 500);
 };
 
 loadPage();
