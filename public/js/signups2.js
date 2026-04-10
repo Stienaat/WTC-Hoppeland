@@ -51,10 +51,25 @@ function renderTable(signups) {
         tr.innerHTML = `
             <td>${su.Leden?.name || ""}</td>
             <td>${su.Leden?.email || ""}</td>
-            <td>${su.paid ? "Ja" : "Nee"}</td>
-            <td>${su.method || ""}</td>
-            <td>${su.reference || ""}</td>
+
+            <td>
+                <select data-field="paid">
+                    <option value="pending" ${su.paid === null ? "selected" : ""}>pending</option>
+                    <option value="true" ${su.paid === true ? "selected" : ""}>ja</option>
+                    <option value="false" ${su.paid === false ? "selected" : ""}>nee</option>
+                </select>
+            </td>
+
+            <td>
+                <input data-field="payment_method" type="text" value="${su.method || ""}">
+            </td>
+
+            <td>
+                <input data-field="payment_reference" type="text" value="${su.reference || ""}">
+            </td>
+
             <td>${new Date(su.created_at).toLocaleString()}</td>
+
             <td>
                 <button class="updateBtn" data-id="${su.id}" data-name="${su.Leden?.name || ""}">update</button>
                 <button class="deleteBtn" data-id="${su.id}" data-name="${su.Leden?.name || ""}">delete</button>
