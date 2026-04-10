@@ -71,7 +71,6 @@ body {
 					Naam 
 					<span id="sortNaam" style="cursor:pointer; font-size:12px; margin-left:4px;">▲▼</span>
 				</th>
-
                 <th>E-mail</th>
                 <th>Telefoon</th>
                 <th>Gemeente</th>
@@ -86,16 +85,14 @@ body {
 
 <script type="module">
 
+let sortDirection = "asc"; // als je dit ook elders gebruikt, laat staan
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const db = createClient(
     "https://orvjhbtoxjqhedsgnxqp.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
 );
-
-// ... rest van je code
-
-
 
 // =====================================
 //  EXCELJS VIA ESM (NIET GEBLOKKEERD)
@@ -109,6 +106,8 @@ async function loadLeden() {
     const { data: Leden, error } = await db
         .from("Leden")
         .select("*")
+		.order("naam", { ascending: sortDirection === "asc" });
+
       
     if (error) {
         alert("Fout bij laden Leden: " + error.message);
@@ -263,6 +262,7 @@ document.getElementById("exportBtn").onclick = async () => {
 
 
 loadLeden();
+
 document.getElementById("sortNaam").onclick = () => {
     sortDirection = sortDirection === "asc" ? "desc" : "asc";
     loadLeden();
