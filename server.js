@@ -648,31 +648,33 @@ app.post("/api/signups", requireAuth, async (req, res) => {
       payment_reference: null
     };
 
-    const { data, error } = await supabase
-      .from("signups")
-      .insert(insertPayload)
-      .select(`id, paid, method, reference, created_at, Leden ( naam, email)`)
-	  .eq("event_id", eventId);
+   const { data, error } = await supabase
+	  .from("signups")
+	  .insert(insertPayload)
+	  .select("id, member_id, event_id, paid, status, payment_method, payment_reference, created_at")
+	  .single();
 
-    if (error) throw error;
 
-    res.json({
-      ok: true,
-      signup: {
-        id: data.id,
-        signup_id: data.id,
-        member_id: data.member_id,
-        event_id: data.event_id,
-        name: member.naam,
-        email: member.email,
-        phone: member.telefoon || "",
-        status: data.status || "pending",
-        paid: !!data.paid,
-        payment_method: data.payment_method,
-        payment_reference: data.payment_reference,
-        created_at: data.created_at
-      }
-    });
+   const signup = data;
+
+res.json({
+  ok: true,
+  signup: {
+    id: signup.id,
+    signup_id: signup.id,
+    member_id: member.id,
+    event_id: eventId,
+    name: member.naam,
+    email: member.email,
+    phone: member.telefoon || "",
+    status: signup.status || "pending",
+    paid: !!signup.paid,
+    payment_method: signup.payment_method,
+    payment_reference: signup.payment_reference,
+    created_at: signup.created_at
+  }
+});
+
   } catch (err) {
     console.error("POST /api/signups ERROR:", err);
     res.status(500).json({ ok: false, error: err.message || "SERVER_ERROR" });
