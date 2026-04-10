@@ -50,9 +50,8 @@ function renderTable(signups) {
 
         tr.innerHTML = `
 		
-			<td>${su.members?.name || ""}</td>
-			<td>${su.members?.email || ""}</td>
-
+			<td>${su.Leden?.name || ""}</td>
+			<td>${su.Leden?.email || ""}</td>
 
             <td>${su.paid ? "Ja" : "Nee"}</td>
             <td>${su.method || ""}</td>
