@@ -49,8 +49,11 @@ function renderTable(signups) {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td>${su.name || ""}</td>
-            <td>${su.email || ""}</td>
+		
+			<td>${su.members?.name || ""}</td>
+			<td>${su.members?.email || ""}</td>
+
+
             <td>${su.paid ? "Ja" : "Nee"}</td>
             <td>${su.method || ""}</td>
             <td>${su.reference || ""}</td>
