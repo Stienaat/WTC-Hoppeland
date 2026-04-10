@@ -106,7 +106,7 @@ async function loadLeden() {
     const { data: Leden, error } = await db
         .from("Leden")
         .select("*")
-		.order("naam", { ascending: sortDirection === "asc" });
+//		.order("naam", { ascending: sortDirection === "asc" });
 
       
     if (error) {
