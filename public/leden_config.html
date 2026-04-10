@@ -106,7 +106,7 @@ async function loadLeden() {
     const { data: Leden, error } = await db
         .from("Leden")
         .select("*")
-//		.order("naam", { ascending: sortDirection === "asc" });
+		.order("naam", { ascending: sortDirection === "asc" });
 
       
     if (error) {
@@ -170,7 +170,7 @@ async function loadLeden() {
 // =====================================
 //  EXCEL EXPORT
 // =====================================
-let sortDirection = "asc"; // als je dit ook elders gebruikt, laat staan
+
 
 document.getElementById("exportBtn").onclick = async () => {
     const { data: Leden, error } = await db
