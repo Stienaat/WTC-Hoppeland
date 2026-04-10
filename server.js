@@ -651,7 +651,8 @@ app.post("/api/signups", requireAuth, async (req, res) => {
     const { data, error } = await supabase
       .from("signups")
       .insert(insertPayload)
-      .select("id, created_at, member_id, event_id, paid, status, payment_method, payment_reference")
+      .select(`id, paid, method, reference, created_at, Leden ( name, email)`)
+
       .single();
 
     if (error) throw error;
