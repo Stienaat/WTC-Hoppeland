@@ -38,37 +38,33 @@ async function loadPage() {
 }
 
 function renderTable(signups) {
+    tableBody.innerHTML = "";
+
     if (!signups.length) {
         tableBody.innerHTML = `<tr><td colspan="7" style="color:#666;">Geen inschrijvingen…</td></tr>`;
         return;
     }
 
-    tableBody.innerHTML = "";
-
-    signups.forEach(s => {
+    signups.forEach(su => {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-            <td>${s.name || ""}</td>
-            <td>${s.email || ""}</td>
+            <td>${su.name || ""}</td>
+            <td>${su.email || ""}</td>
+            <td>${su.paid ? "Ja" : "Nee"}</td>
+            <td>${su.method || ""}</td>
+            <td>${su.reference || ""}</td>
+            <td>${new Date(su.created_at).toLocaleString()}</td>
             <td>
-                <select data-field="paid">
-                    <option value="false" ${!s.paid ? "selected" : ""}>Nee</option>
-                    <option value="true"  ${s.paid ? "selected" : ""}>Ja</option>
-                </select>
-            </td>
-            <td><input type="text" value="${s.payment_method || ""}" data-field="payment_method"></td>
-            <td><input type="text" value="${s.payment_reference || ""}" data-field="payment_reference"></td>
-            <td>${s.created_at || ""}</td>
-            <td style="white-space:nowrap;">
-                <button class="wtc-button updateBtn" data-id="${s.signup_id}" data-name="${s.name}">update</button>
-                <button class="wtc-button deleteBtn" data-id="${s.signup_id}" data-name="${s.name}">delete</button>
+                <button class="update" data-id="${su.id}">update</button>
+                <button class="delete" data-id="${su.id}">delete</button>
             </td>
         `;
 
         tableBody.appendChild(tr);
     });
 }
+
 
 // UPDATE
 document.addEventListener("click", async e => {
