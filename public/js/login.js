@@ -254,7 +254,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 		window.location.href = "leden-dashboard.html";
 	  }, 1000);
 	} else {
-	  showModal("error", "Login mislukt", data.error || "Onbekende fout");
+	  showModal("error", "Login mislukt.");
 	}
 
   }
