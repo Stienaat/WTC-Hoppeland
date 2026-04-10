@@ -8,12 +8,15 @@ import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import ledenRoutes from "./routes/leden.js";
 import signups from "./routes/signups.js";
+import events from "./routes/events.js";
+
 
 const upload = multer();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 
+app.use("/api/events", events);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
