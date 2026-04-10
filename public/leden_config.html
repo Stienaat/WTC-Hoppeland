@@ -270,6 +270,28 @@ document.getElementById("sortNaam").onclick = () => {
 
 </script>
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const table = document.querySelector("table");
+    const rows = Array.from(table.querySelectorAll("tr")).slice(1); // skip header
+    const header = table.querySelector("th:first-child");
+
+    let asc = true;
+
+    header.style.cursor = "pointer";
+    header.addEventListener("click", () => {
+        rows.sort((a, b) => {
+            const nameA = a.children[0].innerText.toLowerCase();
+            const nameB = b.children[0].innerText.toLowerCase();
+            return asc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+        });
+
+        asc = !asc;
+
+        rows.forEach(r => table.appendChild(r));
+    });
+});
+</script>
 
 </body>
 </html>
