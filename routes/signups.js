@@ -9,7 +9,7 @@ function requireMemberOrAdmin(req, res, next) {
         return res.status(403).json({ error: "Niet ingelogd" });
     }
     next();
-}
+
 
 router.use(requireMemberOrAdmin);
 
