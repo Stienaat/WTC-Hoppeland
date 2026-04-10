@@ -50,8 +50,8 @@ function renderTable(signups) {
 
         tr.innerHTML = `
 		
-			<td>${su.Leden?.name || ""}</td>
-			<td>${su.Leden?.email || ""}</td>
+			<td>${su.name || ""}</td>
+			<td>${su.email || ""}</td>
 
             <td>${su.paid ? "Ja" : "Nee"}</td>
             <td>${su.method || ""}</td>
@@ -112,7 +112,7 @@ document.addEventListener("click", async e => {
             })
         });
 
-        showAlert("success", "Inschrijving verwijderd ✔️");
+        showModal("success", "Inschrijving verwijderd ✔️");
         loadPage();
     }
 });
@@ -128,14 +128,14 @@ cleanupBtn.onclick = async () => {
         body: JSON.stringify({ action: "cleanup" })
     });
 
-    showAlert("success", "Opruiming voltooid ✔️");
+    showModal("success", "Opruiming voltooid ✔️");
     loadPage();
 };
 
 // EXPORT
 exportBtn.onclick = () => {
     window.location = `/api/signups/export?event_id=${currentEvent}`;
-    setTimeout(() => showAlert("success", "Bestand is aangemaakt ✔️"), 500);
+    setTimeout(() => showModal("success", "Bestand is aangemaakt ✔️"), 500);
 };
 
 loadPage();
