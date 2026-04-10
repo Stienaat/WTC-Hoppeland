@@ -20,15 +20,39 @@ router.get("/", async (req, res) => {
     const eventId = req.query.event_id;
     if (!eventId) return res.json({ signups: [] });
 
-    const { data, error } = await supabase
+    // 1. Haal signups op
+    const { data: signups, error } = await supabase
         .from("signups")
-        .select("*")
+        .select("id, member_id, paid, payment_method, payment_reference, created_at")
         .eq("event_id", eventId)
         .order("created_at", { ascending: true });
 
     if (error) return res.status(500).json({ error: error.message });
 
-    res.json({ signups: data });
+    // 2. Haal leden op
+    const memberIds = [...new Set(signups.map(s => s.member_id))];
+
+    const { data: leden } = await supabase
+        .from("Leden")
+        .select("id, naam, email")
+        .in("id", memberIds);
+
+    const ledenMap = {};
+    leden.forEach(l => {
+        ledenMap[l.id] = { name: l.naam, email: l.email };
+    });
+
+    // 3. Bouw structuur die frontend verwacht
+    const result = signups.map(s => ({
+        id: s.id,
+        created_at: s.created_at,
+        paid: s.paid,
+        method: s.payment_method,
+        reference: s.payment_reference,
+        Leden: ledenMap[s.member_id] || { name: "", email: "" }
+    }));
+
+    res.json({ signups: result });
 });
 
 /* ============================
@@ -47,7 +71,7 @@ router.post("/", async (req, res) => {
                 payment_method: body.payment_method.trim(),
                 payment_reference: body.payment_reference.trim()
             })
-            .eq("signup_id", body.signup_id);
+            .eq("id", body.signup_id);   // FIX
 
         if (error) return res.status(500).json({ error: error.message });
 
@@ -59,7 +83,7 @@ router.post("/", async (req, res) => {
         const { error } = await supabase
             .from("signups")
             .delete()
-            .eq("signup_id", body.signup_id);
+            .eq("id", body.signup_id);   // FIX
 
         if (error) return res.status(500).json({ error: error.message });
 
@@ -70,7 +94,6 @@ router.post("/", async (req, res) => {
     if (action === "cleanup") {
         const now = new Date().toISOString();
 
-        // Zoek oude events
         const { data: oldEvents } = await supabase
             .from("events")
             .select("id")
@@ -88,19 +111,31 @@ router.post("/", async (req, res) => {
     res.status(400).json({ error: "Onbekende actie" });
 });
 
-export default router;
+/* ============================
+   EXPORT
+   ============================ */
 import ExcelJS from "exceljs";
 
 router.get("/export", async (req, res) => {
     const eventId = req.query.event_id;
     if (!eventId) return res.status(400).send("Geen event_id");
 
-    const { data: signups, error } = await supabase
+    const { data: signups } = await supabase
         .from("signups")
-        .select("*")
+        .select("id, member_id, paid, payment_method, payment_reference, created_at")
         .eq("event_id", eventId);
 
-    if (error) return res.status(500).send(error.message);
+    const memberIds = [...new Set(signups.map(s => s.member_id))];
+
+    const { data: leden } = await supabase
+        .from("Leden")
+        .select("id, naam, email")
+        .in("id", memberIds);
+
+    const ledenMap = {};
+    leden.forEach(l => {
+        ledenMap[l.id] = { name: l.naam, email: l.email };
+    });
 
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Inschrijvingen");
@@ -108,9 +143,10 @@ router.get("/export", async (req, res) => {
     ws.addRow(["Naam", "Email", "Betaald", "Methode", "Referentie", "Ingeschreven"]);
 
     signups.forEach(s => {
+        const lid = ledenMap[s.member_id] || { name: "", email: "" };
         ws.addRow([
-            s.name,
-            s.email,
+            lid.name,
+            lid.email,
             s.paid ? "Ja" : "Nee",
             s.payment_method,
             s.payment_reference,
@@ -118,15 +154,11 @@ router.get("/export", async (req, res) => {
         ]);
     });
 
-    res.setHeader(
-        "Content-Type",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
-    res.setHeader(
-        "Content-Disposition",
-        'attachment; filename="inschrijvingen.xlsx"'
-    );
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", 'attachment; filename="inschrijvingen.xlsx"');
 
     await wb.xlsx.write(res);
     res.end();
 });
+
+export default router;
