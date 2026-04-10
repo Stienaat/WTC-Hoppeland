@@ -83,6 +83,15 @@ body {
 
 </div>
 
+<div id="app-modal" class="modal hidden">
+  <div class="modal-content">
+    <span id="modal-close" class="close">&times;</span>
+    <h2 id="modal-title"></h2>
+    <p id="modal-message"></p>
+  </div>
+</div>
+
+<script src="js/modal.js"></script>
 <script type="module">
 
 let sortDirection = "asc"; // als je dit ook elders gebruikt, laat staan
@@ -110,7 +119,7 @@ async function loadLeden() {
 
       
     if (error) {
-        alert("Fout bij laden Leden: " + error.message);
+        showModal("error", "Fout", "Er ging iets mis bij laden");
         return;
     }
 
@@ -146,8 +155,10 @@ async function loadLeden() {
                 .update(updates)
                 .eq("id", lid.id);
 
-            if (error) alert("Fout bij update: " + error.message);
-            else alert("Lid bijgewerkt ✔️");
+            if (error) 
+				showModal("error", "Fout", "fout bij update");
+            else 
+				showModal("success", "Gelukt", "Het lid is opgeslagen");
         };
 
         // DELETE
@@ -159,7 +170,8 @@ async function loadLeden() {
                 .delete()
                 .eq("id", lid.id);
 
-            if (error) alert("Fout bij verwijderen: " + error.message);
+            if (error) 
+				showModal("error", "Fout", "Er ging iets mis bij verwijderen");
             else tr.remove();
         };
 
@@ -178,7 +190,7 @@ document.getElementById("exportBtn").onclick = async () => {
         .select("*");
 
     if (error) {
-        alert("Fout bij export: " + error.message);
+        showModal("error", "Fout", "Er ging iets mis bij export");
         return;
     }
 
