@@ -5,10 +5,11 @@ const router = express.Router();
 
 // Alleen leden of admin
 function requireMemberOrAdmin(req, res, next) {
-   if (!req.session?.user && !req.session?.is_admin)
+    if (!req.session?.user && !req.session?.is_admin) {
         return res.status(403).json({ error: "Niet ingelogd" });
     }
     next();
+}
 
 
 router.use(requireMemberOrAdmin);
