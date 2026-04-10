@@ -86,8 +86,6 @@ body {
 
 <script type="module">
 
-let sortDirection = "asc"; // of "desc"
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const db = createClient(
@@ -173,21 +171,31 @@ async function loadLeden() {
 // =====================================
 //  EXCEL EXPORT
 // =====================================
+let sortDirection = "asc"; // als je dit ook elders gebruikt, laat staan
+
 document.getElementById("exportBtn").onclick = async () => {
     const { data: Leden, error } = await db
         .from("Leden")
-        .select("*")
-        .order("naam", { ascending: sortDirection === "asc" });
+        .select("*");
 
     if (error) {
         alert("Fout bij export: " + error.message);
         return;
     }
 
+    // JS-sortering op naam, met richting
+    Leden.sort((a, b) => {
+        const an = a.naam || "";
+        const bn = b.naam || "";
+        return sortDirection === "asc"
+            ? an.localeCompare(bn)
+            : bn.localeCompare(an);
+    });
+
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Leden");
 
-    // Kolombreedtes (20)
+    // Kolommen + breedtes
     ws.columns = [
         { header: "Naam", key: "naam", width: 20 },
         { header: "Email", key: "email", width: 20 },
@@ -196,7 +204,7 @@ document.getElementById("exportBtn").onclick = async () => {
         { header: "Adres", key: "adres", width: 20 }
     ];
 
-    // Header stijl
+    // Header-stijl
     ws.getRow(1).eachCell(cell => {
         cell.fill = {
             type: "pattern",
@@ -212,17 +220,7 @@ document.getElementById("exportBtn").onclick = async () => {
         };
     });
 
-    // Sorteren op naam (voor de zekerheid)
-   // Sorteren op naam met richting
-	Leden.sort((a, b) => {
-		if (!a.naam) return 1;
-		if (!b.naam) return -1;
-		return sortDirection === "asc"
-			? a.naam.localeCompare(b.naam)
-			: b.naam.localeCompare(a.naam);
-	});
-
-    // Rijen toevoegen
+    // Data-rijen
     Leden.forEach(lid => {
         ws.addRow({
             naam: lid.naam || "",
@@ -234,7 +232,7 @@ document.getElementById("exportBtn").onclick = async () => {
     });
 
     // Borders voor alle cellen
-    ws.eachRow((row, rowNumber) => {
+    ws.eachRow(row => {
         row.eachCell(cell => {
             cell.border = {
                 top: { style: "thin" },
@@ -244,14 +242,13 @@ document.getElementById("exportBtn").onclick = async () => {
             };
         });
     });
-	
-	ws.autoFilter = {
-    from: 'A1',
-    to: 'E1'
-};
 
+    // 🔽 Sorteer-/filterpijltjes in Excel-header
+    ws.autoFilter = {
+        from: 'A1',
+        to: 'E1'
+    };
 
-    // Download
     const buffer = await wb.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -262,6 +259,7 @@ document.getElementById("exportBtn").onclick = async () => {
     a.download = "Leden.xlsx";
     a.click();
 };
+
 
 
 loadLeden();
