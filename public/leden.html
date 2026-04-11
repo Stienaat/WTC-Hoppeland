@@ -312,34 +312,39 @@ fetch("/notice")
 </script>
 
 <script>
-	document.getElementById('loginForm').addEventListener('submit', async (e) => {
-	  e.preventDefault();
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-	  const email = document.getElementById('Editbox4').value.trim();
-	  const code  = document.getElementById('Editbox6').value.trim();
-	  const status = document.getElementById('loginStatus');
+  const email = document.getElementById('Editbox4').value.trim();
+  const code = document.getElementById('Editbox6').value.trim();
+  const status = document.getElementById('loginStatus');
 
-	  setStatus(status, 'Bezig met inloggen…', 'info');
+  setStatus(status, 'Bezig met inloggen…', 'info');
 
-	  try {
-		const { data, error } = await supabase
-		  .from('leden')
-		  .select('*')
-		  .eq('email', email)
-		  .eq('code', code)
-		  .single();
+  try {
+    const { data, error } = await supabase
+      .from('leden')
+      .select('*')
+      .eq('email', email)
+      .eq('code', code)
+      .single();
 
-		if (error || !data) {
-		  setStatus(status, 'Onbekende combinatie.', 'error');
-		  return;
-		}
-		catch (err) {
-  
-			setStatus(status, 'Er ging iets mis. Probeer opnieuw.', 'error');
-		}
+    if (error || !data) {
+      setStatus(status, 'Onbekende combinatie.', 'error');
+      return;
+    }
 
-	});
+    console.log('Lid gevonden:', data);
+    setStatus(status, 'Ingelogd!', 'success');
+
+  } catch (err) {
+    console.error('Supabase fout:', err);
+    setStatus(status, 'Er ging iets mis. Probeer opnieuw.', 'error');
+  }
+});
 </script>
+
+
 
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
 
