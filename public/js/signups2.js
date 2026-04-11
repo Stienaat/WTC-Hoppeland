@@ -105,7 +105,7 @@ document.addEventListener("click", async e => {
             body: JSON.stringify(payload)
         });
 
-        showAlert("success", "Inschrijving bijgewerkt ✔️");
+		showModal("success", "👌", "Inschrijving bijgewerkt ✔️");
         loadPage();
     }
 
@@ -125,7 +125,7 @@ document.addEventListener("click", async e => {
             })
         });
 
-        showAlert("success", "Inschrijving verwijderd ✔️");
+       showModal("success", "👌", "Inschrijving verwijderd ✔️");
         loadPage();
     }
 });
@@ -141,14 +141,14 @@ cleanupBtn.onclick = async () => {
         body: JSON.stringify({ action: "cleanup" })
     });
 
-    showAlert("success", "Opruiming voltooid ✔️");
+	showModal("success", "👌", "Opruiming voltooid ✔️");
     loadPage();
 };
 
 // EXPORT
 exportBtn.onclick = () => {
     window.location = `/api/signups/export?event_id=${currentEvent}`;
-    setTimeout(() => showAlert("success", "Bestand is aangemaakt ✔️"), 500);
+    setTimeout(() => showModal("success", "👌", "Bestand is aangemaakt ✔️",v500);
 };
 
 loadPage();
