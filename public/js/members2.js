@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const oldPinInput  = document.getElementById('oldPinInput');
   const newPinInput  = document.getElementById('newPinInput');
   const newPinInput2 = document.getElementById('newPinInput2');
-  const pinChangeErr = document.getElementById('pinChangeError');
+  const pinChangeErr = document.getElementById('pinChangeError');    //
   
   const pinError2 = document.getElementById('pinError2');
   

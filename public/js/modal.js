@@ -1,25 +1,48 @@
-function showModal(type, title, message) {
+function showModal(type, title, message, onConfirm) {
     const modal = document.getElementById("app-modal");
-    const modalTitle = document.getElementById("modal-title");
-    const modalMessage = document.getElementById("modal-message");
+    const t = document.getElementById("modal-title");
+    const m = document.getElementById("modal-message");
+    const btnBox = document.getElementById("modal-buttons");
 
-    modal.classList.remove("modal-success", "modal-error");
-    modal.classList.add(type === "error" ? "modal-error" : "modal-success");
+    t.textContent = title || "";
+    m.textContent = message || "";
 
-    modalTitle.textContent = title;
-    modalMessage.textContent = message;
+    // Reset knoppen
+    btnBox.innerHTML = "";
+
+    if (type === "success" || type === "error") {
+        const ok = document.createElement("button");
+        ok.className = "wtc-button";
+        ok.textContent = "OK";
+        ok.onclick = closeModal;
+        btnBox.appendChild(ok);
+    }
+
+    if (type === "confirm") {
+        const yes = document.createElement("button");
+        yes.className = "wtc-button";
+        yes.textContent = "Ja";
+        yes.onclick = () => {
+            closeModal();
+            if (typeof onConfirm === "function") onConfirm(true);
+        };
+
+        const no = document.createElement("button");
+        no.className = "wtc-button";
+        no.textContent = "Nee";
+        no.onclick = () => {
+            closeModal();
+            if (typeof onConfirm === "function") onConfirm(false);
+        };
+
+        btnBox.appendChild(yes);
+        btnBox.appendChild(no);
+    }
 
     modal.classList.remove("hidden");
-	
-	
-		setTimeout(() => {
-		el.style.opacity = "0";
-		}, 3500);
-    
 }
-
 
 function closeModal() {
-    const modal = document.getElementById("app-modal");
-    if (modal) modal.classList.add("hidden");
+    document.getElementById("app-modal").classList.add("hidden");
 }
+
