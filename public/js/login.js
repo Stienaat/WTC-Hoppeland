@@ -249,12 +249,12 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 
 	if (data.ok) {
 	  localStorage.setItem("user_email", email);
-	  showModal("success", "Welkom", "Je bent ingelogd.");
+	  showModal("success", "Welkom", "Je bent ingelogd. ✔️");
 	  setTimeout(() => {
 		window.location.href = "leden-dashboard.html";
 	  }, 1000);
 	} else {
-	  showModal("error", "Login mislukt.");
+	  showModal("error","👎" "Login mislukt. ❌");
 	}
 
   }
