@@ -118,6 +118,9 @@
 <div id="app-modal" class="modal hidden">
     <div class="modal-content">
         <h3 id="modal-title"></h3>
+			<div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+				<img src="images/Logo.png" id="hoplogo" alt="" width="45px" height="45px">
+			</div>
         <p id="modal-message"></p>
         <button class="wtc-button" onclick="closeModal()">OK</button>
     </div>
@@ -309,31 +312,39 @@ fetch("/notice")
 </script>
 
 <script>
-	document.getElementById('loginForm').addEventListener('submit', async (e) => {
-	  e.preventDefault();
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
-	  const email = document.getElementById('Editbox4').value.trim();
-	  const code  = document.getElementById('Editbox6').value.trim();
-	  const status = document.getElementById('loginStatus');
+  const email  = document.getElementById('Editbox4').value.trim();
+  const code   = document.getElementById('Editbox6').value.trim();
+  const status = document.getElementById('loginStatus');
 
-	  setStatus(status, 'Bezig met inloggen…', 'info');
+  setStatus(status, 'Bezig met inloggen…', 'info');
 
-	  try {
-		const { data, error } = await supabase
-		  .from('leden')
-		  .select('*')
-		  .eq('email', email)
-		  .eq('code', code)
-		  .single();
+  try {
+    const { data, error } = await supabase
+      .from('leden')
+      .select('*')
+      .eq('email', email)
+      .eq('code', code)
+      .single();
 
-		if (error || !data) {
-		  setStatus(status, 'Onbekende combinatie.', 'error');
-		  return;
-		}
+    if (error || !data) {
+      setStatus(status, 'Onbekende combinatie.', 'error');
+      return;
+    }
 
+    // Succes
+    setStatus(status, 'Ingelogd!', 'success');
 
-	});
+  } catch (err) {
+    console.error(err);
+    setStatus(status, 'Er ging iets mis. Probeer opnieuw.', 'error');
+  }
+
+});
 </script>
+
 
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
 
