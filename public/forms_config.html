@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
-<title>Leden beheer</title>
+<title>Contacten Beheer</title>
 
 <link href="/css/WTC.css" rel="stylesheet">
 
@@ -52,7 +52,7 @@ body {
 <div class="container">
 
     <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="margin:0;">Leden Beheer</h2>
+        <h2 style="margin:0;">Contacten Beheer</h2>
         <img src="images/Logo.png" width="40" height="40">
     </div>
 
@@ -75,6 +75,7 @@ body {
                 <th>Telefoon</th>
                 <th>Gemeente</th>
                 <th>Adres</th>
+				<th>Boodschap</th>
                 <th>Acties</th>
             </tr>
         </thead>
@@ -116,9 +117,9 @@ import ExcelJS from "https://esm.sh/exceljs";
 // =====================================
 async function loadLeden() {
     const { data: Leden, error } = await db
-        .from("Leden")
+        .from("forms")
         .select("*")
-		.order("naam", { ascending: sortDirection === "asc" });
+		.order("name", { ascending: sortDirection === "asc" });
 
       
     if (error) {
