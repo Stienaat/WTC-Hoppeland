@@ -333,6 +333,10 @@ fetch("/notice")
 		  setStatus(status, 'Onbekende combinatie.', 'error');
 		  return;
 		}
+		catch (err) {
+  
+			setStatus(status, 'Er ging iets mis. Probeer opnieuw.', 'error');
+		}
 
 	});
 </script>
