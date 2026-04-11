@@ -148,7 +148,7 @@ cleanupBtn.onclick = async () => {
 // EXPORT
 exportBtn.onclick = () => {
     window.location = `/api/signups/export?event_id=${currentEvent}`;
-    setTimeout(() => showModal("success", "👌", "Bestand is aangemaakt ✔️", 500);
+    setTimeout(() => showModal("success", "👌", "Bestand is aangemaakt ✔️"), 500);
 };
 
 loadPage();
