@@ -114,18 +114,21 @@
 
 	</form>
 </div>
-
 <div id="app-modal" class="modal hidden">
     <div class="modal-content">
         <h3 id="modal-title"></h3>
-			<div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
-				<img src="images/Logo.png" id="hoplogo" alt="" width="45px" height="45px">
-			</div>
+
+        <div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+            <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        </div>
+
         <p id="modal-message"></p>
-        <button class="wtc-button" onclick="closeModal()">OK</button>
+
+        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+            <!-- Knoppen worden dynamisch ingevuld -->
+        </div>
     </div>
 </div>
-
 
 <!-- ========================= -->
 <!-- FASE 1 PIN   ✅ -->
@@ -162,7 +165,7 @@
 			<button type="button" id="btnCloseAdmin2" class="wtc-button">Sluiten</button>
 		</div>
 		<div class="overlay-row">
-			<div class="text-kader" style="font-size: 15px; width:120px">Mededeling -----> :</div>
+			<div class="text-kader" style="font-size: 15px; width:120px">Mededeling ►►►►►► :</div>
 			<div>
 				<button type="button" id="btnEditNotice"  class="wtc-button" style="min-width:70px">Edit</button>
 				<button type="button" id="btnNoticeClose" class="wtc-button" style="min-width:70px">Opslaan</button>
@@ -171,8 +174,8 @@
 		</div>	
 		<div class="overlay-row" >
 			<button type="button" class="wtc-button" onclick= "window.location.href='./leden_config.html'">Leden-config</button>
-			<button type="button" class="wtc-button" onclick= "window.location.href='./signups_config.html'">Inschrijvingen-config</button>
-			<button type="button" class="wtc-button" onclick= "window.location.href='./routes/routes.html'">Fietsroutes</button>
+			<button type="button" class="wtc-button" onclick= "window.location.href='./signups_config.html'">Events-config</button>
+			<button type="button" class="wtc-button" onclick= "window.location.href='./forms_config.html'">Contacts-config</button>
 		</div>		
 		<div class="overlay-row" >
 			<button type="button" class="wtc-button" onclick= "window.location.href='./leden-dashboard.html?overlay=1'">Leden pagina</button>
@@ -182,6 +185,7 @@
 				
 		<div class="overlay-row" >
 			<button type="button" class="wtc-button"  onclick= "window.location.href='./Help.html'">Help</button>	
+			<button type="button" class="wtc-button" onclick= "window.location.href='./routes/routes.html'">Fietsroutes</button>
 		</div>
 		<!-- knop pincode wijzigen -->		
 		<div class="overlay-row" style="margin-top:3px;">

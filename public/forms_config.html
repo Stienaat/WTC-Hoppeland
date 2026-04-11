@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Leden beheer</title>
+
+<link href="/css/WTC.css" rel="stylesheet">
+
+<style>
+body {
+    font-family: Arial;
+    background:#C2D5F3;
+}
+
+.container {
+    max-width:1120px;
+    margin:30px auto;
+    background:#fff;
+    padding:18px;
+    border-radius:14px;
+}
+
+#ledenRows input {
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 4px 6px;
+    font-size: 14px;
+}
+
+#ledenRows input:focus {
+    border-bottom: 1px solid #999;
+}
+
+
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin: 4px 0 12px;
+}
+.toolbar .spacer{ flex:1; }
+</style>
+
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0;">Leden Beheer</h2>
+        <img src="images/Logo.png" width="40" height="40">
+    </div>
+
+    <div class="toolbar" style="margin-top:20px;">
+        <button type="button" id="exportBtn" class="wtc-button">Export</button>
+        <div class="spacer"></div>
+        <a href="/leden.html?overlay=1" class="wtc-button">⏪Terug</a>
+        <a href="/index.html" class="wtc-button">🏡Home</a>
+        <a href="/logout.html" class="wtc-button">Uitloggen</a>
+    </div>
+
+    <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
+        <thead>
+            <tr style="background:#e2e8f0;">
+                <th>
+					Naam 
+					<span id="sortNaam" style="cursor:pointer; font-size:12px; margin-left:4px;">▲▼</span>
+				</th>
+                <th>E-mail</th>
+                <th>Telefoon</th>
+                <th>Gemeente</th>
+                <th>Adres</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody id="ledenRows"></tbody>
+    </table>
+
+</div>
+
+<div id="app-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modal-title"></h3>
+			<div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+				<img src="images/Logo.png" id="hoplogo" alt="" width="45px" height="45px">
+			</div>
+        <p id="modal-message"></p>
+        <button class="wtc-button" onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<script src="js/modal.js"></script>
+<script type="module">
+
+let sortDirection = "asc"; // als je dit ook elders gebruikt, laat staan
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const db = createClient(
+    "https://orvjhbtoxjqhedsgnxqp.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
+);
+
+// =====================================
+//  EXCELJS VIA ESM (NIET GEBLOKKEERD)
+// =====================================
+import ExcelJS from "https://esm.sh/exceljs";
+
+// =====================================
+//  LADEN VAN LEDEN
+// =====================================
+async function loadLeden() {
+    const { data: Leden, error } = await db
+        .from("Leden")
+        .select("*")
+		.order("naam", { ascending: sortDirection === "asc" });
+
+      
+    if (error) {
+        showModal("error", "👎", "Er ging iets mis bij laden");
+        return;
+    }
+
+    const tbody = document.getElementById("ledenRows");
+    tbody.innerHTML = "";
+
+    Leden.forEach(lid => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td><input value="${lid.naam || ""}" data-field="naam"></td>
+            <td>${lid.email}</td>
+            <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
+            <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
+            <td><input value="${lid.adres || ""}" data-field="adres"></td>
+            <td>
+                <button class="wtc-button updateBtn">Update</button>
+                <button class="wtc-button wtc-delete deleteBtn">Delete</button>
+            </td>
+        `;
+
+        // UPDATE
+        tr.querySelector(".updateBtn").onclick = async () => {
+            const inputs = tr.querySelectorAll("input");
+            const updates = {};
+
+            inputs.forEach(inp => {
+                updates[inp.dataset.field] = inp.value;
+            });
+
+            const { error } = await db
+                .from("Leden")
+                .update(updates)
+                .eq("id", lid.id);
+
+            if (error) 
+				showModal("error", "👎", "fout bij update");
+            else 
+				showModal("success", "👌", "record is opgeslagen");
+        };
+
+        // DELETE
+        tr.querySelector(".deleteBtn").onclick = async () => {
+            if (!confirm("Verwijderen?")) 
+			return;
+
+            const { error } = await db
+                .from("Leden")
+                .delete()
+                .eq("id", lid.id);
+
+            if (error) 
+				showModal("error", "👎", "Er ging iets mis bij verwijderen");
+            else tr.remove();
+        };
+
+        tbody.appendChild(tr);
+    });
+}
+
+// =====================================
+//  EXCEL EXPORT
+// =====================================
+
+
+document.getElementById("exportBtn").onclick = async () => {
+    const { data: Leden, error } = await db
+        .from("Leden")
+        .select("*");
+
+    if (error) {
+        showModal("error", "👎", "Er ging iets mis bij export");
+        return;
+    }
+
+    // JS-sortering op naam, met richting
+    Leden.sort((a, b) => {
+        const an = a.naam || "";
+        const bn = b.naam || "";
+        return sortDirection === "asc"
+            ? an.localeCompare(bn)
+            : bn.localeCompare(an);
+    });
+
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("Leden");
+
+    // Kolommen + breedtes
+    ws.columns = [
+        { header: "Naam", key: "naam", width: 20 },
+        { header: "Email", key: "email", width: 20 },
+        { header: "Telefoon", key: "telefoon", width: 20 },
+        { header: "Gemeente", key: "gemeente", width: 20 },
+        { header: "Adres", key: "adres", width: 20 }
+    ];
+
+    // Header-stijl
+    ws.getRow(1).eachCell(cell => {
+        cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFEFEFEF" } // lichtgrijs
+        };
+        cell.font = { bold: true };
+        cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" }
+        };
+    });
+
+    // Data-rijen
+    Leden.forEach(lid => {
+        ws.addRow({
+            naam: lid.naam || "",
+            email: lid.email || "",
+            telefoon: lid.telefoon || "",
+            gemeente: lid.gemeente || "",
+            adres: lid.adres || ""
+        });
+    });
+
+    // Borders voor alle cellen
+    ws.eachRow(row => {
+        row.eachCell(cell => {
+            cell.border = {
+                top: { style: "thin" },
+                left: { style: "thin" },
+                bottom: { style: "thin" },
+                right: { style: "thin" }
+            };
+        });
+    });
+
+    // 🔽 Sorteer-/filterpijltjes in Excel-header
+    ws.autoFilter = {
+        from: 'A1',
+        to: 'E1'
+    };
+
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Leden.xlsx";
+    a.click();
+};
+
+
+
+loadLeden();
+
+document.getElementById("sortNaam").onclick = () => {
+    sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    loadLeden();
+};
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const table = document.querySelector("table");
+    const rows = Array.from(table.querySelectorAll("tr")).slice(1); // skip header
+    const header = table.querySelector("th:first-child");
+
+    let asc = true;
+
+    header.style.cursor = "pointer";
+    header.addEventListener("click", () => {
+        rows.sort((a, b) => {
+            const nameA = a.children[0].innerText.toLowerCase();
+            const nameB = b.children[0].innerText.toLowerCase();
+            return asc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+        });
+
+        asc = !asc;
+
+        rows.forEach(r => table.appendChild(r));
+    });
+});
+</script>
+
+</body>
+</html>
