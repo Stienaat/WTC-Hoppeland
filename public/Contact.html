@@ -106,14 +106,25 @@
   </form>
 </div>
   
-<!-- minimal submit-to-forms.json patch -->
+<div id="app-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modal-title"></h3>
+			<div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+				<img src="images/Logo.png" id="hoplogo" alt="" width="45px" height="45px">
+			</div>
+        <p id="modal-message"></p>
+        <button class="wtc-button" onclick="closeModal()">OK</button>
+    </div>
+</div>
+<script src="js/modal.js"></script>
 
 <script>
 window.addEventListener('DOMContentLoaded', function () {
-  const form = document.querySelector('.contact-wrap form') || document.querySelector('form');
+  const form = document.querySelector('#contactForm');
   if (!form) return;
 
-  function v(fd){ var names = Array.prototype.slice.call(arguments,1);
+  function v(fd){ 
+    var names = Array.prototype.slice.call(arguments,1);
     for (const n of names){
       if (fd.has(n) && String(fd.get(n)).trim()) return String(fd.get(n)).trim();
     }
@@ -125,9 +136,9 @@ window.addEventListener('DOMContentLoaded', function () {
 
     const fd = new FormData(form);
     const consent = document.getElementById('consent');
-    if (consent && !consent.checked){
-      showMsg("Lid succesvol bijgewerkt ✔️");
 
+    if (!consent.checked){
+      showModal("error", "⚠️", "Je moet toestemming geven om te verzenden.");
       return;
     }
 
@@ -143,7 +154,7 @@ window.addEventListener('DOMContentLoaded', function () {
     };
 
     if (!payload.name || !payload.message){
-		showMsg("Naam en bericht zijn verplicht. ✔️");
+      showModal("error", "⚠️", "Naam en bericht zijn verplicht.");
       return;
     }
 
@@ -162,29 +173,31 @@ window.addEventListener('DOMContentLoaded', function () {
         throw new Error(msg);
       }
 
-      // Automatische download van Forms.txt naar de pc van de gebruiker
       if (j.txt) {
         const blob = new Blob([j.txt], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'Forms.txt'; // bestandsnaam in de download
+        a.download = 'Forms.txt';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
       }
 
-      showMsg("Uw boodschap werd verzonden !. ✔️");
+      showModal("success", "👌", "Uw boodschap werd verzonden!");
       form.reset();
+
     }catch(err){
-   	  showMsg("Verzenden mislukt: ' + err.message. ✔️");
+      showModal("error", "❌", "Verzenden mislukt: " + err.message);
     }
   }
 
   form.addEventListener('submit', onSubmit);
 });
 </script>
+
+<!--
 <script>
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -208,7 +221,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   }
 });
 </script>
-
+-->
 
 <link href="./css/WTC.css" rel="stylesheet">
 <link href="./css/Contact.css" rel="stylesheet">
