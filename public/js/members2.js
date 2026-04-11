@@ -375,79 +375,73 @@ document.addEventListener('DOMContentLoaded', function () {
   /************************************************************
    * 5) PIN WIJZIGEN POPUP (APART)
    ************************************************************/
-  const btnPinChange      = document.getElementById('btnPinChange');
-  const pinChangeOverlay  = document.getElementById('pinChangeOverlay');
-  const btnChangeCode     = document.getElementById('btnChangeCode');
-  const btnClosePinChange = document.getElementById('btnClosePinChange');
-  const closePinOverlay  = document.getElementById('closePinOverlay');
-  const oldPinInput  = document.getElementById('oldPinInput');
-  const newPinInput  = document.getElementById('newPinInput');
-  const newPinInput2 = document.getElementById('newPinInput2');
-  const pinChangeErr = document.getElementById('pinChangeError');
-  
-  const pinError2 = document.getElementById('pinError2');
-  
-  function openPinChangePopup(){
-    pinChangeOverlay.classList.add('show');
-    oldPinInput && (oldPinInput.value = '');
-    newPinInput && (newPinInput.value = '');
-    newPinInput2 && (newPinInput2.value = '');
-    pinChangeErr.textContent = '';
-    oldPinInput && oldPinInput.focus();
+/************************************************************
+ * 5) PIN WIJZIGEN POPUP (APART)
+ ************************************************************/
+const btnPinChange      = document.getElementById('btnPinChange');
+const pinChangeOverlay  = document.getElementById('pinChangeOverlay');
+const btnChangeCode     = document.getElementById('btnChangeCode');
+const btnClosePinChange = document.getElementById('btnClosePinChange');
+
+const oldPinInput  = document.getElementById('oldPinInput');
+const newPinInput  = document.getElementById('newPinInput');
+const newPinInput2 = document.getElementById('newPinInput2');
+
+const pinError2 = document.getElementById('pinError2');
+
+function openPinChangePopup(){
+  if (!pinChangeOverlay) return;
+
+  pinChangeOverlay.classList.add('show');
+
+  if (oldPinInput) oldPinInput.value = '';
+  if (newPinInput) newPinInput.value = '';
+  if (newPinInput2) newPinInput2.value = '';
+
+  setStatus(pinError2, '', 'info');
+
+  oldPinInput && oldPinInput.focus();
+}
+
+function closePinChangePopup(){
+  if (!pinChangeOverlay) return;
+  pinChangeOverlay.classList.remove('show');
+}
+
+async function handlePinChange(){
+  const oldPin = oldPinInput.value.trim();
+  const newPin = newPinInput.value.trim();
+  const newPin2 = newPinInput2.value.trim();
+
+  if (!oldPin || !newPin || newPin !== newPin2){
+    setStatus(pinError2,'PIN ongeldig.','error');
+    return;
   }
 
-  function closePinChangePopup(){
-    pinChangeOverlay.classList.remove('show');
-  }
+  const fd = new FormData();
+  fd.append('actie','admin_change_pin');
+  fd.append('old_pin', oldPin);
+  fd.append('new_pin', newPin);
 
-  async function handlePinChange(){
-    const oldPin = oldPinInput.value.trim();
-    const newPin = newPinInput.value.trim();
-    const newPin2= newPinInput2.value.trim();
+  try{
+    const r = await fetch('./leden.php',{method:'POST',body:fd});
+    const j = await r.json();
 
-    if (!oldPin || !newPin || newPin !== newPin2){
-      setStatus(pinError2,'PIN ongeldig.','error');
+    if (!j.ok){
+      setStatus(pinError2,'Wijzigen mislukt.','error');
       return;
     }
 
-    const fd = new FormData();
-    fd.append('actie','admin_change_pin');
-    fd.append('old_pin', oldPin);
-    fd.append('new_pin', newPin);
+    setStatus(pinError2,'✔ PIN gewijzigd','ok');
+    setTimeout(closePinChangePopup, 800);
 
-    try{
-      const r = await fetch('./leden.php',{method:'POST',body:fd});
-      const j = await r.json();
-      if (!j.ok){
-           setStatus(pinError2,'wijzigen mislukt.','error');
-        return;
-      }
-      pinChangeErr.textContent = '✔ PIN gewijzigd';
-      setTimeout(closePinChangePopup, 800);
-    }catch{
-         setStatus(pinError2,'✔ PIN gewijzigd.','ok');
-    }
+  }catch (e){
+    console.error(e);
+    setStatus(pinError2,'Technische fout bij wijzigen.','error');
   }
-
- document.getElementById('btnCloseAdmin')
-  ?.addEventListener('click', closeAdminUI);
-
- document.getElementById('btnCloseAdmin2')
-  ?.addEventListener('click', closeAdminPan);
-
- document.getElementById('btnClosePinChange')
-  ?.addEventListener('click', closePinWijz);
-
-
-
-  btnPinChange && btnPinChange.addEventListener('click', openPinChangePopup);
- 
-  btnChangeCode && btnChangeCode.addEventListener('click', handlePinChange);
-
-if (btnPinChange && pinChangeOverlay){btnPinChange.addEventListener('click', () => {showPinOverlay();
-    });
 }
 
-function showPinOverlay(){
-    pinChangeOverlay.style.display = 'flex';
-}
+/* EVENTS */
+btnPinChange && btnPinChange.addEventListener('click', openPinChangePopup);
+btnChangeCode && btnChangeCode.addEventListener('click', handlePinChange);
+btnClosePinChange && btnClosePinChange.addEventListener('click', closePinChangePopup);
