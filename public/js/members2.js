@@ -370,6 +370,64 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 50);
     }
 });
+  
+  
+  /************************************************************
+   * 5) PIN WIJZIGEN POPUP (APART)
+   ************************************************************/
+  const btnPinChange      = document.getElementById('btnPinChange');
+  const pinChangeOverlay  = document.getElementById('pinChangeOverlay');
+  const btnChangeCode     = document.getElementById('btnChangeCode');
+  const btnClosePinChange = document.getElementById('btnClosePinChange');
+  const closePinOverlay  = document.getElementById('closePinOverlay');
+  const oldPinInput  = document.getElementById('oldPinInput');
+  const newPinInput  = document.getElementById('newPinInput');
+  const newPinInput2 = document.getElementById('newPinInput2');
+  const pinChangeErr = document.getElementById('pinChangeError');
+  
+  const pinError2 = document.getElementById('pinError2');
+  
+  function openPinChangePopup(){
+    pinChangeOverlay.classList.add('show');
+    oldPinInput && (oldPinInput.value = '');
+    newPinInput && (newPinInput.value = '');
+    newPinInput2 && (newPinInput2.value = '');
+    pinChangeErr.textContent = '';
+    oldPinInput && oldPinInput.focus();
+  }
+
+  function closePinChangePopup(){
+    pinChangeOverlay.classList.remove('show');
+  }
+
+  async function handlePinChange(){
+    const oldPin = oldPinInput.value.trim();
+    const newPin = newPinInput.value.trim();
+    const newPin2= newPinInput2.value.trim();
+
+    if (!oldPin || !newPin || newPin !== newPin2){
+      setStatus(pinError2,'PIN ongeldig.','error');
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append('actie','admin_change_pin');
+    fd.append('old_pin', oldPin);
+    fd.append('new_pin', newPin);
+
+    try{
+      const r = await fetch('./leden.php',{method:'POST',body:fd});
+      const j = await r.json();
+      if (!j.ok){
+           setStatus(pinError2,'wijzigen mislukt.','error');
+        return;
+      }
+      pinChangeErr.textContent = '✔ PIN gewijzigd';
+      setTimeout(closePinChangePopup, 800);
+    }catch{
+         setStatus(pinError2,'✔ PIN gewijzigd.','ok');
+    }
+  }
 
  document.getElementById('btnCloseAdmin')
   ?.addEventListener('click', closeAdminUI);
@@ -380,6 +438,16 @@ document.addEventListener('DOMContentLoaded', function () {
  document.getElementById('btnClosePinChange')
   ?.addEventListener('click', closePinWijz);
 
+
+
   btnPinChange && btnPinChange.addEventListener('click', openPinChangePopup);
  
-  btnChangeCode && btnC
+  btnChangeCode && btnChangeCode.addEventListener('click', handlePinChange);
+
+if (btnPinChange && pinChangeOverlay){btnPinChange.addEventListener('click', () => {showPinOverlay();
+    });
+}
+
+function showPinOverlay(){
+    pinChangeOverlay.style.display = 'flex';
+}
