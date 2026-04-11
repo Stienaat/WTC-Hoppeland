@@ -219,7 +219,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   if (actie === "registreer") {
 
     if (password !== codeRepeat) {
-      showModal("error", "Fout", "Paswoorden komen niet overeen.");
+      showModal("error", "👎", "Paswoorden komen niet overeen.");
       return;
     }
 
@@ -230,7 +230,11 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     });
 
     const data = await res.json();
-     showModal("success", "Welkom", "Je bent geregistreerd.");
+     showModal("success", "Welkom", "Je bent geregistreerd. ✔️");
+	  setTimeout(() => {
+		window.location.href = "leden-dashboard.html";
+	  }, 2000);
+	} else {
     return;
   }
 
@@ -252,7 +256,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 	  showModal("success", "Welkom", "Je bent ingelogd. ✔️");
 	  setTimeout(() => {
 		window.location.href = "leden-dashboard.html";
-	  }, 1000);
+	  }, 2000);
 	} else {
 	  showModal("error","👎","Login mislukt. ❌");
 	}
