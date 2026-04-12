@@ -79,13 +79,16 @@
 <div id="app-modal" class="modal hidden">
     <div class="modal-content">
         <h3 id="modal-title"></h3>
-			<div id="hoplog" style="width:45px;height:45px;z-index:2;">
-				<img src="images/Logo.png" id="hoplogo" alt="" width="45px" height="45px">
-			</div>
 
+        <div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+            <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        </div>
 
         <p id="modal-message"></p>
-        <button class="wtc-button" onclick="closeModal()">OK</button>
+
+        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+            <!-- Knoppen worden dynamisch ingevuld -->
+        </div>
     </div>
 </div>
 
