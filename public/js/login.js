@@ -151,6 +151,43 @@ btnChangeCode?.addEventListener("click", handlePinChange);
 btnClosePinChange?.addEventListener("click", closePinChangePopup);
 
 /************************************************************
+ * 4) LOGIN / REGISTRATIE UI
+ ************************************************************/
+(function initLoginRegister() {
+  const regOnlyFields = document.querySelectorAll(".reg-only");
+  const loginBtn = document.getElementById("Button1");
+  const regBtn   = document.getElementById("Button2");
+  const goReg    = document.getElementById("GoRegister");
+  const goLogin  = document.getElementById("GoLogin");
+
+  function setMode(mode) {
+    const isLogin = mode === "login";
+
+    regOnlyFields.forEach(el => el.style.display = isLogin ? "none" : "block");
+    loginBtn.style.display = isLogin ? "inline-block" : "none";
+    regBtn.style.display   = isLogin ? "none" : "inline-block";
+    goReg.style.display    = isLogin ? "inline" : "none";
+    goLogin.style.display  = isLogin ? "none" : "inline";
+  }
+
+  setMode("login");
+
+  goReg?.addEventListener("click", e => {
+    e.preventDefault();
+    setMode("registreer");
+  });
+
+  goLogin?.addEventListener("click", e => {
+    e.preventDefault();
+    setMode("login");
+  });
+
+  if (typeof loadNotice === "function") {
+    loadNotice();
+  }
+})();
+
+/************************************************************
  * 5) MEMBER LOGIN & REGISTRATIE
  ************************************************************/
 /************************************************************/
@@ -192,8 +229,6 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 	  setTimeout(() => {
 		window.location.href = "leden-dashboard.html";
 	  }, 2000);
-	} else {
-    return;
   }
 
   /***********************
