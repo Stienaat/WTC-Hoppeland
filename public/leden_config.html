@@ -89,8 +89,6 @@ body {
 			<div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
 				<img src="images/Logo.png" id="hoplogo" alt="" width="45px" height="45px">
 			</div>
-
-
         <p id="modal-message"></p>
         <button class="wtc-button" onclick="closeModal()">OK</button>
     </div>
@@ -168,7 +166,15 @@ async function loadLeden() {
 
         // DELETE
         tr.querySelector(".deleteBtn").onclick = async () => {
-            if (!confirm("Verwijderen?")) return;
+           showModal("confirm", "Bevestigen", "Weet je het zeker?", function(result){
+			if (result) {
+				console.log("Gebruiker koos JA");
+			} else {
+				console.log("Gebruiker koos NEE");
+			}
+		});
+
+			return;
 
             const { error } = await db
                 .from("Leden")
