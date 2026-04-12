@@ -225,9 +225,11 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     });
 
     const data = await res.json();
-	 window.location.href = "leden.html";
-     showModal("success", "Welkom", "Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
 	
+     showModal("success", "Welkom", "Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
+	 setTimeout(() => {
+		window.location.href = "leden.html";
+	  }, 2000);
 
 
   }
