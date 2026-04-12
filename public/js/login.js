@@ -190,7 +190,7 @@ btnClosePinChange?.addEventListener("click", closePinChangePopup);
 /************************************************************
  * 5) MEMBER LOGIN & REGISTRATIE
  ************************************************************/
-/************************************************************/
+
 document.getElementById("loginForm")?.addEventListener("submit", async e => {
   e.preventDefault();
 
@@ -225,10 +225,8 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     });
 
     const data = await res.json();
-     showModal("success", "Welkom", "Je bent geregistreerd. ✔️");
-	  setTimeout(() => {
-		window.location.href = "leden-dashboard.html";
-	  }, 2000);
+     showModal("success", "Welkom", "Je bent geregistreerd. ✔️","Je kunt nu inloggen !");
+
   }
 
   /***********************
