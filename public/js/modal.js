@@ -10,6 +10,14 @@ function showModal(type, title, message, onConfirm) {
     // Reset knoppen
     btnBox.innerHTML = "";
 
+    // ❗ Eerst ALLE border‑classes verwijderen
+    modal.classList.remove("modal-success", "modal-error", "modal-confirm");
+
+    // ❗ Dan border‑class toevoegen op basis van type
+    if (type === "success") modal.classList.add("modal-success");
+    if (type === "error")   modal.classList.add("modal-error");
+    if (type === "confirm") modal.classList.add("modal-confirm");
+
     if (type === "success" || type === "error") {
         const ok = document.createElement("button");
         ok.className = "wtc-button";
@@ -41,6 +49,7 @@ function showModal(type, title, message, onConfirm) {
 
     modal.classList.remove("hidden");
 }
+
 
 function closeModal() {
     document.getElementById("app-modal").classList.add("hidden");
