@@ -209,9 +209,12 @@ document.getElementById("exportBtn").onclick = async () => {
         .select("*");
 
     if (error) {
-        showModal("error", "👎", "Er ging iets mis bij export");
+        showModal("error", "👎", "Er ging iets mis bij export.");
         return;
-    }
+    }else {
+		
+		showModal("success", "👌", "Bestand is aangemaakt.");
+	}
 
     // JS-sortering op naam, met richting
     Leden.sort((a, b) => {
