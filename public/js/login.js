@@ -146,7 +146,7 @@ async function handlePinChange() {
   }
 }
 
-btnPinChange?.addEventListener("click", openPinChangePopup);
+btnPinChange?.addEventListener("click", pinChangeOverlay);
 btnChangeCode?.addEventListener("click", handlePinChange);
 btnClosePinChange?.addEventListener("click", closePinChangePopup);
 
@@ -229,7 +229,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
      showModal("success", "Welkom", "Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
 	 setTimeout(() => {
 		window.location.href = "leden.html";
-	  }, 2000);
+	  }, 5000);
 
 
   }
@@ -252,7 +252,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 	  showModal("success", "Welkom", "Je bent ingelogd. ✔️");
 	  setTimeout(() => {
 		window.location.href = "leden-dashboard.html";
-	  }, 2000);
+	  }, 5000);
 	} else {
 	  showModal("error","👎","Login mislukt. ❌");
 	}
