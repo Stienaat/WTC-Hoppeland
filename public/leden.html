@@ -323,7 +323,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const code = document.getElementById('Editbox6').value.trim();
   const status = document.getElementById('loginStatus');
 
-  setStatus(status, 'Bezig met inloggen…', 'info');
+<!--  setStatus(status, 'Bezig met inloggen…', 'info'); -->
 
   try {
     const { data, error } = await supabase
