@@ -366,7 +366,7 @@ function fmt(text){
 
   function loadNotice(){
     if (!box) return;
-    showModal("error", "❌", "tekst laden mislukt: " + err.message);
+ 
  fetch('/notice.md')
   .then(r => r.text())
   .then(md => {
