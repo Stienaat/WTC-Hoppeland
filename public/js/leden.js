@@ -68,8 +68,8 @@ function fmt(text){
   let html = '';
   let inList = false;
 
- const R = {
-  lg:   /
+  const R = {
+    lg:   /
 
 \[lg\]
 
@@ -78,7 +78,7 @@ function fmt(text){
 \[\/lg\]
 
 /g,
-  sm:   /
+    sm:   /
 
 \[sm\]
 
@@ -87,10 +87,10 @@ function fmt(text){
 \[\/sm\]
 
 /g,
-  bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
-  em:   /\*\s*([\s\S]+?)\s*\*/g,
-  u:    /__\s*([\s\S]+?)\s*__/g
-};
+    bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
+    em:   /\*\s*([\s\S]+?)\s*\*/g,
+    u:    /__\s*([\s\S]+?)\s*__/g
+  };
 
   const applyFmt = (s) => {
     return s
@@ -102,7 +102,7 @@ function fmt(text){
   };
 
   const pushLine = (raw) => {
-    let body = raw;               // NIET escapen vóór formatting
+    let body = raw;
     let cls = 'n-line';
 
     if (body.startsWith('##')) {
@@ -113,9 +113,8 @@ function fmt(text){
       body = body.replace(/^#\s*/, '');
     }
 
-    body = applyFmt(body);        // eerst markdown → HTML
-    body = esc(body).replace(/&lt;(\/?(?:strong|em|u|span)[^&]*)&gt;/g, '<$1>');  
-    // esc() terugdraaien voor toegestane tags
+    body = applyFmt(body);
+    body = esc(body).replace(/&lt;(\/?(?:strong|em|u|span)[^&]*)&gt;/g, '<$1>');
 
     html += `<div class="${cls}">${body || '&nbsp;'}</div>`;
   };
@@ -130,7 +129,6 @@ function fmt(text){
 
       let item = applyFmt(m[1]);
       item = esc(item).replace(/&lt;(\/?(?:strong|em|u|span)[^&]*)&gt;/g, '<$1>');
-
       html += `<li>${item || '&nbsp;'}</li>`;
       continue;
     }
