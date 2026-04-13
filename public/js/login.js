@@ -373,9 +373,7 @@ function fmt(text){
     document.getElementById('noticebox').innerHTML = marked.parse(md);
   });
 
-      })
-      .catch(()=>setStatus('Fout bij laden.'));
-  }
+
 
   function startEditNotice(){
     if (!box) return;
