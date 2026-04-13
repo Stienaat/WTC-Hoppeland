@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs").promises;
+const fsSync = require("fs");   // ← deze toevoegen
+
 const multer = require("multer");
 const upload = multer();
 
@@ -854,7 +856,9 @@ app.post("/cancel", upload.none(), requireAuth, async (req, res) => {
 
 
 function readJson(pathname, fallback) {
-  if (!fs.existsSync(pathname)) return fallback;
+  if (!fsSync.existsSync(pathname)) return fallback;
+	const raw = fsSync.readFileSync(pathname, "utf8");
+
   try {
     const raw = fs.readFileSync(pathname, "utf8");
     const j = JSON.parse(raw);
