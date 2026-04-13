@@ -10,28 +10,27 @@ import ledenRoutes from "./routes/leden.js";
 import signups from "./routes/signups.js";
 import events from "./routes/events.js";
 
+const path = require("path");
+const fs = require("fs").promises;
+const upload = require("multer")();
 
-const upload = multer();
+const NOTICE_PATH = path.join(__dirname, "public", "notice.md");
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 
 app.use("/api/events", events);
+app.use("/api/signups", signups);
+app.use("/api/leden", ledenRoutes);
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "change-this-session-secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false
-    }
+app.use(session({secret: process.env.SESSION_SECRET || "change-this-session-secret",
+    resave: false, saveUninitialized: false, cookie: {
+      httpOnly: true, sameSite: "lax", secure: false}
   })
 );
-app.use("/api/signups", signups);
+
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -182,35 +181,18 @@ app.get("/kalender", requireKalenderPage, (req, res) => {
 /* =====================================
    NOTICE
    ===================================== */
-app.get("/notice", async (req, res) => {
-  try {
-    const filePath = path.join(__dirname, "data", "notice.md");
-    const text = await fs.readFile(filePath, "utf8");
 
-    res.json({
-      ok: true,
-      text
-    });
-  } catch (err) {
-    res.json({
-      ok: false,
-      error: "Kon mededelingen niet laden."
-    });
-  }
-});
-
-
+// BEWAREN
 app.post("/api/notice", upload.none(), async (req, res) => {
   try {
     const { text = "" } = req.body;
-    const filePath = path.join(__dirname, "public", "notice.md");
-    await fs.writeFile(filePath, text, "utf8");
+    await fs.writeFile(NOTICE_PATH, text, "utf8");
     res.json({ ok: true });
-  } catch {
-    res.json({ ok: false });
+  } catch (err) {
+    console.error("Notice save error:", err);
+    res.json({ ok: false, error: "Kon mededelingen niet bewaren." });
   }
 });
-
 
 /* =====================================
    AUTH
@@ -893,8 +875,6 @@ function readJson(pathname, fallback) {
     return fallback;
   }
 }
-
-app.use("/api/leden", ledenRoutes);
 
 /* =====================================
    SERVER START
