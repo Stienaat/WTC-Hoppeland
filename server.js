@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-const multer = require("multer");
+
 const upload = multer();
 
 // Fix voor __dirname in ESM
