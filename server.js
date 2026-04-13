@@ -9,9 +9,7 @@ const NOTICE_PATH = path.join(__dirname, "public", "notice.md");
 
 const app = express();
 
-app.use("/api/events", events);
-app.use("/api/signups", signups);
-app.use("/api/leden", ledenRoutes);
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
