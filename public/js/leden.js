@@ -137,22 +137,19 @@ function render() {
 }
 
 function loadNotice() {
-  if (!box) return;
-
-  fetch("notice.md")
-    .then(r => {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.text();
-    })
-    .then(md => {
-      setRaw(md);
+  fetch("/api/notice")
+    .then(r => r.json())
+    .then(j => {
+      if (!j.ok) throw new Error(j.error);
+      setRaw(j.text);
       render();
     })
-  .catch(err => {
+    .catch(err => {
       console.error("Notice load error:", err);
       box.innerHTML = "<em>Kon mededelingen niet laden.</em>";
     });
 }
+
 function startEditNotice() {
   if (!box) return;
  box.innerHTML = getRaw().replace(/\n/g, "<br>");
@@ -165,28 +162,25 @@ async function saveNotice() {
   if (!box) return;
   if (box.contentEditable !== "true") return;
 
- const raw = box.innerHTML
-  .replace(/<br\s*\/?>/gi, "\n")
-  .replace(/&nbsp;/g, " ");
+  const raw = box.innerHTML
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/&nbsp;/g, " ");
 
   setRaw(raw);
   box.contentEditable = "false";
   render();
 
   const fd = new FormData();
-  fd.append('text', raw);
+  fd.append("text", raw);
 
-  try {
-    const res = await fetch("/api/notice", {
-      method: "POST",
-      body: fd
-    });
-    const data = await res.json();
-    if (!data.ok) {
-      console.error("Notice save failed:", data.error);
-    }
-  } catch (err) {
-    console.error("Notice save error:", err);
+  const res = await fetch("/api/notice", {
+    method: "POST",
+    body: fd
+  });
+
+  const j = await res.json();
+  if (!j.ok) {
+    console.error("Notice save failed:", j.error);
   }
 }
 
