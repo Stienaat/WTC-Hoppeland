@@ -45,8 +45,7 @@ function setStatus(el, message = '', type = 'info'){
 /************************************************************
    * 2) NOTICE
 ************************************************************/
-  const box    = document.getElementById('noticeBox');
- 
+  const box    = document.getElementById('noticeBox'); 
   const btnEditNotice  = document.getElementById('btnEditNotice');
   const btnNoticeClose = document.getElementById('btnNoticeClose');
   const btnMedSave = document.getElementById('btnMedSave');
@@ -58,6 +57,7 @@ function setStatus(el, message = '', type = 'info'){
   function getRaw(){
     return box ? (box.dataset.raw || '') : '';
   }
+
 function fmt(text){
   const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
@@ -69,16 +69,14 @@ function fmt(text){
   let html = '';
   let inList = false;
 
- const R = {
-    lg:   new RegExp("\\[lg\\]\\s*([\\s\\S]*?)\\s*\\[\\/lg\\]", "g"),
-	
-	sm:   new RegExp("\\[sm\\]\\s*([\\s\\S]*?)\\s*\\[\\/sm\\]", "g"),
-		
-	bold: new RegExp("\\*\\*\\s*([\\s\\S]+?)\\s*\\*\\*", "g"),
-	em:   new RegExp("\\*\\s*([\\s\\S]+?)\\s*\\*", "g"),   
-	u:    new RegExp("__\\s*([\\s\\S]+?)\\s*__", "g")
-	
-	};
+const R = {
+  lg:   /\[lg\]\s*([\s\S]*?)\s*\[\/lg\]/g,
+  sm:   /\[sm\]\s*([\s\S]*?)\s*\[\/sm\]/g,
+  bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
+  em:   /\*\s*([\s\S]+?)\s*\*/g,
+  u:    /__\s*([\s\S]+?)\s*__/g
+};
+
 	
  const pushLine = (raw) => {let body = esc(raw);
    
@@ -132,29 +130,32 @@ function fmt(text){
   return html;
 }
 
-
-
-
-
   function render(){
     if (!box) return;
     box.innerHTML = fmt(getRaw());
   }
 
-  function loadNotice(){
-    if (!box) return;
-    setStatus(status, 'Tekst laden…', 'info');
-    fetch(API_NOTICE + '?action=getNotice', { cache:'no-store' })
-      .then(r => r.json())
-      .then(d => {
-        if (d.ok){
-          setRaw(d.text || '');
-          render();
-          setStatus('');
-        }
-      })
-      .catch(()=>setStatus('Fout bij laden.'));
-  }
+function loadNotice(){
+  if (!box) return;
+
+  const status = document.getElementById('loginStatus');
+  setStatus(status, 'Tekst laden…', 'info');
+
+fetch(API_NOTICE)
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  })
+  .then(t => {
+    setRaw(t);
+    render();
+    setStatus(status, '', 'info');
+  })
+  .catch(e => {
+    console.error(e);
+    setStatus(status, 'Fout bij laden.', 'error');
+    });
+}
 
   function startEditNotice(){
     if (!box) return;
@@ -196,19 +197,15 @@ async function saveNotice(){
     setStatus(btnMedSave, '✔ Opgeslagen', 'ok');
     box.setAttribute('contenteditable','false');
 	
-	
-
   } catch (e){
     console.error(e);
     setStatus(adminStatus, 'Technische fout bij bewaren.', 'error');
   }
 }
 
-
   btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
   btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
-	
-	
+		
 /************************************************************
  * 3) ADMIN CONFIG (naam + IBAN + BIC + Mededeling)
  ************************************************************/
