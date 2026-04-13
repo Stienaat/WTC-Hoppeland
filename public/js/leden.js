@@ -48,7 +48,7 @@ function setStatus(el, message = '', type = 'info'){
  
   const btnEditNotice  = document.getElementById('btnEditNotice');
   const btnNoticeClose = document.getElementById('btnNoticeClose');
-  const btnMedSave = document.getElementById('btnMedSave');
+/*  const btnMedSave = document.getElementById('btnMedSave');     */
 
   
  function setRaw(text){
@@ -148,69 +148,60 @@ function fmt(text){
   return html;
 }
 
-function render(){
-  const html = marked.parse(raw);   // raw = markdown tekst
-  noticeBox.innerHTML = html;
+function render() {
+  if (!box) return;
+  box.innerHTML = fmt(getRaw());
 }
 
-function loadNotice(){
-  const box = document.getElementById('noticeBox');
+function loadNotice() {
   if (!box) return;
 
-  fetch('notice.md')
-    .then(r => r.text())
-    .then(md => {
-      box.innerHTML = marked.parse(md);
+  fetch("notice.md")
+    .then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
     })
-    .catch(err => {
-      box.innerHTML = "<em>Kon notice.md niet laden.</em>";
-      console.error(err);
+    .then(md => {
+      setRaw(md);
+      render();
+    })
+  .catch(err => {
+      console.error("Notice load error:", err);
+      box.innerHTML = "<em>Kon mededelingen niet laden.</em>";
     });
 }
-
-  function startEditNotice(){
-    if (!box) return;
-    box.innerText = getRaw();
-    box.contentEditable = 'true';
-    box.focus();
-  }
-
-async function saveNotice(){
+function startEditNotice() {
   if (!box) return;
- 
-  if (noticeBox.contentEditable !== "true") return;
+  box.textContent = getRaw();
+  box.contentEditable = "true";
+  box.focus();
+}
 
-  const adminStatus = document.getElementById('admin-status');
+async function saveNotice() {
+  if (!box) return;
+  if (box.contentEditable !== "true") return;
 
-  const raw = (box.innerText || '').replace(/\r\n?/g, '\n');
+  const raw = (box.innerText || "").replace(/\r\n?/g, "\n");
   setRaw(raw);
-  box.setAttribute('contenteditable','false');
-  
+  box.contentEditable = "false";
   render();
-  
   const fdNotice = new FormData();
   fdNotice.append('action', 'setNotice');
   fdNotice.append('text', raw);
 
   setStatus(btnMedSave, 'Bewaren…', 'info');
 
-  try {
-    const j = await ajax(API_NOTICE, {
-      method: 'POST',
-      body: fdNotice
+   try {
+    const res = await fetch("/api/notice", {
+      method: "POST",
+      body: fd
     });
-
-    if (!j.ok){
-      setStatus(btnMedSave, 'Kon tekst niet bewaren.', 'error');
-      return;
+    const data = await res.json();
+    if (!data.ok) {
+      console.error("Notice save failed:", data.error);
     }
-
-    setStatus(btnMedSave, '✔ Opgeslagen', 'ok');
-    box.setAttribute('contenteditable','false');
-	
-  } catch (e){
-    console.error(e);
-    setStatus(adminStatus, 'Technische fout bij bewaren.', 'error');
+  } catch (err) {
+    console.error("Notice save error:", err);
   }
 }
 
