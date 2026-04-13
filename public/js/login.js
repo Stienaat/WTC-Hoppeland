@@ -146,7 +146,12 @@ async function handlePinChange() {
   }
 }
 
-btnPinChange?.addEventListener("click", pinChangeOverlay);
+ document.getElementById('btnCloseAdmin2');
+ btnCloseAdmin2?.addEventListener('click', closeAdminPan);
+ 
+
+
+btnPinChange?.addEventListener("click", openPinChangePopup);
 btnChangeCode?.addEventListener("click", handlePinChange);
 btnClosePinChange?.addEventListener("click", closePinChangePopup);
 
