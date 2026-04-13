@@ -5,7 +5,7 @@ Dit is Uw pagina, 
 *met nieuws allerhande. *
  
  
-__van gisteren van vandaag van morgen.   __-
+__van gisteren    __-
  
 
 Komende zaterdag duikt Wout van Aert in Antwerpen het veld in. De voorbije dagen bereidde hij zich voor tijdens een stage in Spanje, al toont hij in zijn wekelijkse terugblik op Instagram dat je voor het goede weer niet bepaald in de regio Calpe-Valencia moest zijn.
