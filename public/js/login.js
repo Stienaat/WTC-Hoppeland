@@ -272,8 +272,8 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   /************************************************************
    * 6) NOTICE
    ************************************************************/
-  const box    = document.getElementById('noticeBox');
- 
+
+  const box    = document.getElementById('noticeBox'); 
   const btnEditNotice  = document.getElementById('btnEditNotice');
   const btnNoticeClose = document.getElementById('btnNoticeClose');
   const btnMedSave = document.getElementById('btnMedSave');
@@ -285,6 +285,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   function getRaw(){
     return box ? (box.dataset.raw || '') : '';
   }
+
 function fmt(text){
   const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
@@ -296,16 +297,14 @@ function fmt(text){
   let html = '';
   let inList = false;
 
- const R = {
-    lg:   new RegExp("\\[lg\\]\\s*([\\s\\S]*?)\\s*\\[\\/lg\\]", "g"),
-	
-	sm:   new RegExp("\\[sm\\]\\s*([\\s\\S]*?)\\s*\\[\\/sm\\]", "g"),
-		
-	bold: new RegExp("\\*\\*\\s*([\\s\\S]+?)\\s*\\*\\*", "g"),
-	em:   new RegExp("\\*\\s*([\\s\\S]+?)\\s*\\*", "g"),   
-	u:    new RegExp("__\\s*([\\s\\S]+?)\\s*__", "g")
-	
-	};
+const R = {
+  lg:   /\[lg\]\s*([\s\S]*?)\s*\[\/lg\]/g,
+  sm:   /\[sm\]\s*([\s\S]*?)\s*\[\/sm\]/g,
+  bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
+  em:   /\*\s*([\s\S]+?)\s*\*/g,
+  u:    /__\s*([\s\S]+?)\s*__/g
+};
+
 	
  const pushLine = (raw) => {let body = esc(raw);
    
@@ -364,14 +363,25 @@ function fmt(text){
     box.innerHTML = fmt(getRaw());
   }
 
- function loadNotice(){
-  const box = document.getElementById('noticeBox');
+function loadNotice(){
   if (!box) return;
 
-  fetch('data/notice.md')
-    .then(r => r.text())
-    .then(md => {
-      box.innerHTML = marked.parse(md);
+  const status = document.getElementById('loginStatus');
+  setStatus(status, 'Tekst laden…', 'info');
+
+fetch(API_NOTICE)
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  })
+  .then(t => {
+    setRaw(t);
+    render();
+    setStatus(status, '', 'info');
+  })
+  .catch(e => {
+    console.error(e);
+    setStatus(status, 'Fout bij laden.', 'error');
     });
 }
 
