@@ -94,7 +94,7 @@ adminLogo?.addEventListener("dblclick", e => {
 /************************************************************
  * 3) PIN WIJZIGEN
  ************************************************************/
-const pinChangeOverlay      = document.getElementById("pinChangeOverlay");
+const btnPinChange      = document.getElementById("btnPinChange");
 const pinChangeOverlay  = document.getElementById("pinChangeOverlay");
 const btnChangeCode     = document.getElementById("btnChangeCode");
 const btnClosePinChange = document.getElementById("btnClosePinChange");
@@ -151,9 +151,7 @@ async function handlePinChange() {
   }
 }
 
-
-
-pinChangeOverlay?.addEventListener("click", openPinChangePopup);
+btnPinChange?.addEventListener("click", openPinChangePopup);
 btnChangeCode?.addEventListener("click", handlePinChange);
 btnClosePinChange?.addEventListener("click", closePinChangePopup);
 
@@ -268,3 +266,173 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 });
 
 });
+
+  /************************************************************
+   * 6) NOTICE
+   ************************************************************/
+
+  const box    = document.getElementById('noticeBox'); 
+  const btnEditNotice  = document.getElementById('btnEditNotice');
+  const btnNoticeClose = document.getElementById('btnNoticeClose');
+  const btnMedSave = document.getElementById('btnMedSave');
+
+  
+ function setRaw(text){
+    if (box) box.dataset.raw = String(text || '');
+  }
+  function getRaw(){
+    return box ? (box.dataset.raw || '') : '';
+  }
+
+function fmt(text){
+  const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+  const lines = String(text||'')
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .map(l => l.trim());
+
+  let html = '';
+  let inList = false;
+
+const R = {
+  lg:   /\[lg\]\s*([\s\S]*?)\s*\[\/lg\]/g,
+  sm:   /\[sm\]\s*([\s\S]*?)\s*\[\/sm\]/g,
+  bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
+  em:   /\*\s*([\s\S]+?)\s*\*/g,
+  u:    /__\s*([\s\S]+?)\s*__/g
+};
+
+	
+ const pushLine = (raw) => {let body = esc(raw);
+   
+   let cls = 'n-line';
+
+    if (body.startsWith('##')) {
+      cls = 'n-h2';
+      body = body.replace(/^##\s*/, '');
+    } else if (body.startsWith('#')) {
+      cls = 'n-h1';
+      body = body.replace(/^#\s*/, '');
+    }
+
+    body = body.replace(R.lg, '<span class="n-lg">$1</span>');
+    body = body.replace(R.sm, '<span class="n-sm">$1</span>');
+    body = body.replace(R.bold, '<strong>$1</strong>');
+    body = body.replace(R.em, '<em>$1</em>');
+    body = body.replace(R.u, '<u>$1</u>');
+
+    html += `<div class="${cls}">${body || '&nbsp;'}</div>`;
+  };
+
+  for (let line of lines) {
+
+    const m = /^\-\s*(.*)$/.exec(line);
+    if (m) {
+      if (!inList) {
+        html += '<ul class="n-ul">';
+        inList = true;
+      }
+
+      let item = esc(m[1]);
+      item = item.replace(R.bold, '<strong>$1</strong>');
+      item = item.replace(R.em, '<em>$1</em>');
+      item = item.replace(R.u, '<u>$1</u>');
+
+      html += `<li>${item || '&nbsp;'}</li>`;
+      continue;
+    }
+
+    if (inList) {
+      html += '</ul>';
+      inList = false;
+    }
+
+    pushLine(line);
+  }
+
+  if (inList) html += '</ul>';
+
+  return html;
+}
+
+  function render(){
+    if (!box) return;
+    box.innerHTML = fmt(getRaw());
+  }
+
+function loadNotice(){
+  if (!box) return;
+
+  const status = document.getElementById('loginStatus');
+  setStatus(status, 'Tekst laden…', 'info');
+
+fetch(API_NOTICE)
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.text();
+  })
+  .then(t => {
+    setRaw(t);
+    render();
+    setStatus(status, '', 'info');
+  })
+  .catch(e => {
+    console.error(e);
+    setStatus(status, 'Fout bij laden.', 'error');
+    });
+}
+
+
+  function startEditNotice(){
+    if (!box) return;
+    box.innerText = getRaw();
+    box.contentEditable = 'true';
+    box.focus();
+  }
+
+async function saveNotice(){
+  if (!box) return;
+ 
+  if (noticeBox.contentEditable !== "true") return;
+
+  const adminStatus = document.getElementById('admin-status');
+
+  const raw = (box.innerText || '').replace(/\r\n?/g, '\n');
+  setRaw(raw);
+  box.setAttribute('contenteditable','false');
+  
+  render();
+  
+  const fdNotice = new FormData();
+  fdNotice.append('action', 'setNotice');
+  fdNotice.append('text', raw);
+
+  setStatus(btnMedSave, 'Bewaren…', 'info');
+
+  try {
+    const j = await ajax(API_NOTICE, {
+      method: 'POST',
+      body: fdNotice
+    });
+
+    if (!j.ok){
+      setStatus(btnMedSave, 'Kon tekst niet bewaren.', 'error');
+      return;
+    }
+
+    setStatus(btnMedSave, '✔ Opgeslagen', 'ok');
+    box.setAttribute('contenteditable','false');
+	
+	
+
+  } catch (e){
+    console.error(e);
+    setStatus(adminStatus, 'Technische fout bij bewaren.', 'error');
+  }
+}
+
+
+  btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
+  btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
+	
