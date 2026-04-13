@@ -1,6 +1,7 @@
-ok, {
+{
   "name": "intercom-mini",
   "version": "1.0.0",
+  "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -15,7 +16,4 @@ ok, {
     "multer": "^2.1.1",
     "socket.io": "^4.7.0"
   }
-}
-{
-  "type": "module"
 }
