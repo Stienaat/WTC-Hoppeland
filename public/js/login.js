@@ -427,3 +427,4 @@ async function saveNotice(){
   btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
   btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
 	
+  };
