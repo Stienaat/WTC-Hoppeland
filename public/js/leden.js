@@ -68,8 +68,8 @@ function fmt(text){
   let html = '';
   let inList = false;
 
-  const R = {
-    lg:   /
+ const R = {
+  lg:   /
 
 \[lg\]
 
@@ -78,7 +78,7 @@ function fmt(text){
 \[\/lg\]
 
 /g,
-    sm:   /
+  sm:   /
 
 \[sm\]
 
@@ -87,10 +87,10 @@ function fmt(text){
 \[\/sm\]
 
 /g,
-    bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
-    em:   /\*\s*([\s\S]+?)\s*\*/g,
-    u:    /__\s*([\s\S]+?)\s*__/g
-  };
+  bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
+  em:   /\*\s*([\s\S]+?)\s*\*/g,
+  u:    /__\s*([\s\S]+?)\s*__/g
+};
 
   const applyFmt = (s) => {
     return s
@@ -185,11 +185,15 @@ async function saveNotice() {
   setRaw(raw);
   box.contentEditable = "false";
   render();
-  const fdNotice = new FormData();
-  fdNotice.append('action', 'setNotice');
-  fdNotice.append('text', raw);
+	const fd = new FormData();
+	fd.append('text', raw);
 
-  setStatus(btnMedSave, 'Bewaren…', 'info');
+	try {
+	  const res = await fetch("/api/notice", {
+		method: "POST",
+		body: fd
+	  });
+
 
    try {
     const res = await fetch("/api/notice", {
