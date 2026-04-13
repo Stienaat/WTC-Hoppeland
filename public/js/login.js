@@ -267,7 +267,6 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   }
 });
 
-
 });
 
   /************************************************************
@@ -368,14 +367,12 @@ function fmt(text){
   function loadNotice(){
     if (!box) return;
     setStatus(status, 'Tekst laden…', 'info');
-    fetch(API_NOTICE + '?action=getNotice', { cache:'no-store' })
-      .then(r => r.json())
-      .then(d => {
-        if (d.ok){
-          setRaw(d.text || '');
-          render();
-          setStatus('');
-        }
+ fetch('/notice.md')
+  .then(r => r.text())
+  .then(md => {
+    document.getElementById('noticebox').innerHTML = marked.parse(md);
+  });
+
       })
       .catch(()=>setStatus('Fout bij laden.'));
   }
