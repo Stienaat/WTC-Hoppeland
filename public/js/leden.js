@@ -152,24 +152,37 @@ function loadNotice() {
 
 function startEditNotice() {
   if (!box) return;
- box.innerHTML = getRaw().replace(/\n/g, "<br>");
+
+  box.innerHTML = getRaw()
+    .replace(/\n/g, "<br>");
 
   box.contentEditable = "true";
   box.focus();
 }
 
+
 async function saveNotice() {
   if (!box) return;
   if (box.contentEditable !== "true") return;
 
+  // HTML → RAW TEXT
   const raw = box.innerHTML
+    .replace(/<div>/gi, "\n")
+    .replace(/<\/div>/gi, "")
     .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/&nbsp;/g, " ");
+    .replace(/&nbsp;/g, " ")
+    .trim();
 
+  // Bewaar raw tekst
   setRaw(raw);
+
+  // Stop edit mode
   box.contentEditable = "false";
+
+  // Render opnieuw vanuit RAW
   render();
 
+  // Verstuur RAW naar Supabase
   const fd = new FormData();
   fd.append("text", raw);
 
@@ -183,6 +196,7 @@ async function saveNotice() {
     console.error("Notice save failed:", j.error);
   }
 }
+
 
 
   btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
