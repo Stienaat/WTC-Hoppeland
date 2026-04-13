@@ -364,15 +364,16 @@ function fmt(text){
     box.innerHTML = fmt(getRaw());
   }
 
-  function loadNotice(){
-    if (!box) return;
- 
- fetch('/notice.md')
-  .then(r => r.text())
-  .then(md => {
-    document.getElementById('noticebox').innerHTML = marked.parse(md);
-  });
+ function loadNotice(){
+  const box = document.getElementById('noticeBox');
+  if (!box) return;
 
+  fetch('/notice.md')
+    .then(r => r.text())
+    .then(md => {
+      box.innerHTML = marked.parse(md);
+    });
+}
 
 
   function startEditNotice(){
