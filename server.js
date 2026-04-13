@@ -185,12 +185,20 @@ app.get("/kalender", requireKalenderPage, (req, res) => {
 app.get("/notice", async (req, res) => {
   try {
     const filePath = path.join(__dirname, "data", "notice.md");
-    const data = await fs.readFile(filePath, "utf8");
-    res.send(data);
-  } catch {
-    res.status(500).send("Kon mededelingen niet laden.");
+    const text = await fs.readFile(filePath, "utf8");
+
+    res.json({
+      ok: true,
+      text
+    });
+  } catch (err) {
+    res.json({
+      ok: false,
+      error: "Kon mededelingen niet laden."
+    });
   }
 });
+
 
 app.post("/notice", upload.none(), async (req, res) => {
   try {
