@@ -1,18 +1,9 @@
-import express from "express";
-import path from "path";
-import fs from "fs/promises";
-import { fileURLToPath } from "url";
-import multer from "multer";
-import session from "express-session";
-import { createClient } from "@supabase/supabase-js";
-import bcrypt from "bcryptjs";
-import ledenRoutes from "./routes/leden.js";
-import signups from "./routes/signups.js";
-import events from "./routes/events.js";
-
+const express = require("express");
 const path = require("path");
 const fs = require("fs").promises;
-const upload = require("multer")();
+const multer = require("multer");
+const upload = multer();
+
 
 const NOTICE_PATH = path.join(__dirname, "public", "notice.md");
 const __filename = fileURLToPath(import.meta.url);
