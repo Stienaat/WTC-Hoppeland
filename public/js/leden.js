@@ -42,10 +42,13 @@ async function ajax(url, options = {}) {
   
   const API_NOTICE = '/notice';
 
+ // const ROUTES_API = /WTC/routes/upload_do.php';
+  
+  
  
-/************************************************************
+  /************************************************************
    * 2) NOTICE
-************************************************************/
+   ************************************************************/
   const box    = document.getElementById('noticeBox'); 
   const btnEditNotice  = document.getElementById('btnEditNotice');
   const btnNoticeClose = document.getElementById('btnNoticeClose');
@@ -211,7 +214,8 @@ async function saveNotice(){
   btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
   btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
 	
-/************************************************************
+
+	/************************************************************
  * 3) ADMIN CONFIG (naam + IBAN + BIC + Mededeling)
  ************************************************************/
  
