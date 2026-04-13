@@ -368,7 +368,7 @@ function fmt(text){
   const box = document.getElementById('noticeBox');
   if (!box) return;
 
-  fetch('/data/notice.md')
+  fetch('data/notice.md')
     .then(r => r.text())
     .then(md => {
       box.innerHTML = marked.parse(md);
