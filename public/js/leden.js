@@ -1,7 +1,6 @@
 /************************************************************
  * CORE HELPERS
  ************************************************************/
-console.log("LEDEN.JS IS GELADEN");
  
 const noticeStatus = document.getElementById('loginStatus');
 
