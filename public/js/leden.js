@@ -69,27 +69,27 @@ function fmt(text){
   let inList = false;
 
   const R = {
-    lg:   /
+    lg:   new RegExp("\
 
-\[lg\]
+\[lg\\]
 
-\s*([\s\S]*?)\s*
+\\s*([\\s\\S]*?)\\s*\
 
-\[\/lg\]
+\[\\/lg\\]
 
-/g,
-    sm:   /
+", "g"),
+    sm:   new RegExp("\
 
-\[sm\]
+\[sm\\]
 
-\s*([\s\S]*?)\s*
+\\s*([\\s\\S]*?)\\s*\
 
-\[\/sm\]
+\[\\/sm\\]
 
-/g,
-    bold: /\*\*\s*([\s\S]+?)\s*\*\*/g,
-    em:   /\*\s*([\s\S]+?)\s*\*/g,
-    u:    /__\s*([\s\S]+?)\s*__/g
+", "g"),
+    bold: new RegExp("\\*\\*\\s*([\\s\\S]+?)\\s*\\*\\*", "g"),
+    em:   new RegExp("\\*\\s*([\\s\\S]+?)\\s*\\*", "g"),
+    u:    new RegExp("__\\s*([\\s\\S]+?)\\s*__", "g")
   };
 
   const applyFmt = (s) => {
@@ -145,6 +145,7 @@ function fmt(text){
 
   return html;
 }
+
 
 function render() {
   if (!box) return;
