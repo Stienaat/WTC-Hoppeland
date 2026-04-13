@@ -169,17 +169,11 @@ async function saveNotice() {
   setRaw(raw);
   box.contentEditable = "false";
   render();
-	const fd = new FormData();
-	fd.append('text', raw);
 
-	try {
-	  const res = await fetch("/api/notice", {
-		method: "POST",
-		body: fd
-	  });
+  const fd = new FormData();
+  fd.append('text', raw);
 
-
-   try {
+  try {
     const res = await fetch("/api/notice", {
       method: "POST",
       body: fd
@@ -192,6 +186,7 @@ async function saveNotice() {
     console.error("Notice save error:", err);
   }
 }
+
 
   btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
   btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
