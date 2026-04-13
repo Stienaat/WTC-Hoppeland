@@ -6,8 +6,7 @@ const upload = multer();
 
 
 const NOTICE_PATH = path.join(__dirname, "public", "notice.md");
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 const app = express();
 
 app.use("/api/events", events);
