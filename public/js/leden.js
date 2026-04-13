@@ -33,7 +33,6 @@ async function ajax(url, options = {}) {
   el.classList.add(type);
 }
 	
-
   /************************************************************
    * 0) BASIS DOM
    ************************************************************/
@@ -42,9 +41,6 @@ async function ajax(url, options = {}) {
   
   const API_NOTICE = '/notice';
 
- // const ROUTES_API = /WTC/routes/upload_do.php';
-  
-  
  
   /************************************************************
    * 2) NOTICE
@@ -136,10 +132,6 @@ function fmt(text){
   return html;
 }
 
-
-
-
-
   function render(){
     if (!box) return;
     box.innerHTML = fmt(getRaw());
@@ -154,10 +146,12 @@ function fmt(text){
         if (d.ok){
           setRaw(d.text || '');
           render();
-          setStatus('');
+          setStatus(status, '', 'info');
+
         }
       })
-      .catch(()=>setStatus('Fout bij laden.'));
+      .catch(()=>setStatus(status, 'Fout bij laden.', 'error');
+
   }
 
   function startEditNotice(){
