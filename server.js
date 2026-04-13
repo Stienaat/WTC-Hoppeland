@@ -200,16 +200,17 @@ app.get("/notice", async (req, res) => {
 });
 
 
-app.post("/notice", upload.none(), async (req, res) => {
+app.post("/api/notice", upload.none(), async (req, res) => {
   try {
     const { text = "" } = req.body;
-    const filePath = path.join(__dirname, "data", "notice.md");
+    const filePath = path.join(__dirname, "public", "notice.md");
     await fs.writeFile(filePath, text, "utf8");
     res.json({ ok: true });
   } catch {
     res.json({ ok: false });
   }
 });
+
 
 /* =====================================
    AUTH
