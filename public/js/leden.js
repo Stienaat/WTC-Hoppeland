@@ -153,22 +153,20 @@ function render(){
   noticeBox.innerHTML = html;
 }
 
+function loadNotice(){
+  const box = document.getElementById('noticeBox');
+  if (!box) return;
 
-  function loadNotice(){
-    if (!box) return;
-    setStatus(status, 'Tekst laden…', 'info');
-    fetch(API_NOTICE + '?action=getNotice', { cache:'no-store' })
-      .then(r => r.json())
-      .then(d => {
-        if (d.ok){
-          setRaw(d.text || '');
-          render();
-          setStatus(status, '', 'info');
-        }
-      })
-      .catch(()=>setStatus(status, 'Fout bij laden.', 'error'));
-
-  }
+  fetch('notice.md')
+    .then(r => r.text())
+    .then(md => {
+      box.innerHTML = marked.parse(md);
+    })
+    .catch(err => {
+      box.innerHTML = "<em>Kon notice.md niet laden.</em>";
+      console.error(err);
+    });
+}
 
   function startEditNotice(){
     if (!box) return;
