@@ -194,7 +194,9 @@ async function saveNotice() {
   const j = await res.json();
   if (!j.ok) {
     console.error("Notice save failed:", j.error);
-  }
+  }else
+	  showModal("success", "👌", "Uw tekst werd opgeslagen!");
+
 }
 
 
