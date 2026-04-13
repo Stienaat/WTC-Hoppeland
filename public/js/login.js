@@ -94,7 +94,7 @@ adminLogo?.addEventListener("dblclick", e => {
 /************************************************************
  * 3) PIN WIJZIGEN
  ************************************************************/
-const btnPinChange      = document.getElementById("btnPinChange");
+const pinChangeOverlay      = document.getElementById("pinChangeOverlay");
 const pinChangeOverlay  = document.getElementById("pinChangeOverlay");
 const btnChangeCode     = document.getElementById("btnChangeCode");
 const btnClosePinChange = document.getElementById("btnClosePinChange");
@@ -153,7 +153,7 @@ async function handlePinChange() {
 
 
 
-btnPinChange?.addEventListener("click", openPinChangePopup);
+pinChangeOverlay?.addEventListener("click", openPinChangePopup);
 btnChangeCode?.addEventListener("click", handlePinChange);
 btnClosePinChange?.addEventListener("click", closePinChangePopup);
 
