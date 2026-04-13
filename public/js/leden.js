@@ -1,6 +1,7 @@
 /************************************************************
  * CORE HELPERS
  ************************************************************/
+console.log("LEDEN.JS IS GELADEN");
  
 const noticeStatus = document.getElementById('loginStatus');
 
@@ -24,7 +25,7 @@ async function ajax(url, options = {}) {
 
  /*********Helper meldingen ***********/
  
-function setStatus(el, message = '', type = 'info'){
+	function setStatus(el, message = '', type = 'info'){
   if (!el) return;
 
   el.textContent = message;
@@ -157,6 +158,7 @@ fetch(API_NOTICE)
     });
 }
 
+
   function startEditNotice(){
     if (!box) return;
     box.innerText = getRaw();
@@ -197,15 +199,18 @@ async function saveNotice(){
     setStatus(btnMedSave, '✔ Opgeslagen', 'ok');
     box.setAttribute('contenteditable','false');
 	
+	
+
   } catch (e){
     console.error(e);
     setStatus(adminStatus, 'Technische fout bij bewaren.', 'error');
   }
 }
 
+
   btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
   btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
-		
+	
 /************************************************************
  * 3) ADMIN CONFIG (naam + IBAN + BIC + Mededeling)
  ************************************************************/
