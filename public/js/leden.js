@@ -68,42 +68,20 @@ function fmt(text){
   let html = '';
   let inList = false;
 
-  const R = {
-    lg:   new RegExp("\
-
-\[lg\\]
-
-\\s*([\\s\\S]*?)\\s*\
-
-\[\\/lg\\]
-
-", "g"),
-    sm:   new RegExp("\
-
-\[sm\\]
-
-\\s*([\\s\\S]*?)\\s*\
-
-\[\\/sm\\]
-
-", "g"),
-    bold: new RegExp("\\*\\*\\s*([\\s\\S]+?)\\s*\\*\\*", "g"),
-    em:   new RegExp("\\*\\s*([\\s\\S]+?)\\s*\\*", "g"),
-    u:    new RegExp("__\\s*([\\s\\S]+?)\\s*__", "g")
-  };
-
-  const applyFmt = (s) => {
-    return s
-      .replace(R.lg, '<span class="n-lg">$1</span>')
-      .replace(R.sm, '<span class="n-sm">$1</span>')
-      .replace(R.bold, '<strong>$1</strong>')
-      .replace(R.em, '<em>$1</em>')
-      .replace(R.u, '<u>$1</u>');
-  };
-
-  const pushLine = (raw) => {
-    let body = raw;
-    let cls = 'n-line';
+ const R = {
+    lg:   new RegExp("\\[lg\\]\\s*([\\s\\S]*?)\\s*\\[\\/lg\\]", "g"),
+	
+	sm:   new RegExp("\\[sm\\]\\s*([\\s\\S]*?)\\s*\\[\\/sm\\]", "g"),
+		
+	bold: new RegExp("\\*\\*\\s*([\\s\\S]+?)\\s*\\*\\*", "g"),
+	em:   new RegExp("\\*\\s*([\\s\\S]+?)\\s*\\*", "g"),   
+	u:    new RegExp("__\\s*([\\s\\S]+?)\\s*__", "g")
+	
+	};
+	
+ const pushLine = (raw) => {let body = esc(raw);
+   
+   let cls = 'n-line';
 
     if (body.startsWith('##')) {
       cls = 'n-h2';
@@ -113,13 +91,17 @@ function fmt(text){
       body = body.replace(/^#\s*/, '');
     }
 
-    body = applyFmt(body);
-    body = esc(body).replace(/&lt;(\/?(?:strong|em|u|span)[^&]*)&gt;/g, '<$1>');
+    body = body.replace(R.lg, '<span class="n-lg">$1</span>');
+    body = body.replace(R.sm, '<span class="n-sm">$1</span>');
+    body = body.replace(R.bold, '<strong>$1</strong>');
+    body = body.replace(R.em, '<em>$1</em>');
+    body = body.replace(R.u, '<u>$1</u>');
 
     html += `<div class="${cls}">${body || '&nbsp;'}</div>`;
   };
 
   for (let line of lines) {
+
     const m = /^\-\s*(.*)$/.exec(line);
     if (m) {
       if (!inList) {
@@ -127,8 +109,11 @@ function fmt(text){
         inList = true;
       }
 
-      let item = applyFmt(m[1]);
-      item = esc(item).replace(/&lt;(\/?(?:strong|em|u|span)[^&]*)&gt;/g, '<$1>');
+      let item = esc(m[1]);
+      item = item.replace(R.bold, '<strong>$1</strong>');
+      item = item.replace(R.em, '<em>$1</em>');
+      item = item.replace(R.u, '<u>$1</u>');
+
       html += `<li>${item || '&nbsp;'}</li>`;
       continue;
     }
