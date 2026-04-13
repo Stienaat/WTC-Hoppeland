@@ -1,11 +1,10 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs").promises;
-const fsSync = require("fs");   // ← deze toevoegen
-
+const fsSync = require("fs");
 const multer = require("multer");
 const upload = multer();
-
+const session = require("express-session");   // ← DEZE MOET ER STAAN
 
 const NOTICE_PATH = path.join(__dirname, "public", "notice.md");
 
