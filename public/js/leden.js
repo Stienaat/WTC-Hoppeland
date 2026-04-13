@@ -156,7 +156,8 @@ function loadNotice() {
 }
 function startEditNotice() {
   if (!box) return;
-  box.textContent = getRaw();
+ box.innerHTML = getRaw().replace(/\n/g, "<br>");
+
   box.contentEditable = "true";
   box.focus();
 }
@@ -165,7 +166,10 @@ async function saveNotice() {
   if (!box) return;
   if (box.contentEditable !== "true") return;
 
-  const raw = (box.innerText || "").replace(/\r\n?/g, "\n");
+ const raw = box.innerHTML
+  .replace(/<br\s*\/?>/gi, "\n")
+  .replace(/&nbsp;/g, " ");
+
   setRaw(raw);
   box.contentEditable = "false";
   render();
