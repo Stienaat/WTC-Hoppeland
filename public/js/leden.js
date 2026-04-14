@@ -230,31 +230,35 @@ function initAdminConfigCard(){
   })();
 
   // Opslaan
-	 btnSave.addEventListener('click', async () => {
-	 setStatus(confSaveStatus, 'Naam en bestand zijn verplicht.', 'error');
+	btnSave.addEventListener('click', async () => {
+  setStatus(confSaveStatus, 'Naam en bestand zijn verplicht.', 'error');
 
-	const j = await ajax('/api/admin/config', {
-	  method: 'POST',
-	  headers: { 'Content-Type':'application/json' },
-	  body: JSON.stringify({
-		vereniging: {
-		  naam: elName.value.trim(),
-		  iban: elIban.value.trim(),
-		  bic: elBic.value.trim(),
-		  med: elMed.value.trim()
-		}
-	  })
-	});
+  try {
+    const j = await ajax('/api/admin/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        vereniging: {
+          naam: elName.value.trim(),
+          iban: elIban.value.trim(),
+          bic: elBic.value.trim(),
+          med: elMed.value.trim()
+        }
+      })
+    });
 
-    if (!j.ok){
-	   showModal("error", "❌", "Configuratie is niet opgeslagen: " + err.message);
+    if (!j.ok) {
+      showModal("error", "❌", "Configuratie is niet opgeslagen.");
       return;
     }
 
-    catch (e){
-		showModal("error", "❌", "Technische fout: " + err.message);
-	}
+    setStatus(confSaveStatus, '✔ Opgeslagen.', 'ok');
+
+  } catch (e) {
+    showModal("error", "❌", "Technische fout: " + e.message);
+  }
 });
+
 }
 /************************************************************
 	*  4) FIETS	ROUTES
