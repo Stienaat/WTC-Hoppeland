@@ -253,7 +253,7 @@ if (actie === "login") {
 
   if (data.ok) {
     // BEWAAR VOLLEDIGE MEMBER INFO
-    sessionStorage.setItem("member", JSON.stringify(data.member));
+    localStorage.setItem("member", JSON.stringify(data.member));
 
     showModal("success", "Welkom", "Je bent ingelogd. ✔️");
     setTimeout(() => {
