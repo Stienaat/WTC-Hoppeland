@@ -182,7 +182,8 @@ app.post("/login", async (req, res) => {
       return res.json({ ok: false, error: "Fout wachtwoord." });
     }
 
-    res.json({ ok: true, user });
+   res.json({ ok: true, member: user });
+
   } catch (err) {
   console.error("LOGIN ERROR:", err);
   res.json({ ok: false, error: "Technische fout" });
@@ -338,7 +339,8 @@ app.post("/api/contact", async (req, res) => {
 // verificatie login
 // =====================================
 
-app.get("/me", async (req, res) => {
+app.get("/api/me", async (req, res) => {
+
   const email = req.query.email;
 
   if (!email) {
