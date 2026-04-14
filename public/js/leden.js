@@ -212,8 +212,7 @@ function initAdminConfigCard(){
 
   const confSaveStatus  = document.getElementById('confSaveStatus');
 
-  if (!elName || !elIban || !elBic || !elMed ||!btnSave) return;
-  
+  if (!elName || !elIban || !elBic || !elMed ||!btnSave) return;  
 
   // Laden
   (async () => {
@@ -247,16 +246,14 @@ function initAdminConfigCard(){
 	  })
 	});
 
-
     if (!j.ok){
-	   setStatus(confSaveStatus, 'Niet opgeslagen.', 'error');
+	   showModal("error", "❌", "Configuratie is niet opgeslagen: " + err.message);
       return;
     }
 
-	setStatus(confSaveStatus,'✔ Opgeslagen.','ok');
   } catch (e){
-    console.error(e);
-   	   setStatus(confSaveStatus, 'Technische fout!', 'error');
+		showModal("error", "❌", "Technische foit: " + err.message);
+
   }
 });
 }
