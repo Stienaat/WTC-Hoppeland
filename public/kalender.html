@@ -17,8 +17,8 @@
 	const email = localStorage.getItem("user_email");
 	const isAdmin = localStorage.getItem("is_admin") === "true";
 
-	const lid = JSON.parse(localStorage.getItem("member"));
-	if (!lid) window.location.href = "leden.html?msg=notknown";
+	if (!email && !isAdmin) {
+	window.location.href = "leden.html?msg=notknown";
 
 </script>
 
