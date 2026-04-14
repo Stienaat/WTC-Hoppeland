@@ -25,7 +25,7 @@ async function loadLid() {
     return;
   }
 
-  const lid = JSON.parse(sessionStorage.getItem("member"));
+  const lid = JSON.parse(localStorage.getItem("member"));
 
 	document.getElementById("naam").textContent = lid.naam;
 	document.getElementById("email").textContent = lid.email;
