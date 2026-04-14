@@ -303,19 +303,6 @@
   </div>
 </div>
 
-<script>
-fetch("/notice")
-  .then(r => r.text())
-  .then(txt => {
-    document.getElementById("noticeBox").innerText = txt;
-  })
-  .catch(() => {
-    document.getElementById("noticeBox").innerText =
-      "Mededelingen konden niet geladen worden.";
-  });
-</script>
-
-
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
 
 <script src="/js/modal.js"></script>
