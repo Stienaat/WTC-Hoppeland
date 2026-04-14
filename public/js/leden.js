@@ -47,7 +47,7 @@ function setStatus(el, message = '', type = 'info'){
  
   const btnEditNotice  = document.getElementById('btnEditNotice');
   const btnNoticeClose = document.getElementById('btnNoticeClose');
-  const btnMedSave = document.getElementById('btnMedSave');     */
+  const btnMedSave = document.getElementById('btnMedSave');     
 
 function setRaw(text){
     if (box) box.dataset.raw = String(text || '');
