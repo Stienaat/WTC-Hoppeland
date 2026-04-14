@@ -10,29 +10,18 @@
 
 <script type="module">
 
-// 1) Email ophalen uit localStorage (van login)
 const email = localStorage.getItem("user_email");
 
-const res = await fetch(`/api/me?email=${encodeURIComponent(email)}`);
-!uk 
-const isAdmin = localStorage.getItem("is_admin") === "true";
-
-
-if (!email && !isAdmin) {
+if (!email) {
   window.location.href = "leden.html?msg=notknown";
 }
 
-
-// 2) Lidgegevens ophalen via server
 async function loadLid() {
-  const res = await fetch("/api/me", {
-  credentials: "include"
-});
-const data = await res.json();
- 
+  const res = await fetch(`/api/me?email=${encodeURIComponent(email)}`);
+  const data = await res.json();
 
   if (!data.ok) {
-   showModal("error", "❌", "login is mislukt!");
+    showModal("error", "❌", "Lidgegevens konden niet geladen worden.");
     return;
   }
 
@@ -48,6 +37,7 @@ const data = await res.json();
 loadLid();
 
 </script>
+
 
 <!-- LINKERKOLOM -->
 <div style="position:absolute;left:10px;top:20px;max-width:100px;margin:20px auto;padding:10px;border-radius:15px;">
