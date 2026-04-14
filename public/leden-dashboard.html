@@ -11,6 +11,9 @@
 <script>
 // 1) Email ophalen uit localStorage (van login)
 const email = localStorage.getItem("user_email");
+
+const res = await fetch(`/api/me?email=${encodeURIComponent(email)}`);
+!uk 
 const isAdmin = localStorage.getItem("is_admin") === "true";
 
 
@@ -28,7 +31,7 @@ const data = await res.json();
  
 
   if (!data.ok) {
-   showModal("error", "❌", "login mislukt: " + err.message);
+   showModal("error", "❌", "login is mislukt!");
     return;
   }
 
