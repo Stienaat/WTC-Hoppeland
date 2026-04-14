@@ -68,6 +68,63 @@ app.post("/api/notice", upload.none(), async (req, res) => {
   res.json({ ok: true });
 });
 
+// =====================================
+// ADMIN - CONFIGURATIE
+// =====================================
+
+app.get("/api/admin/config", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("Config")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    res.json({
+      ok: true,
+      config: {
+        vereniging: {
+          naam: data?.vereniging_naam || "",
+          iban: data?.vereniging_iban || "",
+          bic:  data?.vereniging_bic  || "",
+          med:  data?.vereniging_med  || ""
+        }
+      }
+    });
+  } catch (err) {
+    res.json({ ok: false, error: err.message });
+  }
+});
+
+app.post("/api/admin/config", upload.none(), async (req, res) => {
+  try {
+    const { vereniging } = req.body;
+
+    const naam = vereniging?.naam || "";
+    const iban = vereniging?.iban || "";
+    const bic  = vereniging?.bic  || "";
+    const med  = vereniging?.med  || "";
+
+    const { error } = await supabase
+      .from("Config")
+      .upsert({
+        id: 1,
+        vereniging_naam: naam,
+        vereniging_iban: iban,
+        vereniging_bic:  bic,
+        vereniging_med:  med
+      });
+
+    if (error) throw error;
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.json({ ok: false, error: err.message });
+  }
+});
+
 
 // =====================================
 // REGISTRATIE (leden)
