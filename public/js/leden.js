@@ -252,8 +252,7 @@ function initAdminConfigCard(){
     }
 
   } catch (e){
-		showModal("error", "❌", "Technische foit: " + err.message);
-
+		showModal("error", "❌", "Technische fout: " + err.message);
   }
 });
 }
