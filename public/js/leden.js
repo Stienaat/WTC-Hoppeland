@@ -36,10 +36,7 @@ function setStatus(el, message = '', type = 'info'){
    ************************************************************/
   const logo         = document.getElementById('Image1');
   const adminOverlay = document.getElementById('adminOverlay'); 
-  
-  const API_NOTICE = '/notice';
-
- 
+   
 /************************************************************
    * 2) NOTICE
    ************************************************************/
@@ -221,7 +218,7 @@ function initAdminConfigCard(){
   // Laden
   (async () => {
     try {
-      const j = await ajax('api_admin_config.php');
+      const j = await ajax('/api/admin/config');
       if (j?.ok && j.config){
         elName.value = j.config.vereniging?.naam || '';
         elIban.value = j.config.vereniging?.iban || '';
@@ -237,19 +234,19 @@ function initAdminConfigCard(){
 	 btnSave.addEventListener('click', async () => {
 	 setStatus(confSaveStatus, 'Naam en bestand zijn verplicht.', 'error');
 
-  try {
-    const j = await ajax('api_admin_config.php', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        vereniging: {
-          naam: elName.value.trim(),
-          iban: elIban.value.trim(),
+	const j = await ajax('/api/admin/config', {
+	  method: 'POST',
+	  headers: { 'Content-Type':'application/json' },
+	  body: JSON.stringify({
+		vereniging: {
+		  naam: elName.value.trim(),
+		  iban: elIban.value.trim(),
 		  bic: elBic.value.trim(),
 		  med: elMed.value.trim()
-        }
-      })
-    });
+		}
+	  })
+	});
+
 
     if (!j.ok){
 	   setStatus(confSaveStatus, 'Niet opgeslagen.', 'error');
@@ -263,7 +260,6 @@ function initAdminConfigCard(){
   }
 });
 }
-
 /************************************************************
 	*  4) FIETS	ROUTES
  ************************************************************/
