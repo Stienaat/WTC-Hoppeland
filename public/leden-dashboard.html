@@ -25,13 +25,14 @@ async function loadLid() {
     return;
   }
 
-  const lid = data.user;
+  const lid = JSON.parse(sessionStorage.getItem("member"));
 
-  document.getElementById("naam").textContent = lid.naam;
-  document.getElementById("email").textContent = lid.email;
-  document.getElementById("adres").textContent = lid.adres;
-  document.getElementById("gemeente").textContent = lid.gemeente;
-  document.getElementById("telefoon").textContent = lid.telefoon;
+	document.getElementById("naam").textContent = lid.naam;
+	document.getElementById("email").textContent = lid.email;
+	document.getElementById("adres").textContent = lid.adres;
+	document.getElementById("gemeente").textContent = lid.gemeente;
+	document.getElementById("telefoon").textContent = lid.telefoon;
+
 }
 
 loadLid();
