@@ -13,7 +13,14 @@
     <span id="headerUserName"></span>
     <div id="weekRange"></div>
 </div>
+<script>
+	const email = localStorage.getItem("user_email");
+	const isAdmin = localStorage.getItem("is_admin") === "true";
 
+	if (!email && !isAdmin) {
+	  window.location.href = "leden.html?msg=notknown";
+	}
+</script>
 
   <div class="rooster">
     <div class="toolbar">
