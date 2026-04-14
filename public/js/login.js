@@ -1,4 +1,3 @@
-
 /************************************************************
  * 1) ADMIN UI OPEN / CLOSE
  ************************************************************/
@@ -237,34 +236,35 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 	 setTimeout(() => {
 		window.location.href = "leden.html";
 	  }, 5000);
-
-
   }
 
   /***********************
    * LOGIN
    ***********************/
-  if (actie === "login") {
+if (actie === "login") {
 
-    const res = await fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
+  const res = await fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-	if (data.ok) {
-	  localStorage.setItem("user_email", email);
-	  showModal("success", "Welkom", "Je bent ingelogd. ✔️");
-	  setTimeout(() => {
-		window.location.href = "leden-dashboard.html";
-	  }, 5000);
-	} else {
-	  showModal("error","👎","Login mislukt. ❌");
-	}
+  if (data.ok) {
+    // BEWAAR VOLLEDIGE MEMBER INFO
+    sessionStorage.setItem("member", JSON.stringify(data.member));
 
+    showModal("success", "Welkom", "Je bent ingelogd. ✔️");
+    setTimeout(() => {
+      window.location.href = "leden-dashboard.html";
+    }, 1500);
+
+  } else {
+    showModal("error","👎","Login mislukt. ❌");
   }
+}
+
 });
 
 });
