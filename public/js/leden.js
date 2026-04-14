@@ -253,7 +253,7 @@ function initAdminConfigCard(){
 
     catch (e){
 		showModal("error", "❌", "Technische fout: " + err.message);
-  }
+	}
 });
 }
 /************************************************************
