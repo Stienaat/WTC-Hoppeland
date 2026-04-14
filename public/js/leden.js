@@ -130,7 +130,6 @@ function fmt(text){
   return html;
 }
 
-
 function render() {
   if (!box) return;
   box.innerHTML = fmt(getRaw());
@@ -145,8 +144,8 @@ function loadNotice() {
       render();
     })
     .catch(err => {
-      console.error("Notice load error:", err);
-      box.innerHTML = "<em>Kon mededelingen niet laden.</em>";
+      showModal("error", "❌", "Kon mededelingen niet laden!: " + err.message);
+
     });
 }
 
@@ -159,7 +158,6 @@ function startEditNotice() {
   box.contentEditable = "true";
   box.focus();
 }
-
 
 async function saveNotice() {
   if (!box) return;
@@ -193,13 +191,12 @@ async function saveNotice() {
 
   const j = await res.json();
   if (!j.ok) {
-    console.error("Notice save failed:", j.error);
+	showModal("error", "❌", "opslaan mislukt: " );
+
   }else
-	  showModal("success", "👌", "Uw tekst werd opgeslagen!");
+	showModal("success", "👌", "Uw tekst werd opgeslagen!");
 
 }
-
-
 
   btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
   btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
