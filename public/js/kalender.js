@@ -1004,25 +1004,5 @@ window.onclick = (e) => {
 
 
 
-function forceLogout() {
-  localStorage.removeItem("member");
-  localStorage.removeItem("user_email");
-  localStorage.removeItem("is_admin");
-}
-
-// Alleen uitloggen als de gebruiker langer dan 500ms weg is
-let hideTimer = null;
-
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") {
-    hideTimer = setTimeout(() => {
-      forceLogout();
-    }, 500);
-  } else {
-    // gebruiker komt terug → timer annuleren
-    clearTimeout(hideTimer);
-  }
-});
-
 
 
