@@ -520,6 +520,8 @@ function renderMemberLeft(eventData) {
 }
 
 function attachMemberEvents(e, status) {
+  let signupDownloaded = false;
+
   const chk = document.getElementById("mDoSignup");
   const qrWrap = document.getElementById("qrWrap");
   const qrText = document.getElementById("qrText");
