@@ -42,8 +42,9 @@ async function apiJson(url, options = {}) {
 }
 
 async function loadCurrentUser() {
-  const data = await apiJson("/api/me");
-  
+  const email = localStorage.getItem("user_email");
+  const data = await apiJson(`/api/me?email=${encodeURIComponent(email)}`);
+
   if (!data?.ok) {
     throw new Error(data?.error || "Niet ingelogd");
   }
