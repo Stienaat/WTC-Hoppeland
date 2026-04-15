@@ -147,23 +147,41 @@ async function loadSignupsForEvent(eventId) {
   return Array.isArray(r) ? r : (r.signups || []);
 }
 
-async function getSignupStatus(eventId) {
-  return await apiJson(`/api/signups/status?event_id=${encodeURIComponent(eventId)}`);
+async function getSignupStatus(eventId, email) {
+  return await apiJson(
+    `/api/signups/status?event_id=${encodeURIComponent(eventId)}&email=${encodeURIComponent(email)}`
+  );
 }
 
-async function doSignups(eventId) {
+async function doSignup(eventId) {
+  const email =
+    typeof memberEmail !== "undefined"
+      ? memberEmail
+      : CURRENT_USER?.email;
+
   return await apiJson("/api/signups", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ event_id: eventId })
+    body: JSON.stringify({
+      event_id: eventId,
+      email
+    })
   });
 }
 
 async function doCancel(eventId) {
+  const email =
+    typeof memberEmail !== "undefined"
+      ? memberEmail
+      : CURRENT_USER?.email;
+
   return await apiJson("/api/signups", {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ event_id: eventId })
+    body: JSON.stringify({
+      event_id: eventId,
+      email
+    })
   });
 }
 
@@ -610,7 +628,7 @@ function attachMemberEvents(e, status) {
         return;
       }
 
-      const r = await doSignups(e.id);
+      const r = await doSignup(e.id);
 
       if (!r || !r.ok) {
       	showModal("error", "Fout!", "Inschrijving mislukt.");
