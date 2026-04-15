@@ -151,7 +151,7 @@ async function getSignupStatus(eventId) {
   return await apiJson(`/api/signups/status?event_id=${encodeURIComponent(eventId)}`);
 }
 
-async function doSignup(eventId) {
+async function doSignups(eventId) {
   return await apiJson("/api/signups", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -438,7 +438,7 @@ function renderMemberRight(eventData, status) {
   // 3. Nog niet ingeschreven → originele dialog
   return `
     <label class="signupLabel">
-      <input type="checkbox" id="mDoSignup">
+      <input type="checkbox" id="mDoSignups">
       <span class="signupText"></span>
     </label>
 
@@ -522,7 +522,7 @@ function renderMemberLeft(eventData) {
 function attachMemberEvents(e, status) {
   let signupDownloaded = false;
 
-  const chk = document.getElementById("mDoSignup");
+  const chk = document.getElementById("mDoSignups");
   const qrWrap = document.getElementById("qrWrap");
   const qrText = document.getElementById("qrText");
   const btn = document.getElementById("btnDownload");
@@ -610,7 +610,7 @@ function attachMemberEvents(e, status) {
         return;
       }
 
-      const r = await doSignup(e.id);
+      const r = await doSignups(e.id);
 
       if (!r || !r.ok) {
       	showModal("error", "Fout!", "Inschrijving mislukt.");
