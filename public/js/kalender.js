@@ -1001,3 +1001,21 @@ window.onclick = (e) => {
     document.getElementById("app-modal").classList.add("hidden");
   }
 };
+
+
+function forceLogout() {
+  localStorage.removeItem("member");
+  localStorage.removeItem("user_email");
+  localStorage.removeItem("is_admin");
+}
+
+// Wanneer de gebruiker de pagina verlaat
+window.addEventListener("beforeunload", forceLogout);
+
+// Wanneer de tab niet meer zichtbaar is (switch naar andere tab/pagina)
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    forceLogout();
+  }
+});
+
