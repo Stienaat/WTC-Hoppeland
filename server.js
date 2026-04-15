@@ -366,7 +366,7 @@ app.get("/api/me", async (req, res) => {
 // =====================================
 
 // GET /events
-app.get("/events", async (req, res) => {
+app.get("/api/events", async (req, res) => {
   const { data: events, error } = await supabase
     .from("events")
     .select("*")
