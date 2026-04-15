@@ -129,7 +129,7 @@ app.post("/api/admin/config", upload.none(), async (req, res) => {
 // =====================================
 // REGISTRATIE (leden)
 // =====================================
-app.post("/register", async (req, res) => {
+app.post("api/register", async (req, res) => {
   const { naam, adres, gemeente, telefoon, email, password } = req.body;
 
   try {
@@ -160,7 +160,7 @@ app.post("/register", async (req, res) => {
 // =====================================
 // LEDEN LOGIN
 // =====================================
-app.post("/login", async (req, res) => {
+app.post("api/login", async (req, res) => {
   console.log("LOGIN BODY:", req.body);
   const { email, password } = req.body;
 
@@ -262,7 +262,7 @@ app.post("/admin-change-pin", async (req, res) => {
 // =====================================
 // EVENT INSCHRIJVEN (via email)
 // =====================================
-app.post("/signup", upload.none(), async (req, res) => {
+app.post("api/signup", upload.none(), async (req, res) => {
   const { email, event_id } = req.body;
 
   if (!email || !event_id) {
@@ -435,7 +435,7 @@ function buildEpcQrText(creditorName, iban, bic, amount, remittance, info = "") 
 // =====================================
 // INSCHRIJVINGEN OPHALEN (ADMIN)
 // =====================================
-app.get("/signups", async (req, res) => {
+app.get("api/signups", async (req, res) => {
   const eventId = req.query.event_id;
 
   if (!eventId) {
@@ -479,7 +479,7 @@ app.get("/signups", async (req, res) => {
 // =====================================
 // INSCHRIJVINGSSTATUS OPHALEN (MEMBER)
 // =====================================
-app.get("/signup-status", async (req, res) => {
+app.get("api/signup-status", async (req, res) => {
   const { email, event_id } = req.query;
 
   if (!email || !event_id) {
@@ -521,7 +521,7 @@ app.get("/signup-status", async (req, res) => {
 // =====================================
 // INSCHRIJVING ANNULEREN (MEMBER)
 // =====================================
-app.post("/cancel", upload.none(), async (req, res) => {
+app.post("api/cancel", upload.none(), async (req, res) => {
   const { email, event_id } = req.body;
 
   if (!email || !event_id) {
