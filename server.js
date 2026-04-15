@@ -182,7 +182,8 @@ app.post("/login", async (req, res) => {
       return res.json({ ok: false, error: "Fout wachtwoord." });
     }
 
-   res.json({ ok: true, member: user });
+   res.json({ ok: true, user });
+
 
   } catch (err) {
   console.error("LOGIN ERROR:", err);
