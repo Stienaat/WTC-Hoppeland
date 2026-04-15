@@ -231,7 +231,7 @@ function initAdminConfigCard(){
 
   // Opslaan
 	btnSave.addEventListener('click', async () => {
-  setStatus(confSaveStatus, 'Naam en bestand zijn verplicht.', 'error');
+	setStatus(confSaveStatus, 'Naam en bestand zijn verplicht.', 'error');
 
   try {
     const j = await ajax('/api/admin/config', {
@@ -377,32 +377,26 @@ document.addEventListener('DOMContentLoaded', function () {
   const pinError = document.getElementById('pinError');
  
 
-async function handlePinUnlock(){
+async function handlePinUnlock() {
   const pin = pinInput?.value?.trim() || '';
 
-  if (pin.length !== 6){
-    setStatus(pinError,'PIN moet 6 cijfers zijn.','error');
+  if (pin.length !== 6) {
+    setStatus(pinError, 'PIN moet 6 cijfers zijn.', 'error');
     return;
   }
 
-
-  const fd = new FormData();
-  fd.append('actie', 'admin_login');
-  fd.append('admin_pin', pin);
-
   try {
-    // ✅ ajax() regelt fetch + JSON + fouten
-    const j = await ajax('./leden.php', {
+    const j = await ajax('/admin-login', {
       method: 'POST',
-      body: fd
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pin })
     });
 
-    if (!j.ok){
-      setStatus(pinError,'PIN onjuist.','error');
+    if (!j.ok) {
+      setStatus(pinError, j.message || 'PIN onjuist.', 'error');
       return;
     }
 
-    // succes
     pinError.textContent = '';
     pinInput.value = '';
     openAdminPhase2();
@@ -465,7 +459,7 @@ async function handlePinUnlock(){
     fd.append('new_pin', newPin);
 
     try{
-      const r = await fetch('./leden.php',{method:'POST',body:fd});
+      const r = await fetch('./leden.html',{method:'POST',body:fd});
       const j = await r.json();
       if (!j.ok){
            setStatus(pinError2,'wijzigen mislukt.','error');
