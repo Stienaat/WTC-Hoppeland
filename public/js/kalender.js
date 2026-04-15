@@ -913,6 +913,19 @@ async function init() {
 
 async function loadCurrentUser() {
   const email = localStorage.getItem("user_email");
+  const isAdmin = localStorage.getItem("is_admin") === "true";
+
+  // Admin via PIN: geen lidrecord nodig
+  if (isAdmin && !email) {
+    CURRENT_USER = {
+      id: "admin",
+      email: null,
+      isAdmin: true,
+      name: "Beheerder"
+    };
+    return;
+  }
+
   if (!email) throw new Error("Geen email in localStorage");
 
   const data = await apiJson(`/api/me?email=${encodeURIComponent(email)}`);
@@ -924,8 +937,8 @@ async function loadCurrentUser() {
   CURRENT_USER = {
     id: user.id,
     email: user.email,
-    isAdmin: user.is_admin === true,
-    name: user.naam || user.name || ""
+    isAdmin: isAdmin || user.is_admin === true,
+    name: user.naam || user.name || (isAdmin ? "Beheerder" : "")
   };
 }
 

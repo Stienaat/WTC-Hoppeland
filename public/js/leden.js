@@ -397,9 +397,10 @@ async function handlePinUnlock() {
       return;
     }
 
-    pinError.textContent = '';
-    pinInput.value = '';
-    openAdminPhase2();
+	localStorage.setItem("is_admin", "true");
+	pinError.textContent = "";
+	pinInput.value = "";
+	openAdminPhase2();
 
   } catch (e) {
     console.error('PIN unlock error:', e);
