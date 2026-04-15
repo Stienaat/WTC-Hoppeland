@@ -41,31 +41,6 @@ async function apiJson(url, options = {}) {
   return json ?? {};
 }
 
-async function loadCurrentUser() {
-  const email = localStorage.getItem("user_email");
-  const data = await apiJson(`/api/me?email=${encodeURIComponent(email)}`);
-
-  
-  if (!data?.ok) {
-    throw new Error(data?.error || "Niet ingelogd");
-  }
-
-  const user = data.user || {};
-
-  CURRENT_USER = {
-    id: user.id ?? null,
-    email: user.email ?? null,
-    isAdmin:
-      data.is_admin === true ||
-      user.is_admin === true ||
-      user.isAdmin === true ||
-      user.role === "admin",
-    name: user.naam ?? user.name ?? ""
-  };
-
-  return CURRENT_USER;
-}
-
 function getUser() {
   return CURRENT_USER;
 }
@@ -131,31 +106,6 @@ function scrollToDefault() {
   if (!sc) return;
   const offsetSlots = (defaultScrollToMin - startMin) / slotMinutes;
   sc.scrollTop = Math.max(0, offsetSlots * 28);
-}
-
-function updateHeader() {
-  const name = getUser()?.name || "";
-  const naamEl = document.getElementById("naam");
-  const headerUserName = document.getElementById("headerUserName");
-  if (naamEl) naamEl.textContent = name;
-  
-}
-
-async function loadEvents() {
-  const data = await apiJson(API_EVENTS_URL, { method: "GET" });
-  const arr = Array.isArray(data) ? data : [];
-  events = arr.map((e) => ({
-    id: e.id,
-    title: e.title ?? "",
-    start: e.start,
-    end: e.end,
-    info: e.info ?? "",
-    requires_signup: !!e.requires_signup,
-    mandatory: !!e.mandatory,
-    paid: !!e.paid,
-    price: Number(e.price ?? 0),
-    qr_text: e.qr_text ?? null
-  }));
 }
 
 async function createEventOnServer(payload) {
@@ -594,7 +544,6 @@ function renderMemberLeft(eventData) {
   `;
 }
 
-
 function attachMemberEvents(e, status) {
   const chk = document.getElementById("mDoSignup");
   const qrWrap = document.getElementById("qrWrap");
@@ -947,38 +896,13 @@ async function handleDeleteEvent() {
   eventDialog.close();
 }
 
-function bindToolbar() {
-  const btnPrev = document.getElementById("btnPrev");
-  const btnNext = document.getElementById("btnNext");
-  const btnToday = document.getElementById("btnToday");
-
-  if (btnPrev) {
-    btnPrev.onclick = async () => {
-      currentWeekStart = addDays(currentWeekStart, -7);
-      render();
-    };
-  }
-
-  if (btnNext) {
-    btnNext.onclick = async () => {
-      currentWeekStart = addDays(currentWeekStart, 7);
-      render();
-    };
-  }
-
-  if (btnToday) {
-    btnToday.onclick = async () => {
-      currentWeekStart = startOfWeekMonday(new Date());
-      render();
-    };
-  }
-}
-
 if (btnCloseTop) {
   btnCloseTop.onclick = () => eventDialog.close();
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", init);
+
+async function init() {
   try {
     await loadCurrentUser();
     updateHeader();
@@ -987,10 +911,60 @@ document.addEventListener("DOMContentLoaded", async () => {
     render();
   } catch (err) {
     console.error("Init mislukt:", err);
-    window.location.href = "/leden.html?msg=notknown";
+    window.location.href = "leden.html?msg=notknown";
   }
-});
+}
 
+async function loadCurrentUser() {
+  const email = localStorage.getItem("user_email");
+  if (!email) throw new Error("Geen email in localStorage");
+
+  const data = await apiJson(`/api/me?email=${encodeURIComponent(email)}`);
+
+  if (!data?.ok) throw new Error(data.error || "Niet ingelogd");
+
+  const user = data.user;
+
+  CURRENT_USER = {
+    id: user.id,
+    email: user.email,
+    isAdmin: user.is_admin === true,
+    name: user.naam || user.name || ""
+  };
+}
+
+async function loadEvents() {
+  const data = await apiJson("/api/events");
+
+  if (!Array.isArray(data)) {
+    events = [];
+    return;
+  }
+
+  events = data.map(e => ({
+    id: e.id,
+    title: e.title || "",
+    start: e.start,
+    end: e.end,
+    info: e.info || "",
+    requires_signup: !!e.requires_signup,
+    mandatory: !!e.mandatory,
+    paid: !!e.paid,
+    price: Number(e.price || 0),
+    qr_text: e.qr_text || null
+  }));
+}
+
+function updateHeader() {
+  document.getElementById("headerUserName").textContent =
+    CURRENT_USER.name || CURRENT_USER.email;
+}
+
+function bindToolbar() {
+  document.getElementById("btnPrev").onclick = () => changeWeek(-1);
+  document.getElementById("btnToday").onclick = () => goToday();
+  document.getElementById("btnNext").onclick = () => changeWeek(1);
+}
 
 
 document.getElementById("modal-close").onclick = () => {
