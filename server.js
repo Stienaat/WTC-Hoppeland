@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
 import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
@@ -36,9 +35,57 @@ app.get("/", (req, res) => {
 });
 
 // =====================================
+// HELPERS
+// =====================================
+function moneyAmount(x) {
+  return "EUR" + Number(x || 0).toFixed(2);
+}
+
+function sanitizeLine(s) {
+  return String(s || "").replace(/[\r\n]/g, " ").trim();
+}
+
+function buildEpcQrText(creditorName, iban, bic, amount, remittance, info = "") {
+  creditorName = sanitizeLine(creditorName);
+  iban = sanitizeLine(iban).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  bic = sanitizeLine(bic).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  remittance = sanitizeLine(remittance);
+  info = sanitizeLine(info);
+
+  return [
+    "BCD",
+    "002",
+    "1",
+    "SCT",
+    bic,
+    creditorName,
+    iban,
+    moneyAmount(amount),
+    "",
+    remittance,
+    info
+  ].join("\n");
+}
+
+async function findMemberByEmail(email) {
+  if (!email) return { member: null, error: "email verplicht" };
+
+  const { data: member, error } = await supabase
+    .from("Leden")
+    .select("id, naam, email")
+    .eq("email", email)
+    .single();
+
+  if (error || !member) {
+    return { member: null, error: "Lid niet gevonden." };
+  }
+
+  return { member, error: null };
+}
+
+// =====================================
 // NOTICE OPHALEN / SAVE
 // =====================================
-// GET notice
 app.get("/api/notice", async (req, res) => {
   const { data, error } = await supabase
     .from("Notice")
@@ -53,7 +100,6 @@ app.get("/api/notice", async (req, res) => {
   res.json({ ok: true, text: data?.text || "" });
 });
 
-// POST notice
 app.post("/api/notice", upload.none(), async (req, res) => {
   const { text = "" } = req.body;
 
@@ -71,7 +117,6 @@ app.post("/api/notice", upload.none(), async (req, res) => {
 // =====================================
 // ADMIN - CONFIGURATIE
 // =====================================
-
 app.get("/api/admin/config", async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -88,8 +133,8 @@ app.get("/api/admin/config", async (req, res) => {
         vereniging: {
           naam: data?.vereniging_naam || "",
           iban: data?.vereniging_iban || "",
-          bic:  data?.vereniging_bic  || "",
-          med:  data?.vereniging_med  || ""
+          bic: data?.vereniging_bic || "",
+          med: data?.vereniging_med || ""
         }
       }
     });
@@ -104,8 +149,8 @@ app.post("/api/admin/config", upload.none(), async (req, res) => {
 
     const naam = vereniging?.naam || "";
     const iban = vereniging?.iban || "";
-    const bic  = vereniging?.bic  || "";
-    const med  = vereniging?.med  || "";
+    const bic = vereniging?.bic || "";
+    const med = vereniging?.med || "";
 
     const { error } = await supabase
       .from("Config")
@@ -113,8 +158,8 @@ app.post("/api/admin/config", upload.none(), async (req, res) => {
         id: 1,
         vereniging_naam: naam,
         vereniging_iban: iban,
-        vereniging_bic:  bic,
-        vereniging_med:  med
+        vereniging_bic: bic,
+        vereniging_med: med
       });
 
     if (error) throw error;
@@ -125,7 +170,6 @@ app.post("/api/admin/config", upload.none(), async (req, res) => {
   }
 });
 
-
 // =====================================
 // REGISTRATIE (leden)
 // =====================================
@@ -135,7 +179,7 @@ app.post("/register", async (req, res) => {
   try {
     const hash = await bcrypt.hash(password, 10);
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("Leden")
       .insert({
         naam,
@@ -144,9 +188,7 @@ app.post("/register", async (req, res) => {
         telefoon,
         email,
         wachtwoord: hash
-      })
-      .select()
-      .single();
+      });
 
     if (error) throw error;
 
@@ -156,14 +198,11 @@ app.post("/register", async (req, res) => {
   }
 });
 
-
 // =====================================
 // LEDEN LOGIN
 // =====================================
 app.post("/login", async (req, res) => {
-  console.log("LOGIN BODY:", req.body);
   const { email, password } = req.body;
-
 
   try {
     const { data: user, error } = await supabase
@@ -182,16 +221,12 @@ app.post("/login", async (req, res) => {
       return res.json({ ok: false, error: "Fout wachtwoord." });
     }
 
-   res.json({ ok: true, user });
-
-
+    res.json({ ok: true, user });
   } catch (err) {
-  console.error("LOGIN ERROR:", err);
-  res.json({ ok: false, error: "Technische fout" });
-}
-
+    console.error("LOGIN ERROR:", err);
+    res.json({ ok: false, error: "Technische fout" });
+  }
 });
-
 
 // =====================================
 // ADMIN LOGIN (PIN)
@@ -258,58 +293,12 @@ app.post("/admin-change-pin", async (req, res) => {
   }
 });
 
-
-// =====================================
-// EVENT INSCHRIJVEN (via email)
-// =====================================
-app.post("api/signup", upload.none(), async (req, res) => {
-  const { email, event_id } = req.body;
-
-  if (!email || !event_id) {
-    return res.json({ ok: false, message: "email en event_id verplicht" });
-  }
-
-  try {
-    const { data: member, error: memberError } = await supabase
-      .from("Leden")
-      .select("id, naam, email")
-      .eq("email", email)
-      .single();
-
-    if (memberError || !member) {
-      return res.json({ ok: false, message: "Lid niet gevonden." });
-    }
-
-    const { error: insertError } = await supabase
-      .from("signups")
-      .insert([{ member_id: member.id, event_id, status: "pending" }]);
-
-    if (insertError) {
-      return res.json({ ok: false, message: "Inschrijving mislukt." });
-    }
-
-    return res.json({
-      ok: true,
-      signup: {
-        event_id,
-        email: member.email,
-        name: member.naam,
-        status: "pending"
-      }
-    });
-  } catch (err) {
-    return res.json({ ok: false, message: "Serverfout." });
-  }
-});
-
-
 // =====================================
 // CONTACT FORM
 // =====================================
 app.post("/api/contact", async (req, res) => {
   try {
-    const { name, email, phone, street, zip, city, message, consent } =
-      req.body;
+    const { name, email, phone, street, zip, city, message, consent } = req.body;
 
     const { error } = await supabase
       .from("forms")
@@ -337,11 +326,9 @@ app.post("/api/contact", async (req, res) => {
 });
 
 // =====================================
-// verificatie login
+// VERIFICATIE LOGIN
 // =====================================
-
 app.get("/api/me", async (req, res) => {
-
   const email = req.query.email;
 
   if (!email) {
@@ -362,10 +349,8 @@ app.get("/api/me", async (req, res) => {
 });
 
 // =====================================
-// events route
+// EVENTS
 // =====================================
-
-// GET /events
 app.get("/api/events", async (req, res) => {
   const { data: events, error } = await supabase
     .from("events")
@@ -374,18 +359,17 @@ app.get("/api/events", async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  // config ophalen voor QR
   const { data: cfg } = await supabase
     .from("Config")
     .select("*")
-    .limit(1)
-    .single();
+    .eq("id", 1)
+    .maybeSingle();
 
-  const iban  = cfg?.iban || "";
-  const bic   = cfg?.bic || "";
-  const name  = cfg?.creditor_name || "";
+  const iban = cfg?.vereniging_iban || "";
+  const bic = cfg?.vereniging_bic || "";
+  const name = cfg?.vereniging_naam || "";
 
-  const withQr = (events || []).map(ev => {
+  const withQr = (events || []).map((ev) => {
     const datum = (ev.start || "").slice(0, 10);
     const qr_text = buildEpcQrText(
       name,
@@ -401,49 +385,90 @@ app.get("/api/events", async (req, res) => {
   res.json(withQr);
 });
 
-// helper
-function moneyAmount(x) {
-  return "EUR" + Number(x || 0).toFixed(2);
-}
+app.post("/api/events", async (req, res) => {
+  try {
+    const payload = {
+      title: req.body.title || "",
+      start: req.body.start,
+      end: req.body.end,
+      info: req.body.info || "",
+      requires_signup: !!req.body.requires_signup,
+      mandatory: !!req.body.mandatory,
+      paid: !!req.body.paid,
+      price: Number(req.body.price || 0)
+    };
 
-function sanitizeLine(s) {
-  return String(s || "").replace(/[\r\n]/g, " ").trim();
-}
+    const { data, error } = await supabase
+      .from("events")
+      .insert([payload])
+      .select()
+      .single();
 
-function buildEpcQrText(creditorName, iban, bic, amount, remittance, info = "") {
-  creditorName = sanitizeLine(creditorName);
-  iban = sanitizeLine(iban).toUpperCase().replace(/[^A-Z0-9]/g, "");
-  bic  = sanitizeLine(bic).toUpperCase().replace(/[^A-Z0-9]/g, "");
-  remittance = sanitizeLine(remittance);
-  info = sanitizeLine(info);
+    if (error) throw error;
 
-  return [
-    "BCD",
-    "002",
-    "1",
-    "SCT",
-    bic,
-    creditorName,
-    iban,
-    moneyAmount(amount),
-    "",
-    remittance,
-    info
-  ].join("\n");
-}
+    res.json({ ok: true, id: data.id, event: data });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+app.put("/api/events/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const payload = {
+      title: req.body.title || "",
+      start: req.body.start,
+      end: req.body.end,
+      info: req.body.info || "",
+      requires_signup: !!req.body.requires_signup,
+      mandatory: !!req.body.mandatory,
+      paid: !!req.body.paid,
+      price: Number(req.body.price || 0)
+    };
+
+    const { data, error } = await supabase
+      .from("events")
+      .update(payload)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({ ok: true, event: data });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+app.delete("/api/events/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const { error } = await supabase
+      .from("events")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
 
 // =====================================
-// INSCHRIJVINGEN OPHALEN (ADMIN)
+// SIGNUPS API
 // =====================================
-app.get("api/signups", async (req, res) => {
+app.get("/api/signups", async (req, res) => {
   const eventId = req.query.event_id;
 
   if (!eventId) {
-    return res.status(400).json({ error: "event_id verplicht" });
+    return res.status(400).json({ ok: false, error: "event_id verplicht" });
   }
 
   try {
-    // 1) signups ophalen
     const { data: signups, error: sErr } = await supabase
       .from("signups")
       .select("*")
@@ -451,16 +476,14 @@ app.get("api/signups", async (req, res) => {
 
     if (sErr) throw sErr;
 
-    // 2) leden ophalen
     const { data: leden, error: lErr } = await supabase
       .from("Leden")
       .select("id, naam, email");
 
     if (lErr) throw lErr;
 
-    // 3) combineren
-    const mapped = (signups || []).map(s => {
-      const lid = leden.find(l => l.id === s.member_id) || {};
+    const mapped = (signups || []).map((s) => {
+      const lid = (leden || []).find((l) => l.id === s.member_id) || {};
       return {
         id: s.id,
         name: lid.naam || "",
@@ -471,15 +494,11 @@ app.get("api/signups", async (req, res) => {
 
     res.json(mapped);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ ok: false, error: err.message });
   }
 });
 
-
-// =====================================
-// INSCHRIJVINGSSTATUS OPHALEN (MEMBER)
-// =====================================
-app.get("api/signup-status", async (req, res) => {
+app.get("/api/signups/status", async (req, res) => {
   const { email, event_id } = req.query;
 
   if (!email || !event_id) {
@@ -487,13 +506,8 @@ app.get("api/signup-status", async (req, res) => {
   }
 
   try {
-    const { data: member, error: memberError } = await supabase
-      .from("Leden")
-      .select("id")
-      .eq("email", email)
-      .single();
-
-    if (memberError || !member) {
+    const { member, error } = await findMemberByEmail(email);
+    if (error || !member) {
       return res.json({ ok: true, signed_up: false });
     }
 
@@ -518,10 +532,7 @@ app.get("api/signup-status", async (req, res) => {
   }
 });
 
-// =====================================
-// INSCHRIJVING ANNULEREN (MEMBER)
-// =====================================
-app.post("api/cancel", upload.none(), async (req, res) => {
+app.post("/api/signups", async (req, res) => {
   const { email, event_id } = req.body;
 
   if (!email || !event_id) {
@@ -529,13 +540,62 @@ app.post("api/cancel", upload.none(), async (req, res) => {
   }
 
   try {
-    const { data: member, error: memberError } = await supabase
-      .from("Leden")
-      .select("id")
-      .eq("email", email)
-      .single();
+    const { member, error } = await findMemberByEmail(email);
+    if (error || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
+    }
 
-    if (memberError || !member) {
+    const { data: existing } = await supabase
+      .from("signups")
+      .select("*")
+      .eq("member_id", member.id)
+      .eq("event_id", event_id)
+      .maybeSingle();
+
+    if (existing) {
+      return res.json({
+        ok: true,
+        signup: {
+          event_id,
+          email: member.email,
+          name: member.naam,
+          status: existing.status || "pending"
+        }
+      });
+    }
+
+    const { error: insertError } = await supabase
+      .from("signups")
+      .insert([{ member_id: member.id, event_id, status: "pending" }]);
+
+    if (insertError) {
+      return res.json({ ok: false, message: "Inschrijving mislukt." });
+    }
+
+    return res.json({
+      ok: true,
+      signup: {
+        event_id,
+        email: member.email,
+        name: member.naam,
+        status: "pending"
+      }
+    });
+  } catch (err) {
+    return res.json({ ok: false, message: "Serverfout." });
+  }
+});
+
+app.delete("/api/signups", async (req, res) => {
+  const { email, event_id } = req.body;
+
+  if (!email || !event_id) {
+    return res.json({ ok: false, message: "email en event_id verplicht" });
+  }
+
+  try {
+    const { member, error } = await findMemberByEmail(email);
+    if (error || !member) {
       return res.json({ ok: false, message: "Lid niet gevonden." });
     }
 
@@ -555,6 +615,91 @@ app.post("api/cancel", upload.none(), async (req, res) => {
   }
 });
 
+app.post("/api/signups/commit", async (req, res) => {
+  const { email, event_id } = req.body;
+
+  if (!email || !event_id) {
+    return res.json({ ok: false, message: "email en event_id verplicht" });
+  }
+
+  try {
+    const { member, error } = await findMemberByEmail(email);
+    if (error || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
+    }
+
+    const { data: signup, error: findError } = await supabase
+      .from("signups")
+      .select("*")
+      .eq("member_id", member.id)
+      .eq("event_id", event_id)
+      .maybeSingle();
+
+    if (findError || !signup) {
+      return res.json({ ok: false, message: "Geen inschrijving gevonden." });
+    }
+
+    const { error: updateError } = await supabase
+      .from("signups")
+      .update({ status: "confirmed" })
+      .eq("id", signup.id);
+
+    if (updateError) {
+      return res.json({ ok: false, message: "Commit mislukt." });
+    }
+
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.json({ ok: false, message: "Serverfout." });
+  }
+});
+
+// =====================================
+// COMPATIBILITEIT MET OUDE ROUTES
+// =====================================
+app.get("/signups", async (req, res) => {
+  req.url = "/api/signups?" + new URLSearchParams(req.query).toString();
+  app.handle(req, res);
+});
+
+app.get("/signup-status", async (req, res) => {
+  req.url = "/api/signups/status?" + new URLSearchParams(req.query).toString();
+  app.handle(req, res);
+});
+
+app.post("/signup", async (req, res) => {
+  req.url = "/api/signups";
+  app.handle(req, res);
+});
+
+app.post("/cancel", async (req, res) => {
+  try {
+    const { email, event_id } = req.body;
+
+    if (!email || !event_id) {
+      return res.json({ ok: false, message: "email en event_id verplicht" });
+    }
+
+    const { member, error } = await findMemberByEmail(email);
+    if (error || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
+    }
+
+    const { error: deleteError } = await supabase
+      .from("signups")
+      .delete()
+      .eq("member_id", member.id)
+      .eq("event_id", event_id);
+
+    if (deleteError) {
+      return res.json({ ok: false, message: "Annuleren mislukt." });
+    }
+
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.json({ ok: false, message: "Serverfout." });
+  }
+});
 
 // =====================================
 // SERVER START
