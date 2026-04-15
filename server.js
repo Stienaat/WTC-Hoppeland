@@ -129,7 +129,7 @@ app.post("/api/admin/config", upload.none(), async (req, res) => {
 // =====================================
 // REGISTRATIE (leden)
 // =====================================
-app.post("api/register", async (req, res) => {
+app.post("/register", async (req, res) => {
   const { naam, adres, gemeente, telefoon, email, password } = req.body;
 
   try {
@@ -160,7 +160,7 @@ app.post("api/register", async (req, res) => {
 // =====================================
 // LEDEN LOGIN
 // =====================================
-app.post("api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   console.log("LOGIN BODY:", req.body);
   const { email, password } = req.body;
 
