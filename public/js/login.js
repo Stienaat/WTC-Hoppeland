@@ -238,9 +238,9 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 	  }, 5000);
   }
 
-  /***********************
-   * LOGIN
-   ***********************/
+/***********************
+ * LOGIN
+ ***********************/
 if (actie === "login") {
 
   const res = await fetch("/login", {
@@ -251,20 +251,22 @@ if (actie === "login") {
 
   const data = await res.json();
 
-  if (data.ok) {
-    // BEWAAR VOLLEDIGE MEMBER INFO
-	localStorage.setItem("user_email", data.user.email);
-	localStorage.setItem("member", JSON.stringify(data.user));
+	if (data.ok) {
+	  // BEWAAR VOLLEDIGE MEMBER INFO + ADMIN-FLAG
+	  localStorage.setItem("user_email", data.user.email);
+	  localStorage.setItem("member", JSON.stringify(data.user));
+	  localStorage.setItem("is_admin", data.user.is_admin ? "true" : "false");
 
-    showModal("success", "Welkom", "Je bent ingelogd. ✔️");
-    setTimeout(() => {
-      window.location.href = "leden-dashboard.html";
-    }, 1500);
-
-  } else {
-    showModal("error","👎","Login mislukt. ❌");
-  }
+	  showModal("success", "Welkom", "Je bent ingelogd. ✔️");
+	  setTimeout(() => {
+		window.location.href = "leden-dashboard.html";
+	  }, 1500);
+	}
+	else {
+		showModal("error","👎","Login mislukt. ❌");
+	  }
 }
+
 
 });
 
