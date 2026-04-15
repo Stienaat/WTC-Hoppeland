@@ -835,7 +835,7 @@ async function handleSaveEvent() {
   };
 
   if (!payload.title) {
-    alert("Geef een titel op");
+    showModal("error", "⚠️", "Geef een titel op.");
     return;
   }
 
@@ -843,13 +843,13 @@ async function handleSaveEvent() {
   if (editingEvent.id) {
     result = await updateEventOnServer(editingEvent.id, payload);
     if (!result?.ok) {
-      alert(result?.error || "Opslaan mislukt");
+      showModal("error", "❌", "opslaan mislukt: " );
       return;
     }
   } else {
     result = await createEventOnServer(payload);
     if (!result?.id) {
-      alert(result?.error || "Aanmaken mislukt");
+      showModal("error", "❌", "aanmaken mislukt: ");
       return;
     }
   }
@@ -865,7 +865,7 @@ async function handleDeleteEvent() {
 
   const result = await deleteEventOnServer(editingEvent.id);
   if (!result?.ok) {
-    alert(result?.error || "Verwijderen mislukt");
+    showModal("error", "❌", "verwijderen mislukt: ");
     return;
   }
 
