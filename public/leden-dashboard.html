@@ -264,20 +264,6 @@ Foto’s en ander beeldmateriaal blijven te allen tijde eigendom van WTC HOPPELA
     </div>
 </div>
 
-<script src="js/modal.js"></script>
-<script>
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      // alle login-info weg
-      localStorage.removeItem("email");
-      localStorage.removeItem("token"); // voor het geval die ooit gebruikt werd
-      // terug naar loginpagina
-      window.location.href = "leden.html";
-    });
-  }
-</script>
-
 
 </body>
 </html>
