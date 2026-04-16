@@ -551,7 +551,7 @@ app.get("/api/admin/config", async (req, res) => {
     const { data, error } = await supabase
       .from("Config")
       .select("*")
-      .eq("id", 1)
+      .limit(1)
       .maybeSingle();
 
     if (error) throw error;
@@ -568,7 +568,8 @@ app.get("/api/admin/config", async (req, res) => {
       }
     });
   } catch (err) {
-    return res.json({ ok: false, error: err.message });
+    console.error("ADMIN CONFIG GET ERROR:", err);
+    return res.status(500).json({ ok: false, error: err.message });
   }
 });
 
@@ -576,28 +577,54 @@ app.get("/api/admin/config", async (req, res) => {
 
 app.post("/api/admin/config", async (req, res) => {
   try {
-    const { vereniging } = req.body || {};
+    const body = req.body || {};
+    const vereniging = body.vereniging || body;
 
-    const naam = vereniging?.naam || "";
-    const iban = vereniging?.iban || "";
-    const bic = vereniging?.bic || "";
-    const med = vereniging?.med || "";
+    const naam = vereniging.naam || "";
+    const iban = vereniging.iban || "";
+    const bic = vereniging.bic || "";
+    const med = vereniging.med || "";
 
-    const { error } = await supabase
+    const { data: existing, error: findError } = await supabase
       .from("Config")
-      .upsert({
-        id: 1,
-        vereniging_naam: naam,
-        vereniging_iban: iban,
-        vereniging_bic: bic,
-        vereniging_med: med
-      });
+      .select("id")
+      .limit(1)
+      .maybeSingle();
+
+    if (findError) throw findError;
+
+    let result;
+    let error;
+
+    if (existing?.id) {
+      ({ data: result, error } = await supabase
+        .from("Config")
+        .update({
+          vereniging_naam: naam,
+          vereniging_iban: iban,
+          vereniging_bic: bic,
+          vereniging_med: med
+        })
+        .eq("id", existing.id)
+        .select());
+    } else {
+      ({ data: result, error } = await supabase
+        .from("Config")
+        .insert({
+          vereniging_naam: naam,
+          vereniging_iban: iban,
+          vereniging_bic: bic,
+          vereniging_med: med
+        })
+        .select());
+    }
 
     if (error) throw error;
 
-    return res.json({ ok: true });
+    return res.json({ ok: true, saved: result });
   } catch (err) {
-    return res.json({ ok: false, error: err.message });
+    console.error("ADMIN CONFIG SAVE ERROR:", err);
+    return res.status(500).json({ ok: false, error: err.message });
   }
 });
 
