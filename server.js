@@ -164,69 +164,14 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// =====================================
-// ADMIN LOGIN (PIN)
-// =====================================
 app.post("/admin-login", async (req, res) => {
-  const { pin } = req.body;
-
-  if (!pin) {
-    return res.json({ ok: false, message: "PIN verplicht." });
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("admin")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    if (!data || data.pin !== pin) {
-      return res.json({ ok: false, message: "PIN fout." });
-    }
-
-    return res.json({ ok: true, message: "PIN OK" });
-  } catch (err) {
-    return res.json({ ok: false, message: "Serverfout." });
-  }
+  req.url = "/api/admin/login";
+  app.handle(req, res);
 });
 
-// =====================================
-// ADMIN PIN WIJZIGEN
-// =====================================
 app.post("/admin-change-pin", async (req, res) => {
-  const { oldPin, newPin } = req.body;
-
-  if (!oldPin || !newPin) {
-    return res.json({ ok: false, message: "Beide PINs verplicht." });
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("admin")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    if (!data || data.pin !== oldPin) {
-      return res.json({ ok: false, message: "Oude PIN fout." });
-    }
-
-    const { error: updateError } = await supabase
-      .from("admin")
-      .update({ pin: newPin })
-      .eq("id", 1);
-
-    if (updateError) throw updateError;
-
-    return res.json({ ok: true, message: "PIN gewijzigd." });
-  } catch (err) {
-    return res.json({ ok: false, message: "Serverfout." });
-  }
+  req.url = "/api/admin/change-pin";
+  app.handle(req, res);
 });
 
 // =====================================
