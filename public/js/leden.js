@@ -475,14 +475,13 @@ async function handlePinChange() {
     const j = await r.json();
 
     if (!j.ok) {
-      setStatus(pinError2, j.message || 'Wijzigen mislukt.', 'error');
+      showModal("error", "❌", "PIN code is mislukt!");
       return;
     }
-
-    setStatus(pinError2, '✔ PIN gewijzigd.', 'ok');
+    showModal("success", "👌", "Uw PIN code is gewijzigd!");
     setTimeout(closePinChangePopup, 800);
   } catch (err) {
-    setStatus(pinError2, 'Serverfout.', 'error');
+    showModal("error", "❌", "serverfout!");
   }
 }
 
