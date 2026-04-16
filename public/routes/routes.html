@@ -579,12 +579,13 @@ window.saveDrawnRoute = function(i) {
   .then(r => r.json())
   .then(res => {
     if (!res.ok) return 
-	showModal("error", "❌", "Opslaan mislukt: " + err.message);
+	showModal("error", "❌", "Opslaan mislukt! " + err.message);
 	showModal("success", "👌", "Route is opgeslagen!");
    
     return reloadCatalog();
   })
-  .catch(() => showModal("error", "❌", "serverfout bij opslaan!: " + err.message);
+  .catch(() => 
+    showModal("error", "❌", "Serverfout bij opslaan! " + err.message);
 
 };
 
