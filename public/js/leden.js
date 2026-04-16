@@ -382,38 +382,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const btnOk    = document.getElementById('btnOk');
   const pinError = document.getElementById('pinError');
  
-
-async function handlePinUnlock() {
-  const pin = pinInput?.value?.trim() || '';
-
-  if (pin.length !== 6) {
-    setStatus(pinError, 'PIN moet 6 cijfers zijn.', 'error');
-    return;
-  }
-
-  try {
-    const j = await ajax('/admin-login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin })
-    });
-
-    if (!j.ok) {
-      setStatus(pinError, j.message || 'PIN onjuist.', 'error');
-      return;
-    }
-
-	localStorage.setItem("is_admin", "true");
-	pinError.textContent = "";
-	pinInput.value = "";
-	openAdminPhase2();
-
-  } catch (e) {
-    console.error('PIN unlock error:', e);
-    pinError.textContent = 'Serverfout.';
-  }
-}
-
   btnOk && btnOk.addEventListener('click', handlePinUnlock);
 
   logo && logo.addEventListener('dblclick', e => {
