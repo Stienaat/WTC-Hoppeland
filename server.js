@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
-
+import eventsRoutes from "./routes/events.js";
 const upload = multer();
 
 // Fix voor __dirname in ESM
@@ -26,6 +26,10 @@ const supabase = createClient(
 // STATIC FILES
 // =====================================
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use("/api/events", eventsRoutes);
+
+
 
 // =====================================
 // HOME
@@ -348,115 +352,6 @@ app.get("/api/me", async (req, res) => {
   res.json({ ok: true, user });
 });
 
-// =====================================
-// EVENTS
-// =====================================
-app.get("/api/events", async (req, res) => {
-  const { data: events, error } = await supabase
-    .from("events")
-    .select("*")
-    .order("start", { ascending: true });
-
-  if (error) return res.status(500).json({ error: error.message });
-
-  const { data: cfg } = await supabase
-    .from("Config")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
-
-  const iban = cfg?.vereniging_iban || "";
-  const bic = cfg?.vereniging_bic || "";
-  const name = cfg?.vereniging_naam || "";
-
-  const withQr = (events || []).map((ev) => {
-    const datum = (ev.start || "").slice(0, 10);
-    const qr_text = buildEpcQrText(
-      name,
-      iban,
-      bic,
-      ev.price || 0,
-      `bet :${ev.title || ""} dd ${datum}`,
-      ""
-    );
-    return { ...ev, qr_text };
-  });
-
-  res.json(withQr);
-});
-
-app.post("/api/events", async (req, res) => {
-  try {
-    const payload = {
-      title: req.body.title || "",
-      start: req.body.start,
-      end: req.body.end,
-      info: req.body.info || "",
-      requires_signup: !!req.body.requires_signup,
-      mandatory: !!req.body.mandatory,
-      paid: !!req.body.paid,
-      price: Number(req.body.price || 0)
-    };
-
-    const { data, error } = await supabase
-      .from("events")
-      .insert([payload])
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    res.json({ ok: true, id: data.id, event: data });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-});
-
-app.put("/api/events/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const payload = {
-      title: req.body.title || "",
-      start: req.body.start,
-      end: req.body.end,
-      info: req.body.info || "",
-      requires_signup: !!req.body.requires_signup,
-      mandatory: !!req.body.mandatory,
-      paid: !!req.body.paid,
-      price: Number(req.body.price || 0)
-    };
-
-    const { data, error } = await supabase
-      .from("events")
-      .update(payload)
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    res.json({ ok: true, event: data });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-});
-
-app.delete("/api/events/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    const { error } = await supabase
-      .from("events")
-      .delete()
-      .eq("id", id);
-
-    if (error) throw error;
-
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ ok: false, error: err.message });
-  }
-});
 
 // =====================================
 // SIGNUPS API
