@@ -16,6 +16,23 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 
+<div id="app-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modal-title"></h3>
+
+        <div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+            <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        </div>
+
+        <p id="modal-message"></p>
+
+        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+            <!-- Knoppen worden dynamisch ingevuld -->
+        </div>
+    </div>
+</div>
+
+<script src="/js/modal.js"></script>
 <link href="/css/WTC.css" rel="stylesheet">
 
 <style>
@@ -66,8 +83,7 @@ a.dl {
 }
 </style>
 
- <link rel="stylesheet" href="./CSS/WTC.css">
- 
+
 </head>
 
 <body>
@@ -379,8 +395,8 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
 
 window.loadCatalogRouteById = function(id) {
   const meta = routes.find(r => r.type === 'catalog' && String(r.id) === String(id));
-  if (!meta) return alert('Route niet gevonden');
-
+  if (!meta) return 
+		showModal("error", "❌", "Route niet gevonden!" + err.message);
   clearActiveRoute();
 
   // 1) catalog item met coords (opgeslagen getekende route)
@@ -421,7 +437,8 @@ window.loadCatalogRouteById = function(id) {
   // 2) catalog item met GPX bestand
   if (meta.bestand) {
     if (String(meta.bestand).includes('/')) {
-      return alert('routes.json fout: bestand mag geen pad bevatten');
+      return 
+	  showModal("error", "❌", "bestand mag geen pad bevatten! " + err.message);
     }
 
     const url = joinUrl(getGpxBaseUrl(meta), meta.bestand);
@@ -435,8 +452,8 @@ window.loadCatalogRouteById = function(id) {
       })
       .then(txt => {
         const active = parseGpxToActiveRoute(txt, meta.naam);
-        if (!active) return alert('GPX bevat geen track');
-
+        if (!active) return 
+			showModal("error", "❌", "GPX bevat geen track!: " + err.message);
         active.catalogId = meta.id; // voor delete-route.php (als je dat wil)
         routes.push(active);
         activeRouteIndex = routes.length - 1;
@@ -445,14 +462,13 @@ window.loadCatalogRouteById = function(id) {
         renderList();
       })
       .catch(err => {
-        console.error('GPX laden mislukt:', err);
-        alert(err.message);
+        showModal("error", "❌", "GPX laden mislukt! " + err.message);
       });
 
     return;
   }
-
-  alert('Deze catalogusroute heeft geen coords en geen bestand.');
+	showModal("error", "❌", "Deze catalogusroute heeft geen coords en geen bestand! " + err.message);
+  
 };
 
 /* =====================================================
@@ -463,8 +479,8 @@ function exportRouteToGPX(route) {
 
   const geo = route.layer.toGeoJSON();
   const coords = geo.geometry.coordinates || [];
-  if (coords.length < 2) return alert('Route bevat te weinig punten');
-
+  if (coords.length < 2) return 
+		showModal("error", "❌", "Route bevat te weinig punten! " + err.message);
   const wpMap = {
     rest:   { sym: 'Restroom',        type: 'rest' },
     food:   { sym: 'Food & Drink',    type: 'food' },
@@ -537,7 +553,8 @@ window.saveDrawnRoute = function(i) {
   // als hij uit catalogus komt, wil je meestal geen "opslaan als nieuw"
   // (anders krijg je duplicaten). Als je wél duplicaten wil: haal deze check weg.
   if (r.catalogId) {
-    alert('Deze route komt al uit de catalogus. Opslaan als nieuw staat nu uit (voorkomt duplicaten).');
+    
+	showModal("error", "❌", "Deze route komt al uit de catalogus. Opslaan als nieuw staat nu uit (voorkomt duplicaten! " + err.message);
     return;
   }
 
@@ -561,11 +578,14 @@ window.saveDrawnRoute = function(i) {
   })
   .then(r => r.json())
   .then(res => {
-    if (!res.ok) return alert(res.error || 'Opslaan mislukt');
-    alert('Route opgeslagen');
+    if (!res.ok) return 
+	showModal("error", "❌", "Opslaan mislukt: " + err.message);
+	showModal("success", "👌", "Route is opgeslagen!");
+   
     return reloadCatalog();
   })
-  .catch(() => alert('Serverfout bij opslaan'));
+  .catch(() => showModal("error", "❌", "serverfout bij opslaan!: " + err.message);
+
 };
 
 /* =====================================================
@@ -633,13 +653,15 @@ window.deleteWaypoint = function(id) {
   .then(r => r.json())
   .then(res => {
     if (!res.ok) {
-      alert(res.error || 'Opslaan mislukt');
+      showModal("error", "❌", "Opslaan mislukt! " + err.message);
+
       return;
     }
-    alert('Route bijgewerkt');
+    showModal("success", "👌", "Route is bijgewerkt!");
     reloadCatalog();
   })
-  .catch(() => alert('Serverfout bij opslaan'));
+  .catch(() => showModal("error", "❌", "Serverfout bij opslaan! " + err.message);
+
 };
 
 
@@ -649,7 +671,8 @@ window.deleteWaypoint = function(id) {
 window.deleteActiveRoute = function(i) {
   const r = routes[i];
   if (!r) {
-    alert('Interne fout: route niet gevonden');
+    showModal("error", "❌", "Interne fout, route niet gevonden! " + err.message);
+
     return;
   }
 
@@ -668,7 +691,8 @@ window.deleteActiveRoute = function(i) {
     .then(res => res.json())
     .then(res => {
       if (!res.ok) {
-        alert(res.error || 'Verwijderen mislukt');
+        showModal("error", "❌", "Verwijderen mislukt! " + err.message);
+
         return;
       }
 
@@ -685,7 +709,8 @@ window.deleteActiveRoute = function(i) {
     })
     .catch(err => {
       console.error(err);
-      alert('Serverfout bij verwijderen');
+      showModal("error", "❌", "Serfout bij verwijderen! " + err.message);
+
     });
 
     return;
