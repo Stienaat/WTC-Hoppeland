@@ -5,7 +5,7 @@ import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import eventsRoutes from "./routes/events.js";
-
+import adminRoutes from "./routes/admin.js";
 
 
 const upload = multer();
@@ -31,7 +31,10 @@ const supabase = createClient(
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/events", eventsRoutes);
-
+app.use("/api/admin", (req, res, next) => {
+  req.supabase = supabase;
+  next();
+}, adminRoutes);
 
 
 // =====================================
@@ -544,89 +547,6 @@ app.post("/cancel", async (req, res) => {
   }
 })
 
-//  ADMIN CONFIG
-
-app.get("/api/admin/config", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("Config")
-      .select("*")
-      .limit(1)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    return res.json({
-      ok: true,
-      config: {
-        vereniging: {
-          naam: data?.vereniging_naam || "",
-          iban: data?.vereniging_iban || "",
-          bic: data?.vereniging_bic || "",
-          med: data?.vereniging_med || ""
-        }
-      }
-    });
-  } catch (err) {
-    console.error("ADMIN CONFIG GET ERROR:", err);
-    return res.status(500).json({ ok: false, error: err.message });
-  }
-});
-
-
-
-app.post("/api/admin/config", async (req, res) => {
-  try {
-    const body = req.body || {};
-    const vereniging = body.vereniging || body;
-
-    const naam = vereniging.naam || "";
-    const iban = vereniging.iban || "";
-    const bic = vereniging.bic || "";
-    const med = vereniging.med || "";
-
-    const { data: existing, error: findError } = await supabase
-      .from("Config")
-      .select("id")
-      .limit(1)
-      .maybeSingle();
-
-    if (findError) throw findError;
-
-    let result;
-    let error;
-
-    if (existing?.id) {
-      ({ data: result, error } = await supabase
-        .from("Config")
-        .update({
-          vereniging_naam: naam,
-          vereniging_iban: iban,
-          vereniging_bic: bic,
-          vereniging_med: med
-        })
-        .eq("id", existing.id)
-        .select());
-    } else {
-      ({ data: result, error } = await supabase
-        .from("Config")
-        .insert({
-          vereniging_naam: naam,
-          vereniging_iban: iban,
-          vereniging_bic: bic,
-          vereniging_med: med
-        })
-        .select());
-    }
-
-    if (error) throw error;
-
-    return res.json({ ok: true, saved: result });
-  } catch (err) {
-    console.error("ADMIN CONFIG SAVE ERROR:", err);
-    return res.status(500).json({ ok: false, error: err.message });
-  }
-});
 
 // =====================================
 // SERVER START
