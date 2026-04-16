@@ -410,7 +410,7 @@ async function handlePinUnlock() {
 
   } catch (e) {
     console.error('PIN unlock error:', e);
-    pinError.textContent = 'Serverfout.';
+    pinError.textContent = 'Serversfout.';
   }
 }
 
@@ -450,7 +450,7 @@ async function handlePinUnlock() {
     pinChangeOverlay.classList.remove('show');
   }
 
-/****** async function handlePinChange() {
+async function handlePinChange() {
   const oldPin = oldPinInput.value.trim();
   const newPin = newPinInput.value.trim();
   const newPin2 = newPinInput2.value.trim();
@@ -483,7 +483,7 @@ async function handlePinUnlock() {
   } catch (err) {
     showModal("error", "❌", "serverfout!");
   }
-} *******/
+}
 
  document.getElementById('btnCloseAdmin')
   ?.addEventListener('click', closeAdminUI);
