@@ -1,10 +1,9 @@
 import express from "express";
+import multer from "multer";
 
 const router = express.Router();
+const upload = multer();
 
-// ============================
-// GET notice
-// ============================
 router.get("/", async (req, res) => {
   const supabase = req.supabase;
 
@@ -27,14 +26,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ============================
-// POST notice
-// ============================
-router.post("/", async (req, res) => {
+router.post("/", upload.none(), async (req, res) => {
   const supabase = req.supabase;
 
   try {
-    const { text = "" } = req.body;
+    const { text = "" } = req.body || {};
 
     const { error } = await supabase
       .from("Notice")
