@@ -201,64 +201,70 @@ async function saveNotice() {
 	* 3) ADMIN CONFIG (naam + IBAN + BIC + Mededeling)
  ************************************************************/
  
-function initAdminConfigCard(){
-
-  const elName  = document.getElementById('cfgOrgName');
-  const elIban  = document.getElementById('cfgIban');
-  const elBic  = document.getElementById('cfgBic');
-  const elMed  = document.getElementById('cfgMed');
+function initAdminConfigCard() {
+  const elName = document.getElementById('cfgOrgName');
+  const elIban = document.getElementById('cfgIban');
+  const elBic = document.getElementById('cfgBic');
+  const elMed = document.getElementById('cfgMed');
   const btnSave = document.getElementById('btnSaveConfig');
-  const elStat  = document.getElementById('configSaveStatus');
+  const confSaveStatus = document.getElementById('confSaveStatus');
 
-  const confSaveStatus  = document.getElementById('confSaveStatus');
-
-  if (!elName || !elIban || !elBic || !elMed ||!btnSave) return;  
+  if (!elName || !elIban || !elBic || !elMed || !btnSave) return;
 
   // Laden
   (async () => {
     try {
       const j = await ajax('/api/admin/config');
-      if (j?.ok && j.config){
-        elName.value = j.config.vereniging?.naam || '';
-        elIban.value = j.config.vereniging?.iban || '';
-		elBic.value = j.config.vereniging?.bic || '';
-		elMed.value = j.config.vereniging?.med || '';
+
+      if (!j?.ok || !j.config) {
+        setStatus(confSaveStatus, 'Kon configuratie niet laden.', 'error');
+        return;
       }
-    } catch (e){
+
+      elName.value = j.config.vereniging?.naam || '';
+      elIban.value = j.config.vereniging?.iban || '';
+      elBic.value = j.config.vereniging?.bic || '';
+      elMed.value = j.config.vereniging?.med || '';
+
+      setStatus(confSaveStatus, '', 'info');
+    } catch (e) {
       setStatus(confSaveStatus, 'Kon configuratie niet laden.', 'error');
     }
   })();
 
   // Opslaan
-	btnSave.addEventListener('click', async () => {
-	setStatus(confSaveStatus, 'Naam en bestand zijn verplicht.', 'error');
-
-  try {
-    const j = await ajax('/api/admin/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        vereniging: {
-          naam: elName.value.trim(),
-          iban: elIban.value.trim(),
-          bic: elBic.value.trim(),
-          med: elMed.value.trim()
-        }
-      })
-    });
-
-    if (!j.ok) {
-      showModal("error", "❌", "Configuratie is niet opgeslagen.");
+  btnSave.onclick = async () => {
+    if (!elName.value.trim()) {
+      setStatus(confSaveStatus, 'Naam is verplicht.', 'error');
       return;
     }
 
-    setStatus(confSaveStatus, '✔ Opgeslagen.', 'ok');
+    setStatus(confSaveStatus, 'Opslaan...', 'info');
 
-  } catch (e) {
-    showModal("error", "❌", "Technische fout: " + e.message);
-  }
-});
+    try {
+      const j = await ajax('/api/admin/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vereniging: {
+            naam: elName.value.trim(),
+            iban: elIban.value.trim(),
+            bic: elBic.value.trim(),
+            med: elMed.value.trim()
+          }
+        })
+      });
 
+      if (!j.ok) {
+        setStatus(confSaveStatus, 'Configuratie is niet opgeslagen.', 'error');
+        return;
+      }
+
+      setStatus(confSaveStatus, '✔ Opgeslagen.', 'ok');
+    } catch (e) {
+      setStatus(confSaveStatus, 'Technische fout: ' + e.message, 'error');
+    }
+  };
 }
 /************************************************************
 	*  4) FIETS	ROUTES
