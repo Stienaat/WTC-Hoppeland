@@ -31,7 +31,10 @@ const supabase = createClient(
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/events", eventsRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/admin", (req, res, next) => {
+  req.supabase = supabase;
+  next();
+}, adminRoutes);
 
 
 // =====================================
