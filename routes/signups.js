@@ -1,169 +1,238 @@
 import express from "express";
-import { supabase } from "../supabaseClient.js";
 
 const router = express.Router();
 
-// Alleen leden of admin
-function requireMemberOrAdmin(req, res, next) {
-    if (!req.session?.user && !req.session?.is_admin) {
-        return res.status(403).json({ error: "Niet ingelogd" });
-    }
-    next();
+async function findMemberByEmail(supabase, email) {
+  if (!email) return { member: null, error: "email verplicht" };
+
+  const { data: member, error } = await supabase
+    .from("Leden")
+    .select("id, naam, email")
+    .eq("email", email)
+    .single();
+
+  if (error || !member) {
+    return { member: null, error: "Lid niet gevonden." };
+  }
+
+  return { member, error: null };
 }
 
-
-router.use(requireMemberOrAdmin);
-
-/* ============================
-   GET – signups voor 1 event
-   ============================ */
+// ============================
+// GET /api/signups?event_id=...
+// ============================
 router.get("/", async (req, res) => {
-    const eventId = req.query.event_id;
-    if (!eventId) return res.json({ signups: [] });
+  const supabase = req.supabase;
+  const eventId = req.query.event_id;
 
-    // 1. Haal signups op
-    const { data: signups, error } = await supabase
-        .from("signups")
-        .select("id, member_id, paid, payment_method, payment_reference, created_at")
-        .eq("event_id", eventId)
-        .order("created_at", { ascending: true });
+  if (!eventId) {
+    return res.status(400).json({ ok: false, error: "event_id verplicht" });
+  }
 
-    if (error) return res.status(500).json({ error: error.message });
+  try {
+    const { data: signups, error: sErr } = await supabase
+      .from("signups")
+      .select("*")
+      .eq("event_id", eventId);
 
-    // 2. Haal leden op
-    const memberIds = [...new Set(signups.map(s => s.member_id))];
+    if (sErr) throw sErr;
 
-    const { data: leden } = await supabase
-        .from("Leden")
-        .select("id, naam, email")
-        .in("id", memberIds);
+    const { data: leden, error: lErr } = await supabase
+      .from("Leden")
+      .select("id, naam, email");
 
-    const ledenMap = {};
-    leden.forEach(l => {
-        ledenMap[l.id] = {
-            name: l.naam,
-            email: l.email
-        };
-    });
+    if (lErr) throw lErr;
 
-    // 3. Bouw structuur die frontend verwacht
-    const result = signups.map(s => ({
+    const mapped = (signups || []).map((s) => {
+      const lid = (leden || []).find((l) => l.id === s.member_id) || {};
+      return {
         id: s.id,
-        created_at: s.created_at,
-        paid: s.paid,
-        method: s.payment_method || "",
-        reference: s.payment_reference || "",
-        Leden: ledenMap[s.member_id] || { name: "", email: "" }
-    }));
+        name: lid.naam || "",
+        email: lid.email || "",
+        status: s.status || ""
+      };
+    });
 
-    res.json({ signups: result });
+    return res.json(mapped);
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: err.message });
+  }
 });
 
+// ===================================
+// GET /api/signups/status
+// ===================================
+router.get("/status", async (req, res) => {
+  const supabase = req.supabase;
+  const { email, event_id } = req.query;
 
-/* ============================
-   POST – update / delete / cleanup
-   ============================ */
+  if (!email || !event_id) {
+    return res.json({ ok: false, error: "email en event_id verplicht" });
+  }
+
+  try {
+    const { member, error } = await findMemberByEmail(supabase, email);
+
+    if (error || !member) {
+      return res.json({ ok: true, signed_up: false });
+    }
+
+    const { data: signup, error: signupError } = await supabase
+      .from("signups")
+      .select("*")
+      .eq("member_id", member.id)
+      .eq("event_id", event_id)
+      .maybeSingle();
+
+    if (signupError || !signup) {
+      return res.json({ ok: true, signed_up: false });
+    }
+
+    return res.json({
+      ok: true,
+      signed_up: true,
+      status: signup.status || "pending"
+    });
+  } catch (err) {
+    return res.json({ ok: false, error: err.message });
+  }
+});
+
+// ============================
+// POST /api/signups
+// ============================
 router.post("/", async (req, res) => {
-    const body = req.body;
-    const action = body.action;
+  const supabase = req.supabase;
+  const { email, event_id } = req.body;
 
-    /* UPDATE */
-    if (action === "update") {
-        const { error } = await supabase
-            .from("signups")
-            .update({
-                paid: body.paid === "true",
-                payment_method: body.payment_method.trim(),
-                payment_reference: body.payment_reference.trim()
-            })
-            .eq("id", body.signup_id);   // FIX
+  if (!email || !event_id) {
+    return res.json({ ok: false, message: "email en event_id verplicht" });
+  }
 
-        if (error) return res.status(500).json({ error: error.message });
+  try {
+    const { member, error } = await findMemberByEmail(supabase, email);
 
-        return res.json({ ok: true });
+    if (error || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
     }
 
-    /* DELETE */
-    if (action === "delete") {
-        const { error } = await supabase
-            .from("signups")
-            .delete()
-            .eq("id", body.signup_id);   // FIX
+    const { data: existing } = await supabase
+      .from("signups")
+      .select("*")
+      .eq("member_id", member.id)
+      .eq("event_id", event_id)
+      .maybeSingle();
 
-        if (error) return res.status(500).json({ error: error.message });
-
-        return res.json({ ok: true });
-    }
-
-    /* CLEANUP */
-    if (action === "cleanup") {
-        const now = new Date().toISOString();
-
-        const { data: oldEvents } = await supabase
-            .from("events")
-            .select("id")
-            .lt("start", now);
-
-        const ids = oldEvents.map(ev => ev.id);
-
-        if (ids.length) {
-            await supabase.from("events").delete().in("id", ids);
+    if (existing) {
+      return res.json({
+        ok: true,
+        signup: {
+          event_id,
+          email: member.email,
+          name: member.naam,
+          status: existing.status || "pending"
         }
-
-        return res.json({ ok: true });
+      });
     }
 
-    res.status(400).json({ error: "Onbekende actie" });
+    const { error: insertError } = await supabase
+      .from("signups")
+      .insert([{ member_id: member.id, event_id, status: "pending" }]);
+
+    if (insertError) {
+      return res.json({ ok: false, message: "Inschrijving mislukt." });
+    }
+
+    return res.json({
+      ok: true,
+      signup: {
+        event_id,
+        email: member.email,
+        name: member.naam,
+        status: "pending"
+      }
+    });
+  } catch (err) {
+    return res.json({ ok: false, message: "Serverfout." });
+  }
 });
 
-/* ============================
-   EXPORT
-   ============================ */
-import ExcelJS from "exceljs";
+// ============================
+// DELETE /api/signups
+// ============================
+router.delete("/", async (req, res) => {
+  const supabase = req.supabase;
+  const { email, event_id } = req.body;
 
-router.get("/export", async (req, res) => {
-    const eventId = req.query.event_id;
-    if (!eventId) return res.status(400).send("Geen event_id");
+  if (!email || !event_id) {
+    return res.json({ ok: false, message: "email en event_id verplicht" });
+  }
 
-    const { data: signups } = await supabase
-        .from("signups")
-        .select("id, member_id, paid, payment_method, payment_reference, created_at")
-        .eq("event_id", eventId);
+  try {
+    const { member, error } = await findMemberByEmail(supabase, email);
 
-    const memberIds = [...new Set(signups.map(s => s.member_id))];
+    if (error || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
+    }
 
-    const { data: leden } = await supabase
-        .from("Leden")
-        .select("id, naam, email")
-        .in("id", memberIds);
+    const { error: deleteError } = await supabase
+      .from("signups")
+      .delete()
+      .eq("member_id", member.id)
+      .eq("event_id", event_id);
 
-    const ledenMap = {};
-    leden.forEach(l => {
-        ledenMap[l.id] = { name: l.naam, email: l.email };
-    });
+    if (deleteError) {
+      return res.json({ ok: false, message: "Annuleren mislukt." });
+    }
 
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet("Inschrijvingen");
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.json({ ok: false, message: "Serverfout." });
+  }
+});
 
-    ws.addRow(["Naam", "Email", "Betaald", "Methode", "Referentie", "Ingeschreven"]);
+// ===================================
+// POST /api/signups/commit
+// ===================================
+router.post("/commit", async (req, res) => {
+  const supabase = req.supabase;
+  const { email, event_id } = req.body;
 
-    signups.forEach(s => {
-        const lid = ledenMap[s.member_id] || { name: "", email: "" };
-        ws.addRow([
-            lid.name,
-            lid.email,
-            s.paid ? "Ja" : "Nee",
-            s.payment_method,
-            s.payment_reference,
-            s.created_at
-        ]);
-    });
+  if (!email || !event_id) {
+    return res.json({ ok: false, message: "email en event_id verplicht" });
+  }
 
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", 'attachment; filename="inschrijvingen.xlsx"');
+  try {
+    const { member, error } = await findMemberByEmail(supabase, email);
 
-    await wb.xlsx.write(res);
-    res.end();
+    if (error || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
+    }
+
+    const { data: signup, error: findError } = await supabase
+      .from("signups")
+      .select("*")
+      .eq("member_id", member.id)
+      .eq("event_id", event_id)
+      .maybeSingle();
+
+    if (findError || !signup) {
+      return res.json({ ok: false, message: "Geen inschrijving gevonden." });
+    }
+
+    const { error: updateError } = await supabase
+      .from("signups")
+      .update({ status: "confirmed" })
+      .eq("id", signup.id);
+
+    if (updateError) {
+      return res.json({ ok: false, message: "Commit mislukt." });
+    }
+
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.json({ ok: false, message: "Serverfout." });
+  }
 });
 
 export default router;
