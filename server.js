@@ -5,7 +5,7 @@ import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
 import bcrypt from "bcryptjs";
 import eventsRoutes from "./routes/events.js";
-import adminRoutes from "./routes/admin.js";
+
 
 
 const upload = multer();
@@ -31,10 +31,7 @@ const supabase = createClient(
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api/events", eventsRoutes);
-app.use("/api/admin", (req, res, next) => {
-  req.supabase = supabase;
-  next();
-}, adminRoutes);
+
 
 
 // =====================================
@@ -544,6 +541,63 @@ app.post("/cancel", async (req, res) => {
     return res.json({ ok: true });
   } catch (err) {
     return res.json({ ok: false, message: "Serverfout." });
+  }
+})
+
+//  ADMIN CONFIG
+
+app.get("/api/admin/config", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("Config")
+      .select("*")
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return res.json({
+      ok: true,
+      config: {
+        vereniging: {
+          naam: data?.vereniging_naam || "",
+          iban: data?.vereniging_iban || "",
+          bic: data?.vereniging_bic || "",
+          med: data?.vereniging_med || ""
+        }
+      }
+    });
+  } catch (err) {
+    return res.json({ ok: false, error: err.message });
+  }
+});
+
+
+
+app.post("/api/admin/config", async (req, res) => {
+  try {
+    const { vereniging } = req.body || {};
+
+    const naam = vereniging?.naam || "";
+    const iban = vereniging?.iban || "";
+    const bic = vereniging?.bic || "";
+    const med = vereniging?.med || "";
+
+    const { error } = await supabase
+      .from("Config")
+      .upsert({
+        id: 1,
+        vereniging_naam: naam,
+        vereniging_iban: iban,
+        vereniging_bic: bic,
+        vereniging_med: med
+      });
+
+    if (error) throw error;
+
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.json({ ok: false, error: err.message });
   }
 });
 
