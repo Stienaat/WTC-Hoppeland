@@ -9,6 +9,8 @@ import adminRoutes from "./routes/admin.js";
 import signupsRoutes from "./routes/signups.js";
 import noticeRoutes from "./routes/notice.js";
 import contactRoutes from "./routes/contact.js";
+import authRoutes from "./routes/auth.js";
+
 
 const upload = multer();
 
@@ -26,6 +28,10 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+app.use((req, res, next) => {
+  req.supabase = supabase;
+  next();
+}, authRoutes);
 
 // =====================================
 // STATIC FILES
@@ -106,63 +112,6 @@ async function findMemberByEmail(email) {
   return { member, error: null };
 }
 
-// =====================================
-// REGISTRATIE (leden)
-// =====================================
-app.post("/register", async (req, res) => {
-  const { naam, adres, gemeente, telefoon, email, password } = req.body;
-
-  try {
-    const hash = await bcrypt.hash(password, 10);
-
-    const { error } = await supabase
-      .from("Leden")
-      .insert({
-        naam,
-        adres,
-        gemeente,
-        telefoon,
-        email,
-        wachtwoord: hash
-      });
-
-    if (error) throw error;
-
-    res.json({ ok: true });
-  } catch (err) {
-    res.json({ ok: false, error: err.message });
-  }
-});
-
-// =====================================
-// LEDEN LOGIN
-// =====================================
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const { data: user, error } = await supabase
-      .from("Leden")
-      .select("*")
-      .eq("email", email)
-      .single();
-
-    if (error || !user) {
-      return res.json({ ok: false, error: "Onbekend emailadres." });
-    }
-
-    const ok = await bcrypt.compare(password, user.wachtwoord);
-
-    if (!ok) {
-      return res.json({ ok: false, error: "Fout wachtwoord." });
-    }
-
-    res.json({ ok: true, user });
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    res.json({ ok: false, error: "Technische fout" });
-  }
-});
 
 app.post("/admin-login", async (req, res) => {
   req.url = "/api/admin/login";
