@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import eventsRoutes from "./routes/events.js";
 import adminRoutes from "./routes/admin.js";
 import signupsRoutes from "./routes/signups.js";
+import noticeRoutes from "./routes/notice.js";
 
 const upload = multer();
 
@@ -39,6 +40,10 @@ app.use("/api/signups", (req, res, next) => {
   req.supabase = supabase;
   next();
 }, signupsRoutes);
+app.use("/api/notice", (req, res, next) => {
+  req.supabase = supabase;
+  next();
+}, noticeRoutes);
 
 // =====================================
 // HOME
@@ -95,38 +100,6 @@ async function findMemberByEmail(email) {
 
   return { member, error: null };
 }
-
-// =====================================
-// NOTICE OPHALEN / SAVE
-// =====================================
-app.get("/api/notice", async (req, res) => {
-  const { data, error } = await supabase
-    .from("Notice")
-    .select("text")
-    .eq("id", 1)
-    .maybeSingle();
-
-  if (error) {
-    return res.json({ ok: false, error: error.message });
-  }
-
-  res.json({ ok: true, text: data?.text || "" });
-});
-
-app.post("/api/notice", upload.none(), async (req, res) => {
-  const { text = "" } = req.body;
-
-  const { error } = await supabase
-    .from("Notice")
-    .upsert({ id: 1, text });
-
-  if (error) {
-    return res.json({ ok: false, error: error.message });
-  }
-
-  res.json({ ok: true });
-});
-
 
 // =====================================
 // REGISTRATIE (leden)
