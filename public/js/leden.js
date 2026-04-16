@@ -33,6 +33,8 @@ function setStatus(el, message = '', type = 'info') {
 const logo = document.getElementById('Image1');
 const adminOverlay = document.getElementById('adminOverlay');
 const adminStatus = document.getElementById('admin-status');
+const adminLogin = document.getElementById('adminLogin');
+const adminFase2 = document.getElementById('adminFase2');
 
 /************************************************************
  * NOTICE
@@ -250,7 +252,6 @@ function initAdminConfigCard() {
 
 /************************************************************
  * LEGACY FIETSROUTES
- * Nog niet migreren - gebruikt nog PHP endpoint.
  ************************************************************/
 const btnUploadRoute = document.getElementById('btnUploadRoute');
 const btnCloseRoute = document.getElementById('btnCloseRoute');
@@ -308,9 +309,6 @@ if (btnUploadRoute) {
 /************************************************************
  * ADMIN UI OPEN / CLOSE
  ************************************************************/
-const adminLogin = document.getElementById('adminLogin');
-const adminFase2 = document.getElementById('adminFase2');
-
 function openAdminPhase1() {
   adminLogin && (adminLogin.style.display = 'block');
   adminFase2 && adminFase2.classList.remove('open');
