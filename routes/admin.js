@@ -7,35 +7,15 @@ const router = express.Router();
 // GET admin config
 // ============================
 router.get("/config", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("Config")
-      .select("*")
-      .eq("id", 1)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    res.json({
-      ok: true,
-      config: {
-        vereniging: {
-          naam: data?.vereniging_naam || "",
-          iban: data?.vereniging_iban || "",
-          bic: data?.vereniging_bic || "",
-          med: data?.vereniging_med || ""
-        }
-      }
-    });
-  } catch (err) {
-    res.json({ ok: false, error: err.message });
-  }
-});
-
+  const supabase = req.supabase;
+console.log("ADMIN CONFIG DATA:", data);
+console.log("ADMIN CONFIG ERROR:", error);
 // ============================
 // SAVE admin config
 // ============================
 router.post("/config", async (req, res) => {
+
+console.log("BODY:", req.body);
   try {
     const { vereniging } = req.body || {};
 
