@@ -8,6 +8,7 @@ import eventsRoutes from "./routes/events.js";
 import adminRoutes from "./routes/admin.js";
 import signupsRoutes from "./routes/signups.js";
 import noticeRoutes from "./routes/notice.js";
+import contactRoutes from "./routes/contact.js";
 
 const upload = multer();
 
@@ -44,6 +45,10 @@ app.use("/api/notice", (req, res, next) => {
   req.supabase = supabase;
   next();
 }, noticeRoutes);
+app.use("/api/contact", (req, res, next) => {
+  req.supabase = supabase;
+  next();
+}, contactRoutes);
 
 // =====================================
 // HOME
@@ -221,38 +226,6 @@ app.post("/admin-change-pin", async (req, res) => {
     return res.json({ ok: true, message: "PIN gewijzigd." });
   } catch (err) {
     return res.json({ ok: false, message: "Serverfout." });
-  }
-});
-
-// =====================================
-// CONTACT FORM
-// =====================================
-app.post("/api/contact", async (req, res) => {
-  try {
-    const { name, email, phone, street, zip, city, message, consent } = req.body;
-
-    const { error } = await supabase
-      .from("forms")
-      .insert([
-        {
-          name,
-          email: email?.toLowerCase() || "",
-          phone,
-          street,
-          zip,
-          city,
-          msg: message,
-          consent: consent === true || consent === "true"
-        }
-      ]);
-
-    if (error) {
-      return res.json({ ok: false, error: "Database insert failed" });
-    }
-
-    return res.json({ ok: true });
-  } catch (err) {
-    return res.json({ ok: false, error: "Server error" });
   }
 });
 
