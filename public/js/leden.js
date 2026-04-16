@@ -450,34 +450,41 @@ async function handlePinUnlock() {
     pinChangeOverlay.classList.remove('show');
   }
 
-  async function handlePinChange(){
-    const oldPin = oldPinInput.value.trim();
-    const newPin = newPinInput.value.trim();
-    const newPin2= newPinInput2.value.trim();
+async function handlePinChange() {
+  const oldPin = oldPinInput.value.trim();
+  const newPin = newPinInput.value.trim();
+  const newPin2 = newPinInput2.value.trim();
 
-    if (!oldPin || !newPin || newPin !== newPin2){
-      setStatus(pinError2,'PIN ongeldig.','error');
+  if (!oldPin || !newPin || newPin !== newPin2) {
+    setStatus(pinError2, 'PIN ongeldig.', 'error');
+    return;
+  }
+
+  try {
+    const r = await fetch("/api/admin/change-pin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        oldPin,
+        newPin
+      })
+    });
+
+    const j = await r.json();
+
+    if (!j.ok) {
+      setStatus(pinError2, j.message || 'Wijzigen mislukt.', 'error');
       return;
     }
 
-    const fd = new FormData();
-    fd.append('actie','admin_change_pin');
-    fd.append('old_pin', oldPin);
-    fd.append('new_pin', newPin);
-
-    try{
-      const r = await fetch('./leden.html',{method:'POST',body:fd});
-      const j = await r.json();
-      if (!j.ok){
-           setStatus(pinError2,'wijzigen mislukt.','error');
-        return;
-      }
-      pinChangeErr.textContent = '✔ PIN gewijzigd';
-      setTimeout(closePinChangePopup, 800);
-    }catch{
-         setStatus(pinError2,'✔ PIN gewijzigd.','ok');
-    }
+    setStatus(pinError2, '✔ PIN gewijzigd.', 'ok');
+    setTimeout(closePinChangePopup, 800);
+  } catch (err) {
+    setStatus(pinError2, 'Serverfout.', 'error');
   }
+}
 
  document.getElementById('btnCloseAdmin')
   ?.addEventListener('click', closeAdminUI);
