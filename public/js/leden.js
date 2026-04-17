@@ -249,8 +249,8 @@ function initAdminConfigCard() {
 }
 
 /************************************************************
- * LEGACY FIETSROUTES
- * Nog niet migreren - gebruikt nog PHP endpoint.
+ * FIETSROUTES UPLOAD (Node API)
+ * Admin-only upload van GPX naar /api/routes/upload-gpx
  ************************************************************/
 const btnUploadRoute = document.getElementById('btnUploadRoute');
 const btnCloseRoute = document.getElementById('btnCloseRoute');
@@ -267,14 +267,19 @@ if (btnCloseRoute) {
 
 if (btnUploadRoute) {
   btnUploadRoute.addEventListener('click', async () => {
-    const naam = document.getElementById('routeNaam')?.value.trim();
-    const groep = document.getElementById('routeGroep')?.value;
-    const afstand = document.getElementById('routeAfstand')?.value.trim();
-    const start = document.getElementById('routeStart')?.value.trim();
-    const file = document.getElementById('routeFile')?.files[0];
+    const naam = document.getElementById('routeNaam')?.value.trim() || '';
+    const groep = document.getElementById('routeGroep')?.value || '';
+    const afstand = document.getElementById('routeAfstand')?.value.trim() || '';
+    const start = document.getElementById('routeStart')?.value.trim() || '';
+    const file = document.getElementById('routeFile')?.files?.[0];
 
-    if (!naam || !file) {
-      setStatus(routeError, 'Naam en bestand zijn verplicht.', 'error');
+    if (!naam || !groep || !afstand || !start || !file) {
+      setStatus(routeError, 'Naam, groep, afstand, start en bestand zijn verplicht.', 'error');
+      return;
+    }
+
+    if (!file.name.toLowerCase().endsWith('.gpx')) {
+      setStatus(routeError, 'Alleen .gpx bestanden zijn toegestaan.', 'error');
       return;
     }
 
@@ -286,18 +291,36 @@ if (btnUploadRoute) {
     fd.append('gpxfile', file);
 
     try {
-      const res = await fetch('/WTC/routes/upload_do.php', {
+      const res = await fetch('/api/routes/upload-gpx', {
         method: 'POST',
         body: fd
       });
 
-      if (!res.ok) {
-        setStatus(routeError, 'Upload mislukt.', 'error');
+      const j = await res.json();
+
+      if (!res.ok || !j.ok) {
+        setStatus(routeError, j.error || 'Upload mislukt.', 'error');
         return;
       }
 
       closeRouteOverlay();
       setStatus(routeError, '✔ Route toegevoegd.', 'ok');
+
+      // optioneel: velden leegmaken
+      const naamEl = document.getElementById('routeNaam');
+      const afstandEl = document.getElementById('routeAfstand');
+      const startEl = document.getElementById('routeStart');
+      const fileEl = document.getElementById('routeFile');
+
+      if (naamEl) naamEl.value = '';
+      if (afstandEl) afstandEl.value = '';
+      if (startEl) startEl.value = '';
+      if (fileEl) fileEl.value = '';
+
+      // optioneel: catalogus herladen als je op dezelfde pagina zit
+      if (typeof reloadCatalog === 'function') {
+        await reloadCatalog();
+      }
     } catch (e) {
       console.error(e);
       setStatus(routeError, 'Technische fout bij upload.', 'error');
