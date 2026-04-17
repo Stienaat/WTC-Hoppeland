@@ -469,7 +469,7 @@ function renderMemberRight(eventData, status) {
         margin: 20px;
         color:#6450E1;
       ">
-        Druk download bevestiging en U bent ingeschreven!
+        Scan deze code met Uw 'bankapp' en druk download bevestiging en U bent ingeschreven!
       </div>
     </div>
 
@@ -634,6 +634,7 @@ function attachMemberEvents(e, status) {
   		showModal("error", "❌", "Inschrijving mislukt: " + err.message);
         return;
       }
+	  	  showModal("success", "👌", "U bent ingeschreven! een bevsstiging is gedownload.");
 
       lastSignup = r.signup || r.data || null;
       signupDownloaded = true;
@@ -642,7 +643,7 @@ function attachMemberEvents(e, status) {
       chk.disabled = true;
 
       downloadConfirmation(e, lastSignup);
-	  showModal("success", "👌", "U bent ingeschreven! een bevsstiging is gedownload.");
+
     };
   }
 }
