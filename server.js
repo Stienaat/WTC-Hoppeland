@@ -11,8 +11,9 @@ import noticeRoutes from "./routes/notice.js";
 import contactRoutes from "./routes/contact.js";
 import authRoutes from "./routes/auth.js";
 import cycleRoutes from "./routes/cycleroutes.js";
+import ridesRouter from './routes/rides.js';
 
-const ridesRouter = require('./routes/rides');
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
