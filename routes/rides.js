@@ -1,6 +1,6 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs/promises');
+import express from 'express';
+import path from 'path';
+import fs from 'fs/promises';
 
 const router = express.Router();
 
@@ -307,4 +307,4 @@ router.delete('/admin/:id', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
