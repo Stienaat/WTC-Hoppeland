@@ -571,7 +571,7 @@ window.saveDrawnRoute = function(i) {
     }))
   };
 
-	fetch('/api/routes/drawn', {
+	fetch('/api/rides', {
 	  method: 'POST',
 	  headers: { 'Content-Type': 'application/json' },
 	  body: JSON.stringify(payload)
@@ -827,7 +827,7 @@ function populateGroepen() {
 }
 
 function reloadCatalog() {
-  return fetch('/api/routes')
+  return fetch('/api/rides')
     .then(r => r.json())
     .then(data => {
       const active = routes.filter(r => r.type !== 'catalog');
