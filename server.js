@@ -3,7 +3,7 @@ import path from "path";
 import session from "express-session";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
-import dotenv from 'dotenv';
+
 import eventsRoutes from "./routes/events.js";
 import adminRoutes from "./routes/admin.js";
 import signupsRoutes from "./routes/signups.js";
@@ -13,7 +13,7 @@ import authRoutes from "./routes/auth.js";
 import cycleRoutes from "./routes/cycleroutes.js";
 import ridesRouter from './routes/rides.js';
 
-dotenv.config();
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
