@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import session from "express-session";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
 
@@ -10,54 +11,47 @@ import noticeRoutes from "./routes/notice.js";
 import contactRoutes from "./routes/contact.js";
 import authRoutes from "./routes/auth.js";
 
-// __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Supabase
+app.use(session({
+  secret: process.env.SESSION_SECRET || "dev-only-change-me",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false
+  }
+}));
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// 🔑 centraal injecteren
 app.use((req, res, next) => {
   req.supabase = supabase;
   next();
 });
 
-// static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// =====================================
-// API ROUTES
-// =====================================
-
-// ⚠️ auth voorlopig op root laten voor compat
 app.use("/", authRoutes);
-
 app.use("/api/events", eventsRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/signups", signupsRoutes);
 app.use("/api/notice", noticeRoutes);
 app.use("/api/contact", contactRoutes);
 
-// =====================================
-// HOME
-// =====================================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
-// =====================================
-// COMPAT ROUTES (tijdelijk)
-// =====================================
 
 app.post("/admin-login", (req, res) => {
   req.url = "/api/admin/login";
@@ -84,7 +78,6 @@ app.post("/signup", (req, res) => {
   app.handle(req, res);
 });
 
-// ⚠️ legacy cancel
 app.post("/cancel", async (req, res) => {
   try {
     const { email, event_id } = req.body;
@@ -119,9 +112,6 @@ app.post("/cancel", async (req, res) => {
   }
 });
 
-// =====================================
-// API /me (tijdelijk hier laten)
-// =====================================
 app.get("/api/me", async (req, res) => {
   const email = req.query.email;
 
@@ -131,7 +121,7 @@ app.get("/api/me", async (req, res) => {
 
   const { data: user } = await supabase
     .from("Leden")
-    .select("*")
+    .select("id, naam, email, adres, gemeente, telefoon")
     .eq("email", email)
     .single();
 
@@ -142,9 +132,6 @@ app.get("/api/me", async (req, res) => {
   res.json({ ok: true, user });
 });
 
-// =====================================
-// ERROR HANDLING
-// =====================================
 app.use("/api", (req, res) => {
   res.status(404).json({ ok: false, error: "API route niet gevonden" });
 });
@@ -154,9 +141,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ ok: false, error: "Serverfout" });
 });
 
-// =====================================
-// START
-// =====================================
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Server draait op poort " + PORT);
