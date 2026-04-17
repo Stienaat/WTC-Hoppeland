@@ -396,7 +396,7 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
 window.loadCatalogRouteById = function(id) {
   const meta = routes.find(r => r.type === 'catalog' && String(r.id) === String(id));
   if (!meta) return 
-		showModal("error", "❌", "Route niet gevonden!");
+		showModal("success", "👌", "Route is geimporteerd!");
   clearActiveRoute();
 
   // 1) catalog item met coords (opgeslagen getekende route)
