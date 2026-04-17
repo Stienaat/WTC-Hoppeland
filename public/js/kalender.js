@@ -631,7 +631,7 @@ function attachMemberEvents(e, status) {
       const r = await doSignup(e.id);
 
       if (!r || !r.ok) {
-      	showModal("error", "Fout!", "Inschrijving mislukt.");
+  		showModal("error", "❌", "Inschrijving mislukt: " + err.message);
         return;
       }
 
@@ -642,6 +642,7 @@ function attachMemberEvents(e, status) {
       chk.disabled = true;
 
       downloadConfirmation(e, lastSignup);
+	  showModal("success", "👌", "U bent ingeschreven! een bevsstiging is gedownload.");
     };
   }
 }
