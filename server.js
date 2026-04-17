@@ -1,9 +1,8 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import multer from "multer";
 import { createClient } from "@supabase/supabase-js";
-import bcrypt from "bcryptjs";
+
 import eventsRoutes from "./routes/events.js";
 import adminRoutes from "./routes/admin.js";
 import signupsRoutes from "./routes/signups.js";
@@ -11,50 +10,43 @@ import noticeRoutes from "./routes/notice.js";
 import contactRoutes from "./routes/contact.js";
 import authRoutes from "./routes/auth.js";
 
-
-const upload = multer();
-
-// Fix voor __dirname in ESM
+// __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Express setup
 const app = express();
+
+// parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Supabase client
+// Supabase
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+// 🔑 centraal injecteren
 app.use((req, res, next) => {
   req.supabase = supabase;
   next();
-}, authRoutes);
+});
 
-// =====================================
-// STATIC FILES
-// =====================================
+// static files
 app.use(express.static(path.join(__dirname, "public")));
 
+// =====================================
+// API ROUTES
+// =====================================
+
+// ⚠️ auth voorlopig op root laten voor compat
+app.use("/", authRoutes);
+
 app.use("/api/events", eventsRoutes);
-app.use("/api/admin", (req, res, next) => {
-  req.supabase = supabase;
-  next();
-}, adminRoutes);
-app.use("/api/signups", (req, res, next) => {
-  req.supabase = supabase;
-  next();
-}, signupsRoutes);
-app.use("/api/notice", (req, res, next) => {
-  req.supabase = supabase;
-  next();
-}, noticeRoutes);
-app.use("/api/contact", (req, res, next) => {
-  req.supabase = supabase;
-  next();
-}, contactRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/signups", signupsRoutes);
+app.use("/api/notice", noticeRoutes);
+app.use("/api/contact", contactRoutes);
 
 // =====================================
 // HOME
@@ -64,106 +56,35 @@ app.get("/", (req, res) => {
 });
 
 // =====================================
-// HELPERS
+// COMPAT ROUTES (tijdelijk)
 // =====================================
-function moneyAmount(x) {
-  return "EUR" + Number(x || 0).toFixed(2);
-}
 
-function sanitizeLine(s) {
-  return String(s || "").replace(/[\r\n]/g, " ").trim();
-}
-
-function buildEpcQrText(creditorName, iban, bic, amount, remittance, info = "") {
-  creditorName = sanitizeLine(creditorName);
-  iban = sanitizeLine(iban).toUpperCase().replace(/[^A-Z0-9]/g, "");
-  bic = sanitizeLine(bic).toUpperCase().replace(/[^A-Z0-9]/g, "");
-  remittance = sanitizeLine(remittance);
-  info = sanitizeLine(info);
-
-  return [
-    "BCD",
-    "002",
-    "1",
-    "SCT",
-    bic,
-    creditorName,
-    iban,
-    moneyAmount(amount),
-    "",
-    remittance,
-    info
-  ].join("\n");
-}
-
-async function findMemberByEmail(email) {
-  if (!email) return { member: null, error: "email verplicht" };
-
-  const { data: member, error } = await supabase
-    .from("Leden")
-    .select("id, naam, email")
-    .eq("email", email)
-    .single();
-
-  if (error || !member) {
-    return { member: null, error: "Lid niet gevonden." };
-  }
-
-  return { member, error: null };
-}
-
-
-app.post("/admin-login", async (req, res) => {
+app.post("/admin-login", (req, res) => {
   req.url = "/api/admin/login";
   app.handle(req, res);
 });
 
-app.post("/admin-change-pin", async (req, res) => {
+app.post("/admin-change-pin", (req, res) => {
   req.url = "/api/admin/change-pin";
   app.handle(req, res);
 });
 
-// =====================================
-// VERIFICATIE LOGIN
-// =====================================
-app.get("/api/me", async (req, res) => {
-  const email = req.query.email;
-
-  if (!email) {
-    return res.json({ ok: false, error: "Geen email ontvangen." });
-  }
-
-  const { data: user, error } = await supabase
-    .from("Leden")
-    .select("*")
-    .eq("email", email)
-    .single();
-
-  if (error || !user) {
-    return res.json({ ok: false, error: "Lid niet gevonden." });
-  }
-
-  res.json({ ok: true, user });
-});
-
-// =====================================
-// COMPATIBILITEIT MET OUDE ROUTES
-// =====================================
-app.get("/signups", async (req, res) => {
+app.get("/signups", (req, res) => {
   req.url = "/api/signups?" + new URLSearchParams(req.query).toString();
   app.handle(req, res);
 });
 
-app.get("/signup-status", async (req, res) => {
+app.get("/signup-status", (req, res) => {
   req.url = "/api/signups/status?" + new URLSearchParams(req.query).toString();
   app.handle(req, res);
 });
 
-app.post("/signup", async (req, res) => {
+app.post("/signup", (req, res) => {
   req.url = "/api/signups";
   app.handle(req, res);
 });
 
+// ⚠️ legacy cancel
 app.post("/cancel", async (req, res) => {
   try {
     const { email, event_id } = req.body;
@@ -172,30 +93,69 @@ app.post("/cancel", async (req, res) => {
       return res.json({ ok: false, message: "email en event_id verplicht" });
     }
 
-    const { member, error } = await findMemberByEmail(email);
-    if (error || !member) {
+    const { data: member } = await supabase
+      .from("Leden")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (!member) {
       return res.json({ ok: false, message: "Lid niet gevonden." });
     }
 
-    const { error: deleteError } = await supabase
+    const { error } = await supabase
       .from("signups")
       .delete()
       .eq("member_id", member.id)
       .eq("event_id", event_id);
 
-    if (deleteError) {
+    if (error) {
       return res.json({ ok: false, message: "Annuleren mislukt." });
     }
 
     return res.json({ ok: true });
-  } catch (err) {
+  } catch {
     return res.json({ ok: false, message: "Serverfout." });
   }
-})
-
+});
 
 // =====================================
-// SERVER START
+// API /me (tijdelijk hier laten)
+// =====================================
+app.get("/api/me", async (req, res) => {
+  const email = req.query.email;
+
+  if (!email) {
+    return res.json({ ok: false, error: "Geen email ontvangen." });
+  }
+
+  const { data: user } = await supabase
+    .from("Leden")
+    .select("*")
+    .eq("email", email)
+    .single();
+
+  if (!user) {
+    return res.json({ ok: false, error: "Lid niet gevonden." });
+  }
+
+  res.json({ ok: true, user });
+});
+
+// =====================================
+// ERROR HANDLING
+// =====================================
+app.use("/api", (req, res) => {
+  res.status(404).json({ ok: false, error: "API route niet gevonden" });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ ok: false, error: "Serverfout" });
+});
+
+// =====================================
+// START
 // =====================================
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
