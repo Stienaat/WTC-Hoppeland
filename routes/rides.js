@@ -13,19 +13,15 @@ const GPX_BASE_DIR = path.join(process.cwd(), 'data', 'gpx');
 function mapRideRow(row) {
   return {
     id: row.id,
-    title: row.title,
-    year: row.year,
-    group_code: row.group_code,
-    start_place: row.start_place,
-    distance_km: row.distance_km,
-    ride_kind: row.ride_kind,
+    naam: row.title,
+    jaar: row.year,
+    groep: row.group_code,
+    start: row.start_place,
+    afstand_km: row.distance_km,
+    bestand: row.gpx_filename,
     coords: row.coords || [],
     waypoints: row.waypoints || [],
-    gpx_filename: row.gpx_filename || null,
-    source: row.source,
-    is_active: row.is_active,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    type: 'catalog'
   };
 }
 
