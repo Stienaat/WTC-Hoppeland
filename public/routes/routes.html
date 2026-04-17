@@ -441,7 +441,7 @@ window.loadCatalogRouteById = function(id) {
 	  showModal("error", "❌", "bestand mag geen pad bevatten! " + err.message);
     }
 
-    const url = joinUrl(getGpxBaseUrl(meta), meta.bestand);
+   const url = `/api/routes/file/${meta.jaar}/${encodeURIComponent(meta.groep)}/${encodeURIComponent(meta.bestand)}`;
     console.log('GPX URL:', url);
 
     fetch(url)
@@ -571,11 +571,11 @@ window.saveDrawnRoute = function(i) {
     }))
   };
 
-  fetch('upload_do.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
+	fetch('/api/routes/drawn', {
+	  method: 'POST',
+	  headers: { 'Content-Type': 'application/json' },
+	  body: JSON.stringify(payload)
+	})
   .then(r => r.json())
   .then(res => {
     if (!res.ok) return 
@@ -684,11 +684,9 @@ window.deleteActiveRoute = function(i) {
   if (r.catalogId) {
     if (!confirm('Deze route definitief verwijderen uit de catalogus?')) return;
 
-    fetch('delete-route.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: r.catalogId })
-    })
+	fetch(`/api/routes/${encodeURIComponent(r.catalogId)}`, {
+	  method: 'DELETE'
+	})
     .then(res => res.json())
     .then(res => {
       if (!res.ok) {
@@ -829,10 +827,9 @@ function populateGroepen() {
 }
 
 function reloadCatalog() {
-  return fetch('routes.json')
+  return fetch('/api/routes')
     .then(r => r.json())
     .then(data => {
-      // behoud actieve routes in de array, vervang catalog
       const active = routes.filter(r => r.type !== 'catalog');
       const catalog = (data || []).map(x => ({ ...x, type: 'catalog' }));
       routes = [...active, ...catalog];
