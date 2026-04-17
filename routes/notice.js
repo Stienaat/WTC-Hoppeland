@@ -1,5 +1,6 @@
 import express from "express";
 import multer from "multer";
+import { requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 const upload = multer();
@@ -26,7 +27,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", upload.none(), async (req, res) => {
+router.post("/", requireAdmin, upload.none(), async (req, res) => {
   const supabase = req.supabase;
 
   try {

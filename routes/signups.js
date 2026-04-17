@@ -1,4 +1,6 @@
 import express from "express";
+import { requireAdmin } from "../middleware/auth.js";
+
 
 const router = express.Router();
 
@@ -194,7 +196,7 @@ router.delete("/", async (req, res) => {
 // ===================================
 // POST /api/signups/commit
 // ===================================
-router.post("/commit", async (req, res) => {
+router.post("/commit", requireAdmin, async (req, res) => {
   const supabase = req.supabase;
   const { email, event_id } = req.body;
 
