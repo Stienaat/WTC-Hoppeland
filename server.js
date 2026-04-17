@@ -3,7 +3,7 @@ import path from "path";
 import session from "express-session";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
-
+import dotenv from 'dotenv';
 import eventsRoutes from "./routes/events.js";
 import adminRoutes from "./routes/admin.js";
 import signupsRoutes from "./routes/signups.js";
@@ -13,6 +13,7 @@ import authRoutes from "./routes/auth.js";
 import cycleRoutes from "./routes/cycleroutes.js";
 import ridesRouter from './routes/rides.js';
 
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,16 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+app.use((req, res, next) => {
+  req.supabase = supabase;
+  next();
+});
 app.use("/api/routes", cycleRoutes);
 
 app.use(session({
@@ -32,18 +43,8 @@ app.use(session({
     secure: false
   }
 }));
+
 app.use('/api/rides', ridesRouter);
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-app.use((req, res, next) => {
-  req.supabase = supabase;
-  next();
-});
-
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", authRoutes);
