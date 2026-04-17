@@ -18,7 +18,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/routes", cycleroutes);
+app.use("/api/routes", cycleRoutes);
 
 app.use(session({
   secret: process.env.SESSION_SECRET || "dev-only-change-me",
