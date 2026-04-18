@@ -396,8 +396,10 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
 
 window.loadCatalogRouteById = function(id) {
   const meta = routes.find(r => r.type === 'catalog' && String(r.id) === String(id));
-  if (!meta) return 
-		showModal("success", "👌", "Route is geimporteerd!");
+ if (!meta) {
+  showModal("error", "❌", "Route niet gevonden");
+  return;
+}
   clearActiveRoute();
 
   // 1) catalog item met coords (opgeslagen getekende route)
@@ -536,7 +538,7 @@ window.exportDrawnRouteToGPX = function(route) {
 };
 
 /* =====================================================
-   I. SAVE DRAWN ROUTE -> upload_do.php (JSON)
+   I. SAVE DRAWN ROUTE -> upload (JSON)
 ===================================================== */
 window.saveDrawnRoute = async function(i) {
   const r = routes[i];
@@ -593,7 +595,7 @@ window.saveDrawnRoute = async function(i) {
   console.log("SAVE payload =", payload);
 
   try {
-    const response = await fetch('/api/admin/rides/drawn', {
+    const response = await fetch('/api/rides/admin/drawn', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'same-origin',
@@ -686,7 +688,7 @@ window.deleteWaypoint = function(id) {
     }))
   };
 
-	fetch(`/api/admin/rides/${encodeURIComponent(r.catalogId)}`, {
+	fetch(`/api/rides/admin/${encodeURIComponent(r.catalogId)}`, {
 	  method: 'PUT',
 	  headers: { 'Content-Type': 'application/json' },
 	  body: JSON.stringify(payload)
@@ -726,7 +728,7 @@ window.deleteActiveRoute = async function(i) {
 	const ok = await confirmModal('Deze route definitief verwijderen uit de catalogus?');
 		if (!ok) return;
 		
-	fetch(`/api/routes/${encodeURIComponent(r.catalogId)}`, {
+	fetch(`/api/rides/admin/${encodeURIComponent(r.catalogId)}`, {
 	  method: 'DELETE'
 	})
     .then(res => res.json())
@@ -852,7 +854,7 @@ routes.filter(r => r.type !== 'catalog').forEach(r => {
           <button type="button" class="wtc-button" onclick="loadCatalogRouteById('${r.id}')">Toon</button>
 
           ${hasGpx ? `
-            <a class="wtc-button" style="padding: 4px 5px 4px 5px" &href="${joinUrl(getGpxBaseUrl(r), r.bestand)}" download>Download GPX</a>
+            <a class="wtc-button" style="padding: 4px 5px 4px 5px" href="${joinUrl(getGpxBaseUrl(r), r.bestand)}" download>Download GPX</a>
           ` : ''}
         </div>
       `;
