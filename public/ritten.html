@@ -584,10 +584,10 @@ window.saveDrawnRoute = function(i) {
    
     return reloadCatalog();
   })
-  .catch(err => {
-    showModal("error", "❌", "Serverfout bij opslaan! ");
+ .catch(() => 
+    showModal("error", "❌", "Serverfout bij opslaan! " + err.message);
 
-});
+};
 
 /* =====================================================
    J. WAYPOINT ACTIONS (popup)
@@ -624,23 +624,13 @@ window.deleteWaypoint = function(id) {
   r.waypoints = r.waypoints.filter(w => w.id !== id);
 };
 
-function confirmModal(message) {
-  return new Promise(resolve => {
-    showModal("confirm", "❓", message, [
-      { text: "Ja", action: () => resolve(true) },
-      { text: "Nee", action: () => resolve(false) }
-    ]);
-  });
-}
-
 	/*******************************************************/
 	
-window.overwriteRoute = async function(i){
+	window.overwriteRoute = function(i){
   const r = routes[i];
   if (!r || !r.catalogId || !r.layer) return;
 
-  const ok = await confirmModal('Deze route overschrijven in de catalogus?');
-	if (!ok) return;
+  if (!confirm('Deze route overschrijven in de catalogus?')) return;
 
   const geo = r.layer.toGeoJSON();
 
@@ -653,8 +643,7 @@ window.overwriteRoute = async function(i){
       lon: wp.lon,
       name: wp.name,
       type: wp.type
-    }
-	 ))
+    }))
   };
 
 	fetch(`/api/admin/rides/${encodeURIComponent(r.catalogId)}`, {
@@ -672,16 +661,15 @@ window.overwriteRoute = async function(i){
     showModal("success", "👌", "Route is bijgewerkt!");
     reloadCatalog();
   })
+/*  .catch(() => showModal("error", "❌", "Serverfout bij opslaan! " + err.message); */
 
-
-};  
-
+};
 
 
 /* =====================================================
    K. DELETE ACTIVE ROUTE
 ===================================================== */
-window.deleteActiveRoute = async function(i) {
+window.deleteActiveRoute = function(i) {
   const r = routes[i];
   if (!r) {
     showModal("error", "❌", "Interne fout, route niet gevonden! ");
@@ -689,25 +677,12 @@ window.deleteActiveRoute = async function(i) {
     return;
   }
 
-function confirmModal(message) {
-  return new Promise(resolve => {
-    showModal("confirm", "❓", message, [
-      { text: "Ja", action: () => resolve(true) },
-      { text: "Nee", action: () => resolve(false) }
-    ]);
-  });
-}
-
   // ============================
-  // 1️ ROUTE KOMT UIT CATALOGUS
+  // 1️⃣ ROUTE KOMT UIT CATALOGUS
   // ============================
-  
   // (geldt voor GPX én opgeslagen getekende routes)
-  
   if (r.catalogId) {
-    const ok = await confirmModal('Deze route definitief verwijderen uit de catalogus?');
-	if (!ok) return;
-
+    if (!confirm('Deze route definitief verwijderen uit de catalogus?')) return;
 
 	fetch(`/api/routes/${encodeURIComponent(r.catalogId)}`, {
 	  method: 'DELETE'
