@@ -19,13 +19,13 @@ body {
 
 #map {
   width:900px;
-  height:540px;
+  height:500px;
   border-radius:15px;
 }
 
 #list {
   flex:1;
-  height:500px;
+  max-height:400px;
   overflow:auto;
   border:1px solid #ddd;
   padding:10px;
