@@ -769,12 +769,21 @@ function renderList() {
 routes.filter(r => r.type !== 'catalog').forEach(r => {
   const i = routes.indexOf(r);
 
-  const canDownload  = !!r.layer;
+  const canDownload = !!r.layer;
   const canOverwrite = !!r.catalogId;
+  const canSaveNew = !r.catalogId && r.type === 'drawn';
 
   html += `
     <div class="row">
       <strong>${r.naam}</strong><br/>
+
+      ${canSaveNew ? `
+        <button type="button"
+                class="wtc-button"
+                onclick="saveDrawnRoute(${i})">
+          Opslaan als nieuw
+        </button>
+      ` : ''}
 
       ${canOverwrite ? `
         <button type="button"
@@ -787,7 +796,7 @@ routes.filter(r => r.type !== 'catalog').forEach(r => {
       ${canDownload ? `
         <button type="button"
                 class="wtc-button"
-				style="padding: 4px 5px 4px 5px"
+                style="padding: 4px 5px 4px 5px"
                 onclick="exportDrawnRouteToGPX(routes[${i}])">
           Download GPX
         </button>
