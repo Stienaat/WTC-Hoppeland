@@ -412,7 +412,7 @@ function renderList() {
                   class="wtc-button"
                   style="padding: 4px 5px 4px 5px"
                   onclick="exportDrawnRouteToGPX(routes[${i}])">
-            Download GPX
+            Download
           </button>
         ` : ''}
 
@@ -426,7 +426,7 @@ function renderList() {
           <button type="button"
                   class="wtc-button"
                   onclick="deleteCatalogRoute(${i})">
-            Verwijder uit catalogus
+            delete
           </button>
         ` : ''}
       </div>
