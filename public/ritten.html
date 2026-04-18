@@ -626,6 +626,47 @@ window.deleteWaypoint = function(id) {
 
 	/*******************************************************/
 	
+window.overwriteRoute = async function(i){
+  const r = routes[i];
+  if (!r || !r.catalogId || !r.layer) return;
+
+  const ok = await confirmModal('Deze route overschrijven in de catalogus?');
+	if (!ok) return;
+
+  const geo = r.layer.toGeoJSON();
+
+  const payload = {
+    id: r.catalogId,
+    naam: r.naam,
+    coords: geo.geometry.coordinates.map(c => [c[1], c[0]]),
+    waypoints: (r.waypoints || []).map(wp => ({
+      lat: wp.lat,
+      lon: wp.lon,
+      name: wp.name,
+      type: wp.type
+    }
+	 ))
+  };
+
+	fetch(`/api/admin/rides/${encodeURIComponent(r.catalogId)}`, {
+	  method: 'PUT',
+	  headers: { 'Content-Type': 'application/json' },
+	  body: JSON.stringify(payload)
+	})
+  .then(r => r.json())
+  .then(res => {
+    if (!res.ok) {
+      showModal("error", "❌", "Opslaan mislukt! ");
+
+      return;
+    }
+    showModal("success", "👌", "Route is bijgewerkt!");
+    reloadCatalog();
+  })
+
+
+};  
+
 
 /* =====================================================
    K. DELETE ACTIVE ROUTE
