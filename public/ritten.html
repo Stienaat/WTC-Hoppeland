@@ -438,7 +438,7 @@ window.loadCatalogRouteById = function(id) {
   if (meta.bestand) {
     if (String(meta.bestand).includes('/')) {
       return 
-	  showModal("error", "❌", "bestand mag geen pad bevatten! " + err.message);
+	  showModal("error", "❌", "bestand mag geen pad bevatten! " );
     }
 
   const url = `/api/rides/${encodeURIComponent(meta.id)}/gpx`;
@@ -453,7 +453,7 @@ window.loadCatalogRouteById = function(id) {
       .then(txt => {
         const active = parseGpxToActiveRoute(txt, meta.naam);
         if (!active) return 
-			showModal("error", "❌", "GPX bevat geen track!: " + err.message);
+			showModal("error", "❌", "GPX bevat geen track!: ");
         active.catalogId = meta.id; // voor delete-route.php (als je dat wil)
         routes.push(active);
         activeRouteIndex = routes.length - 1;
@@ -462,12 +462,12 @@ window.loadCatalogRouteById = function(id) {
         renderList();
       })
       .catch(err => {
-        showModal("error", "❌", "GPX laden mislukt! " + err.message);
+        showModal("error", "❌", "GPX laden mislukt! ");
       });
 
     return;
   }
-	showModal("error", "❌", "Deze catalogusroute heeft geen coords en geen bestand! " + err.message);
+	showModal("error", "❌", "Deze catalogusroute heeft geen coords en geen bestand! ");
   
 };
 
@@ -480,7 +480,7 @@ function exportRouteToGPX(route) {
   const geo = route.layer.toGeoJSON();
   const coords = geo.geometry.coordinates || [];
   if (coords.length < 2) return 
-		showModal("error", "❌", "Route bevat te weinig punten! " + err.message);
+		showModal("error", "❌", "Route bevat te weinig punten! ");
   const wpMap = {
     rest:   { sym: 'Restroom',        type: 'rest' },
     food:   { sym: 'Food & Drink',    type: 'food' },
@@ -554,7 +554,7 @@ window.saveDrawnRoute = function(i) {
   // (anders krijg je duplicaten). Als je wél duplicaten wil: haal deze check weg.
   if (r.catalogId) {
     
-	showModal("error", "❌", "Deze route komt al uit de catalogus. Opslaan als nieuw staat nu uit (voorkomt duplicaten! " + err.message);
+	showModal("error", "❌", "Deze route komt al uit de catalogus. Opslaan als nieuw staat nu uit (voorkomt duplicaten! ");
     return;
   }
 
@@ -579,13 +579,13 @@ window.saveDrawnRoute = function(i) {
   .then(r => r.json())
   .then(res => {
     if (!res.ok) return 
-	showModal("error", "❌", "Opslaan mislukt! " + err.message);
+/*	showModal("error", "❌", "Opslaan mislukt! ");   */
 	showModal("success", "👌", "Route is opgeslagen!");
    
     return reloadCatalog();
   })
-/** .catch(() => 
-    showModal("error", "❌", "Serverfout bij opslaan! " + err.message); ***/
+ .catch(() => 
+    showModal("error", "❌", "Serverfout bij opslaan! " + err.message);
 
 };
 
@@ -630,7 +630,8 @@ window.deleteWaypoint = function(id) {
   const r = routes[i];
   if (!r || !r.catalogId || !r.layer) return;
 
-  if (!confirm('Deze route overschrijven in de catalogus?')) return;
+  const ok = await confirmModal('Deze route overschrijven in de catalogus?');
+	if (!ok) return;
 
   const geo = r.layer.toGeoJSON();
 
@@ -654,7 +655,7 @@ window.deleteWaypoint = function(id) {
   .then(r => r.json())
   .then(res => {
     if (!res.ok) {
-      showModal("error", "❌", "Opslaan mislukt! " + err.message);
+      showModal("error", "❌", "Opslaan mislukt! ");
 
       return;
     }
@@ -672,7 +673,7 @@ window.deleteWaypoint = function(id) {
 window.deleteActiveRoute = function(i) {
   const r = routes[i];
   if (!r) {
-    showModal("error", "❌", "Interne fout, route niet gevonden! " + err.message);
+    showModal("error", "❌", "Interne fout, route niet gevonden! ");
 
     return;
   }
@@ -682,7 +683,9 @@ window.deleteActiveRoute = function(i) {
   // ============================
   // (geldt voor GPX én opgeslagen getekende routes)
   if (r.catalogId) {
-    if (!confirm('Deze route definitief verwijderen uit de catalogus?')) return;
+    const ok = await confirmModal('Deze route definitief verwijderen uit de catalogus?');
+	if (!ok) return;
+
 
 	fetch(`/api/routes/${encodeURIComponent(r.catalogId)}`, {
 	  method: 'DELETE'
@@ -690,7 +693,7 @@ window.deleteActiveRoute = function(i) {
     .then(res => res.json())
     .then(res => {
       if (!res.ok) {
-        showModal("error", "❌", "Verwijderen mislukt! " + err.message);
+        showModal("error", "❌", "Verwijderen mislukt! ");
 
         return;
       }
@@ -707,8 +710,7 @@ window.deleteActiveRoute = function(i) {
       return reloadCatalog();
     })
     .catch(err => {
-      console.error(err);
-      showModal("error", "❌", "Serfout bij verwijderen! " + err.message);
+          showModal("error", "❌", "Serfout bij verwijderen! " + err.message);
 
     });
 
