@@ -4,35 +4,42 @@ body {
 }
 
 .controls {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 10px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin:0px;
 }
 
 .container {
-  display: flex;
-  gap: 12px;
-  padding: 10px;
+  display:flex;
+  gap:12px;
+  padding:10px;
 }
 
 #map {
-  width: 900px;
-  height: 540px;
-  border-radius: 15px;
+  width:900px;
+  height:540px;
+  border-radius:15px;
 }
 
 #list {
-  flex: 1;
-  height: 500px;
-  overflow: auto;
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 15px;
-  background-color: #E4DEE6;
+  flex:1;
+  height:500px;
+  overflow:auto;
+  border:1px solid #ddd;
+  padding:10px;
+  border-radius:15px;
+  background-color:#E4DEE6;
 }
 
 .row {
-  margin-bottom: 12px;
+  margin-bottom:12px;
+}
+
+a.dl {
+  padding:8px 10px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  text-decoration:none;
 }
