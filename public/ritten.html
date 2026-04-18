@@ -678,8 +678,16 @@ window.deleteActiveRoute = function(i) {
     return;
   }
 
+function confirmModal(message) {
+  return new Promise(resolve => {
+    showModal("confirm", "❓", message, [
+      { text: "Ja", action: () => resolve(true) },
+      { text: "Nee", action: () => resolve(false) }
+    ]);
+  });
+}
   // ============================
-  // 1️⃣ ROUTE KOMT UIT CATALOGUS
+  // 1️ ROUTE KOMT UIT CATALOGUS
   // ============================
   // (geldt voor GPX én opgeslagen getekende routes)
   if (r.catalogId) {
