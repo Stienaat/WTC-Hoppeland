@@ -157,6 +157,43 @@ router.get('/:id/gpx', async (req, res) => {
 // POST /api/admin/rides
 // admin
 // -----------------------------
+
+router.post('/admin/drawn', async (req, res) => {
+  try {
+    const supabase = req.supabase;
+    const { naam, groep, coords, waypoints = [] } = req.body;
+
+    if (!naam || !Array.isArray(coords) || coords.length < 2) {
+      return res.status(400).json({ ok: false, error: 'Ongeldige route-data' });
+    }
+
+    const { data, error } = await supabase
+      .from('club_rides')
+      .insert([{
+        title: naam.trim(),
+        year: new Date().getFullYear(),
+        group_code: groep || 'TEKEN',
+        ride_kind: 'drawn',
+        coords,
+        waypoints,
+        source: 'admin',
+        is_active: true
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ ok: false, error: 'Opslaan mislukt' });
+    }
+
+    return res.json({ ok: true, id: data.id });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: 'Serverfout' });
+  }
+});
+
 router.post('/admin/create', async (req, res) => {
   try {
     const supabase = req.supabase;
@@ -225,35 +262,12 @@ router.put('/admin/:id', async (req, res) => {
   try {
     const supabase = req.supabase;
     const { id } = req.params;
-    const {
-      title,
-      year,
-      group_code,
-      start_place,
-      distance_km,
-      ride_kind,
-      coords,
-      waypoints,
-      gpx_filename,
-      gpx_original_name,
-      notes,
-      is_active,
-    } = req.body;
+    const { naam, coords, waypoints = [] } = req.body;
 
     const patch = {};
-
-    if (title !== undefined) patch.title = String(title).trim();
-    if (year !== undefined) patch.year = parseInteger(year);
-    if (group_code !== undefined) patch.group_code = group_code ? String(group_code).trim() : null;
-    if (start_place !== undefined) patch.start_place = start_place ? String(start_place).trim() : null;
-    if (distance_km !== undefined) patch.distance_km = parseNumeric(distance_km);
-    if (ride_kind !== undefined) patch.ride_kind = ride_kind;
+    if (naam !== undefined) patch.title = naam.trim();
     if (coords !== undefined) patch.coords = coords;
-    if (waypoints !== undefined) patch.waypoints = Array.isArray(waypoints) ? waypoints : [];
-    if (gpx_filename !== undefined) patch.gpx_filename = gpx_filename ? sanitizeFilename(gpx_filename) : null;
-    if (gpx_original_name !== undefined) patch.gpx_original_name = gpx_original_name || null;
-    if (notes !== undefined) patch.notes = notes;
-    if (is_active !== undefined) patch.is_active = Boolean(is_active);
+    if (waypoints !== undefined) patch.waypoints = waypoints;
 
     const { data, error } = await supabase
       .from('club_rides')
@@ -263,13 +277,13 @@ router.put('/admin/:id', async (req, res) => {
       .single();
 
     if (error || !data) {
-      console.error('PUT /api/admin/rides/:id error:', error);
-      return res.status(404).json({ ok: false, error: 'Rit niet gevonden of update mislukt' });
+      console.error(error);
+      return res.status(404).json({ ok: false, error: 'Route niet gevonden' });
     }
 
-    return res.json({ ok: true, ride: mapRideRow(data) });
+    return res.json({ ok: true });
   } catch (err) {
-    console.error('PUT /api/admin/rides/:id crash:', err);
+    console.error(err);
     return res.status(500).json({ ok: false, error: 'Serverfout' });
   }
 });
