@@ -11,6 +11,14 @@ const listEl = document.getElementById('list');
 const groepSelect = document.getElementById('groepSelect');
 const zoekInput = document.getElementById('zoekInput');
 
+function isAdminUser() {
+  return localStorage.getItem('is_admin') === 'true';
+}
+
+function canUseAdminFeatures() {
+  return isAdminUser();
+}
+
 // helpers
 function joinUrl(base, file) {
   if (!base.endsWith('/')) base += '/';
@@ -197,42 +205,26 @@ function zoomToLayer(layer) {
 
 /* ================= SAVE ================= */
 
-window.saveDrawnRoute = async function(i) {
-  const r = routes[i];
-  if (!r || r.type !== 'drawn') return;
 
-  const geo = r.layer.toGeoJSON();
-  const coords = geo.geometry.coordinates.map(c => [c[1], c[0]]);
-
-  const payload = {
-    naam: r.naam,
-    groep: 'TEKEN',
-    coords,
-    waypoints: r.waypoints || []
-  };
-
-  const res = await fetch('/api/rides/admin/drawn', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(payload)
-  });
-
-  const j = await res.json();
-
-  if (j.ok) {
-    showModal("success", "👌", "Opgeslagen");
-    reloadCatalog();
-  }
-};
 
 /* ================= DELETE ================= */
 
 window.deleteActiveRoute = async function(i) {
   const r = routes[i];
-  if (!r?.catalogId) return;
+  if (!r || r.type === 'catalog') return;
 
-  await fetch(`/api/rides/admin/${r.catalogId}`, { method:'DELETE' });
-  reloadCatalog();
+  const ok = await confirmModal('Deze route van de kaart verwijderen?');
+  if (!ok) return;
+
+  if (r.layer) drawnItems.removeLayer(r.layer);
+
+  if (Array.isArray(r.waypoints)) {
+    r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+  }
+
+  routes.splice(i, 1);
+  activeRouteIndex = null;
+  renderList();
 };
 
 /* ================= UI ================= */
@@ -243,56 +235,39 @@ function renderList() {
   // ACTIEF
   html += '<div class="row"><em>Actief</em></div>';
 
-  routes.filter(r => r.type !== 'catalog').forEach(r => {
-    const i = routes.indexOf(r);
+  routes
+    .filter(r => r.type !== 'catalog')
+    .forEach(r => {
+      const i = routes.indexOf(r);
+      const canDownload = !!r.layer;
 
-    const canDownload = !!r.layer;
-    const canOverwrite = !!r.catalogId;
-    const canSaveNew = !r.catalogId && r.type === 'drawn';
+      html += `
+        <div class="row">
+          <strong>${r.naam}</strong><br/>
 
-    html += `
-      <div class="row">
-        <strong>${r.naam}</strong><br/>
+          ${canDownload ? `
+            <button type="button"
+                    class="wtc-button"
+                    style="padding: 4px 5px 4px 5px"
+                    onclick="exportDrawnRouteToGPX(routes[${i}])">
+              Download GPX
+            </button>
+          ` : ''}
 
-        ${canSaveNew ? `
           <button type="button"
                   class="wtc-button"
-                  onclick="saveDrawnRoute(${i})">
-            Opslaan als nieuw
+                  onclick="deleteActiveRoute(${i})">
+            Verwijder
           </button>
-        ` : ''}
-
-        ${canOverwrite ? `
-          <button type="button"
-                  class="wtc-button"
-                  onclick="overwriteRoute(${i})">
-            Opslaan
-          </button>
-        ` : ''}
-
-        ${canDownload ? `
-          <button type="button"
-                  class="wtc-button"
-                  style="padding: 4px 5px 4px 5px"
-                  onclick="exportDrawnRouteToGPX(routes[${i}])">
-            Download GPX
-          </button>
-        ` : ''}
-
-        <button type="button"
-                class="wtc-button"
-                onclick="deleteActiveRoute(${i})">
-          Verwijder
-        </button>
-      </div>
-    `;
-  });
+        </div>
+      `;
+    });
 
   // CATALOGUS
   html += '<hr/><div class="row"><em>Catalogus</em></div>';
 
   const groep = groepSelect ? groepSelect.value : 'ALL';
-  const zoek  = zoekInput ? zoekInput.value.toLowerCase() : '';
+  const zoek = zoekInput ? zoekInput.value.toLowerCase() : '';
 
   routes
     .filter(r => r.type === 'catalog')
@@ -331,6 +306,71 @@ function renderList() {
 
   listEl.innerHTML = html;
 }
+
+function exportRouteToGPX(route) {
+  if (!route || !route.layer) return;
+
+  const geo = route.layer.toGeoJSON();
+  const coords = geo.geometry.coordinates || [];
+
+  if (coords.length < 2) {
+    showModal("error", "❌", "Route bevat te weinig punten!");
+    return;
+  }
+
+  const wpMap = {
+    rest:   { sym: 'Restroom',       type: 'rest' },
+    food:   { sym: 'Food & Drink',   type: 'food' },
+    water:  { sym: 'Drinking Water', type: 'water' },
+    danger: { sym: 'Danger Area',    type: 'danger' },
+    climb:  { sym: 'Summit',         type: 'climb' },
+    sprint: { sym: 'Flag',           type: 'sprint' }
+  };
+
+  let gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1"
+     creator="Clubroutes"
+     xmlns="http://www.topografix.com/GPX/1/1">
+<trk>
+  <name>${escapeXml(route.naam)}</name>
+  <trkseg>
+`;
+
+  coords.forEach(c => {
+    gpx += `    <trkpt lat="${c[1]}" lon="${c[0]}"></trkpt>\n`;
+  });
+
+  gpx += `  </trkseg>
+</trk>
+`;
+
+  if (Array.isArray(route.waypoints)) {
+    route.waypoints.forEach(wp => {
+      const map = wpMap[wp.type] || {};
+      gpx += `
+<wpt lat="${wp.lat}" lon="${wp.lon}">
+  <name>${escapeXml(wp.name)}</name>
+  <desc>${escapeXml(wp.type)}</desc>
+  ${map.sym ? `<sym>${map.sym}</sym>` : ''}
+  ${map.type ? `<type>${map.type}</type>` : ''}
+</wpt>
+`;
+    });
+  }
+
+  gpx += `</gpx>`;
+
+  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (route.naam || 'route') + '.gpx';
+  a.click();
+}
+
+window.exportDrawnRouteToGPX = function(route) {
+  exportRouteToGPX(route);
+};
+
 /* ================= GPX PARSER ================= */
 
 function parseGpxToActiveRoute(gpxText, metaNaam) {
