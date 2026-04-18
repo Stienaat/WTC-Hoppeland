@@ -722,8 +722,9 @@ window.deleteActiveRoute = function(i) {
   // ============================
   // (geldt voor GPX én opgeslagen getekende routes)
   if (r.catalogId) {
-    if (!confirm('Deze route definitief verwijderen uit de catalogus?')) return;
-
+ 
+	const ok = await confirmModal('Deze route definitief verwijderen uit de catalogus?');
+		if (!ok) return;
 	fetch(`/api/routes/${encodeURIComponent(r.catalogId)}`, {
 	  method: 'DELETE'
 	})
