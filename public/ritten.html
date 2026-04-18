@@ -709,7 +709,7 @@ window.deleteWaypoint = function(id) {
 /* =====================================================
    K. DELETE ACTIVE ROUTE
 ===================================================== */
-window.deleteActiveRoute = function(i) {
+window.deleteActiveRoute = async function(i) {
   const r = routes[i];
   if (!r) {
     showModal("error", "❌", "Interne fout, route niet gevonden! ");
@@ -725,6 +725,7 @@ window.deleteActiveRoute = function(i) {
  
 	const ok = await confirmModal('Deze route definitief verwijderen uit de catalogus?');
 		if (!ok) return;
+		
 	fetch(`/api/routes/${encodeURIComponent(r.catalogId)}`, {
 	  method: 'DELETE'
 	})
