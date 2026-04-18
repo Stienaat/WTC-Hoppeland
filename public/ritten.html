@@ -571,7 +571,7 @@ window.saveDrawnRoute = function(i) {
     }))
   };
 
-	fetch('/api/rides', {
+	fetch('/api/admin/rides/drawn', {
 	  method: 'POST',
 	  headers: { 'Content-Type': 'application/json' },
 	  body: JSON.stringify(payload)
@@ -646,11 +646,11 @@ window.deleteWaypoint = function(id) {
     }))
   };
 
-  fetch('update-route.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
+	fetch(`/api/admin/rides/${encodeURIComponent(r.catalogId)}`, {
+	  method: 'PUT',
+	  headers: { 'Content-Type': 'application/json' },
+	  body: JSON.stringify(payload)
+	})
   .then(r => r.json())
   .then(res => {
     if (!res.ok) {
