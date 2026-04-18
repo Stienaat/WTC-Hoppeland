@@ -142,11 +142,23 @@ router.get('/:id/gpx', async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Ongeldige bestandsnaam' });
     }
 
-    const year = data.year || 'unknown';
-    const group = data.group_code || 'unknown';
-    const fullPath = path.join(GPX_BASE_DIR, String(year), String(group), safeFilename);
+    const fullPath = path.join(
+      GPX_BASE_DIR,
+      String(data.year || 'unknown'),
+      String(data.group_code || 'unknown'),
+      safeFilename
+    );
+
+    // 🔥 BELANGRIJK
+    try {
+      await fs.access(fullPath);
+    } catch {
+      console.error('GPX file ontbreekt:', fullPath);
+      return res.status(404).json({ ok: false, error: 'GPX bestand niet gevonden op server' });
+    }
 
     return res.download(fullPath, safeFilename);
+
   } catch (err) {
     console.error('GET /api/rides/:id/gpx crash:', err);
     return res.status(500).json({ ok: false, error: 'Serverfout' });
@@ -195,6 +207,8 @@ router.post('/admin/drawn', async (req, res) => {
 });
 
 router.post('/admin/create', async (req, res) => {
+	console.log('POST /admin/drawn body:', req.body);
+	
   try {
     const supabase = req.supabase;
     const {
@@ -246,6 +260,7 @@ router.post('/admin/create', async (req, res) => {
       console.error('POST /api/admin/rides error:', error);
       return res.status(500).json({ ok: false, error: 'Opslaan mislukt' });
     }
+	console.log('POST /admin/drawn body:', req.body);
 
     return res.status(201).json({ ok: true, ride: mapRideRow(data) });
   } catch (err) {
