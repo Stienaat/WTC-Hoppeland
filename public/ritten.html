@@ -9,46 +9,57 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<!-- Leaflet GPX -->
+<script src="https://unpkg.com/leaflet-gpx@1.7.0/gpx.js"></script>
+
 <!-- Leaflet Draw -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 
-<link rel="stylesheet" href="/css/ritten.css">
-<link href="/css/WTC.css" rel="stylesheet">
+<div id="app-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modal-title"></h3>
+
+        <div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+            <img src="./images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        </div>
+
+        <p id="modal-message"></p>
+
+        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+            <!-- Knoppen worden dynamisch ingevuld -->
+        </div>
+    </div>
+</div>
 
 <script src="/js/modal.js"></script>
+<link href="/css/WTC.css" rel="stylesheet">
+<link href="/css/ritten.css" rel="stylesheet">
+
 </head>
 
 <body>
 
-<div id="app-modal" class="modal hidden">
-  <div class="modal-content">
-    <h3 id="modal-title"></h3>
-    <p id="modal-message"></p>
-    <div id="modal-buttons"></div>
-  </div>
-</div>
-
 <div class="controls">
-  <h2>Fietsroutes</h2>
 
+  <h2 style="margin:10px;">Fietsroutes</h2>
   <label>Groep:
-    <select id="groepSelect" class="wtc-select">
+	<select id="groepSelect" class="wtc-select">
       <option value="ALL">Alle</option>
-    </select>
+	</select>
   </label>
 
   <label>Zoek:
-    <input id="zoekInput" type="search" class="wtc-select">
-  </label>
+    <input id="zoekInput" type="search" placeholder="bv. Poperinge, Kemmel..." class="wtc-select">
+  </label>	
+	<button type="button" id="wisBtn" class="wtc-button" onclick="wisRoute()">Wis route</button>
 
-  <button id="wisBtn" class="wtc-button">Wis route</button>
-  <a href="/leden.html?overlay=1" class="wtc-button">&larr; Terug</a>
+	<a href="/leden.html?overlay=1" class="wtc-button" style="padding: 4px 5px 4px 5px">&larr; Terug</a>
 </div>
 
 <div class="container">
   <div id="map"></div>
-  <div id="list"></div>
+  <div id="list">routes</div>
 </div>
 
 <script src="/js/ritten.js"></script>
