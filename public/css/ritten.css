@@ -25,7 +25,7 @@ body {
 
 #list {
   flex:1;
-  max-height:430;
+  max-height:420px;
   overflow:auto;
   border:1px solid #ddd;
   padding:10px;
@@ -42,4 +42,10 @@ a.dl {
   border:1px solid #ddd;
   border-radius:10px;
   text-decoration:none;
+}
+.route-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
