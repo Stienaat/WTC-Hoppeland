@@ -624,6 +624,15 @@ window.deleteWaypoint = function(id) {
   r.waypoints = r.waypoints.filter(w => w.id !== id);
 };
 
+function confirmModal(message) {
+  return new Promise(resolve => {
+    showModal("confirm", "❓", message, [
+      { text: "Ja", action: () => resolve(true) },
+      { text: "Nee", action: () => resolve(false) }
+    ]);
+  });
+}
+
 	/*******************************************************/
 	
 window.overwriteRoute = async function(i){
@@ -668,6 +677,199 @@ window.overwriteRoute = async function(i){
 };  
 
 
+
+/* =====================================================
+   K. DELETE ACTIVE ROUTE
+===================================================== */
+window.deleteActiveRoute = async function(i) {
+  const r = routes[i];
+  if (!r) {
+    showModal("error", "❌", "Interne fout, route niet gevonden! ");
+
+    return;
+  }
+
+function confirmModal(message) {
+  return new Promise(resolve => {
+    showModal("confirm", "❓", message, [
+      { text: "Ja", action: () => resolve(true) },
+      { text: "Nee", action: () => resolve(false) }
+    ]);
+  });
+}
+
+  // ============================
+  // 1️ ROUTE KOMT UIT CATALOGUS
+  // ============================
+  
+  // (geldt voor GPX én opgeslagen getekende routes)
+  
+  if (r.catalogId) {
+    const ok = await confirmModal('Deze route definitief verwijderen uit de catalogus?');
+	if (!ok) return;
+
+
+	fetch(`/api/routes/${encodeURIComponent(r.catalogId)}`, {
+	  method: 'DELETE'
+	})
+    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        showModal("error", "❌", "Verwijderen mislukt! ");
+
+        return;
+      }
+
+      // van kaart verwijderen
+      if (r.layer) drawnItems.removeLayer(r.layer);
+      if (Array.isArray(r.waypoints)) {
+        r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+      }
+
+      activeRouteIndex = null;
+
+      // catalogus opnieuw laden
+      return reloadCatalog();
+    })
+    .catch(err => {
+          showModal("error", "❌", "Serfout bij verwijderen! " + err.message);
+
+    });
+
+    return;
+  }
+
+  // ============================
+  // 2️⃣ ALLEEN LOKAAL (niet opgeslagen)
+  // ============================
+  if (r.layer) drawnItems.removeLayer(r.layer);
+  if (Array.isArray(r.waypoints)) {
+    r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+  }
+
+  routes.splice(i, 1);
+  activeRouteIndex = null;
+  renderList();
+};
+
+
+/* =====================================================
+   L. UI RENDER
+===================================================== */
+function renderList() {
+  let html = '';
+
+  // ACTIEF
+  html += '<div class="row"><em>Actief</em></div>';
+
+routes.filter(r => r.type !== 'catalog').forEach(r => {
+  const i = routes.indexOf(r);
+
+  const canDownload  = !!r.layer;
+  const canOverwrite = !!r.catalogId;
+
+  html += `
+    <div class="row">
+      <strong>${r.naam}</strong><br/>
+
+      ${canOverwrite ? `
+        <button type="button"
+                class="wtc-button"
+                onclick="overwriteRoute(${i})">
+          Opslaan
+        </button>
+      ` : ''}
+
+      ${canDownload ? `
+        <button type="button"
+                class="wtc-button"
+				style="padding: 4px 5px 4px 5px"
+                onclick="exportDrawnRouteToGPX(routes[${i}])">
+          Download GPX
+        </button>
+      ` : ''}
+
+      <button type="button"
+              class="wtc-button"
+              onclick="deleteActiveRoute(${i})">
+        Verwijder
+      </button>
+    </div>
+  `;
+});
+
+
+  // CATALOGUS
+  html += '<hr/><div class="row"><em>Catalogus</em></div>';
+
+  const groep = groepSelect ? groepSelect.value : 'ALL';
+  const zoek  = zoekInput ? zoekInput.value.toLowerCase() : '';
+
+  routes
+    .filter(r => r.type === 'catalog')
+    .filter(r => groep === 'ALL' || r.groep === groep)
+    .filter(r => !zoek || (r.naam || '').toLowerCase().includes(zoek))
+    .forEach(r => {
+
+      const hasGpx = !!r.bestand;
+      const hasCoords = Array.isArray(r.coords) && r.coords.length > 1;
+
+      html += `
+        <div class="row">
+          <strong>${r.naam}</strong><br/>
+          <small>
+            ${r.start ?? ''}${r.start && r.afstand_km ? ' – ' : ''}
+            ${r.afstand_km ? r.afstand_km + ' km' : ''}
+            ${(!r.start && !r.afstand_km && hasCoords) ? '(getekend)' : ''}
+          </small><br/>
+
+          <button type="button" class="wtc-button" onclick="loadCatalogRouteById('${r.id}')">Toon</button>
+
+          ${hasGpx ? `
+            <a class="wtc-button" style="padding: 4px 5px 4px 5px" &href="${joinUrl(getGpxBaseUrl(r), r.bestand)}" download>Download GPX</a>
+          ` : ''}
+        </div>
+      `;
+    });
+ 
+  listEl.innerHTML = html;
+}
+
+/* =====================================================
+   M. LOAD CATALOG
+===================================================== */
+function populateGroepen() {
+  const groepen = [...new Set(routes
+    .filter(r => r.type === 'catalog')
+    .map(r => r.groep)
+    .filter(Boolean)
+  )].sort();
+
+  groepSelect.innerHTML =
+    '<option value="ALL">Alle</option>' +
+    groepen.map(g => `<option value="${g}">${g}</option>`).join('');
+}
+
+function reloadCatalog() {
+  return fetch('/api/rides')
+    .then(r => r.json())
+    .then(data => {
+      const active = routes.filter(r => r.type !== 'catalog');
+      const catalog = (data || []).map(x => ({ ...x, type: 'catalog' }));
+      routes = [...active, ...catalog];
+
+      populateGroepen();
+      renderList();
+    });
+}
+
+/* =====================================================
+   N. INIT
+===================================================== */
+groepSelect?.addEventListener('change', renderList);
+zoekInput?.addEventListener('input', renderList);
+
+reloadCatalog();
 </script>
 
 
