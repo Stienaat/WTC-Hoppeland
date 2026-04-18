@@ -205,8 +205,111 @@ function zoomToLayer(layer) {
 
 /* ================= SAVE ================= */
 
+window.saveDrawnRoute = async function(i) {
+  const r = routes[i];
+  if (!r || r.type !== 'drawn') return;
 
+  if (!isAdminUser()) {
+    showModal("error", "❌", "Alleen admin mag routes opslaan in de catalogus.");
+    return;
+  }
 
+  if (r.catalogId) {
+    return window.overwriteRoute(i);
+  }
+
+  const geo = r.layer.toGeoJSON();
+  const coords = geo?.geometry?.coordinates?.map(c => [c[1], c[0]]) || [];
+
+  if (!Array.isArray(coords) || coords.length < 2) {
+    showModal("error", "❌", "Route bevat te weinig punten.");
+    return;
+  }
+
+  const payload = {
+    naam: r.naam,
+    groep: 'TEKEN',
+    coords,
+    waypoints: (r.waypoints || []).map(wp => ({
+      lat: wp.lat,
+      lon: wp.lon,
+      name: wp.name,
+      type: wp.type
+    }))
+  };
+
+  try {
+    const res = await fetch('/api/rides/admin/drawn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const j = await res.json();
+
+    if (!res.ok || !j.ok) {
+      showModal("error", "❌", j.error || "Opslaan mislukt.");
+      return;
+    }
+
+    r.catalogId = j.id || j.ride?.id || null;
+
+    showModal("success", "👌", "Route opgeslagen in catalogus.");
+    await reloadCatalog();
+    renderList();
+  } catch (err) {
+    console.error(err);
+    showModal("error", "❌", "Serverfout bij opslaan.");
+  }
+};
+
+window.overwriteRoute = async function(i) {
+  const r = routes[i];
+  if (!r || !r.catalogId || !r.layer) return;
+
+  if (!isAdminUser()) {
+    showModal("error", "❌", "Alleen admin mag catalogusroutes bijwerken.");
+    return;
+  }
+
+  const ok = await confirmModal('Deze route overschrijven in de catalogus?');
+  if (!ok) return;
+
+  const geo = r.layer.toGeoJSON();
+
+  const payload = {
+    naam: r.naam,
+    coords: geo.geometry.coordinates.map(c => [c[1], c[0]]),
+    waypoints: (r.waypoints || []).map(wp => ({
+      lat: wp.lat,
+      lon: wp.lon,
+      name: wp.name,
+      type: wp.type
+    }))
+  };
+
+  try {
+    const res = await fetch(`/api/rides/admin/${encodeURIComponent(r.catalogId)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const j = await res.json();
+
+    if (!res.ok || !j.ok) {
+      showModal("error", "❌", j.error || "Opslaan mislukt.");
+      return;
+    }
+
+    showModal("success", "👌", "Route bijgewerkt.");
+    await reloadCatalog();
+    renderList();
+  } catch (err) {
+    console.error(err);
+    showModal("error", "❌", "Serverfout bij opslaan.");
+  }
+};
 /* ================= DELETE ================= */
 
 window.deleteActiveRoute = async function(i) {
@@ -219,14 +322,65 @@ window.deleteActiveRoute = async function(i) {
   if (r.layer) drawnItems.removeLayer(r.layer);
 
   if (Array.isArray(r.waypoints)) {
-    r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+    r.waypoints.forEach(wp => {
+      if (wp.marker) map.removeLayer(wp.marker);
+    });
   }
 
   routes.splice(i, 1);
-  activeRouteIndex = null;
+
+  if (activeRouteIndex === i) {
+    activeRouteIndex = null;
+  } else if (activeRouteIndex > i) {
+    activeRouteIndex--;
+  }
+
   renderList();
 };
 
+function isAdminUser() {
+  return localStorage.getItem('is_admin') === 'true';
+}
+
+window.deleteCatalogRoute = async function(i) {
+  const r = routes[i];
+  if (!r || !r.catalogId) return;
+
+  if (!isAdminUser()) {
+    showModal("error", "❌", "Alleen admin mag catalogusroutes verwijderen.");
+    return;
+  }
+
+  const ok = await confirmModal('Deze route uit de catalogus verwijderen?');
+  if (!ok) return;
+
+  try {
+    const res = await fetch(`/api/rides/admin/${encodeURIComponent(r.catalogId)}`, {
+      method: 'DELETE'
+    });
+
+    const j = await res.json();
+
+    if (!res.ok || !j.ok) {
+      showModal("error", "❌", j.error || "Verwijderen mislukt.");
+      return;
+    }
+
+    if (r.layer) drawnItems.removeLayer(r.layer);
+    if (Array.isArray(r.waypoints)) {
+      r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+    }
+
+    activeRouteIndex = null;
+    await reloadCatalog();
+    renderList();
+
+    showModal("success", "👌", "Route uit catalogus verwijderd.");
+  } catch (err) {
+    console.error(err);
+    showModal("error", "❌", "Serverfout bij verwijderen.");
+  }
+};
 /* ================= UI ================= */
 
 function renderList() {
@@ -235,33 +389,49 @@ function renderList() {
   // ACTIEF
   html += '<div class="row"><em>Actief</em></div>';
 
-  routes
-    .filter(r => r.type !== 'catalog')
-    .forEach(r => {
-      const i = routes.indexOf(r);
-      const canDownload = !!r.layer;
+  routes.filter(r => r.type !== 'catalog').forEach(r => {
+    const i = routes.indexOf(r);
+    const canDownload = !!r.layer;
+    const canSave = isAdminUser() && r.type === 'drawn';
+    const canDeleteCatalog = isAdminUser() && !!r.catalogId;
 
-      html += `
-        <div class="row">
-          <strong>${r.naam}</strong><br/>
+    html += `
+      <div class="row">
+        <strong>${r.naam}</strong><br/>
 
-          ${canDownload ? `
-            <button type="button"
-                    class="wtc-button"
-                    style="padding: 4px 5px 4px 5px"
-                    onclick="exportDrawnRouteToGPX(routes[${i}])">
-              Download GPX
-            </button>
-          ` : ''}
-
+        ${canSave ? `
           <button type="button"
                   class="wtc-button"
-                  onclick="deleteActiveRoute(${i})">
-            Verwijder
+                  onclick="${r.catalogId ? `overwriteRoute(${i})` : `saveDrawnRoute(${i})`}">
+            Opslaan
           </button>
-        </div>
-      `;
-    });
+        ` : ''}
+
+        ${canDownload ? `
+          <button type="button"
+                  class="wtc-button"
+                  style="padding: 4px 5px 4px 5px"
+                  onclick="exportDrawnRouteToGPX(routes[${i}])">
+            Download GPX
+          </button>
+        ` : ''}
+
+        <button type="button"
+                class="wtc-button"
+                onclick="deleteActiveRoute(${i})">
+          Verwijder
+        </button>
+
+        ${canDeleteCatalog ? `
+          <button type="button"
+                  class="wtc-button"
+                  onclick="deleteCatalogRoute(${i})">
+            Verwijder uit catalogus
+          </button>
+        ` : ''}
+      </div>
+    `;
+  });
 
   // CATALOGUS
   html += '<hr/><div class="row"><em>Catalogus</em></div>';
@@ -274,7 +444,6 @@ function renderList() {
     .filter(r => groep === 'ALL' || r.groep === groep)
     .filter(r => !zoek || (r.naam || '').toLowerCase().includes(zoek))
     .forEach(r => {
-      const hasGpx = !!r.bestand;
       const hasCoords = Array.isArray(r.coords) && r.coords.length > 1;
 
       html += `
@@ -291,15 +460,6 @@ function renderList() {
                   onclick="loadCatalogRouteById('${r.id}')">
             Toon
           </button>
-
-          ${hasGpx ? `
-            <a class="wtc-button"
-               style="padding: 4px 5px 4px 5px"
-               href="${joinUrl(getGpxBaseUrl(r), r.bestand)}"
-               download>
-              Download GPX
-            </a>
-          ` : ''}
         </div>
       `;
     });
@@ -371,6 +531,18 @@ window.exportDrawnRouteToGPX = function(route) {
   exportRouteToGPX(route);
 };
 
+function renderUserBadge() {
+  const el = document.getElementById('routeUserBadge');
+  if (!el) return;
+
+  const role = isAdminUser() ? 'Admin' : 'Lid';
+  const name =
+    localStorage.getItem('user_name') ||
+    sessionStorage.getItem('user_name') ||
+    '';
+
+  el.textContent = name ? `${role}: ${name}` : role;
+}
 /* ================= GPX PARSER ================= */
 
 function parseGpxToActiveRoute(gpxText, metaNaam) {
@@ -518,12 +690,72 @@ window.loadCatalogRouteById = function(id) {
 
   showModal("error", "❌", "Deze catalogusroute heeft geen coords en geen bestand");
 };
+
+/* ================= WP's ================= */
+
+map.on('contextmenu', e => {
+  if (isDrawing) return;
+  if (activeRouteIndex === null) return;
+
+  const route = routes[activeRouteIndex];
+  if (!route || !route.layer) return;
+
+  const wp = {
+    id: crypto.randomUUID(),
+    lat: e.latlng.lat,
+    lon: e.latlng.lng,
+    name: 'Waypoint',
+    type: 'rest'
+  };
+
+  wp.marker = L.marker(e.latlng, {
+    icon: waypointIcons[wp.type] || waypointIcons.rest
+  }).addTo(map);
+
+  wp.marker.bindPopup(buildWaypointPopup(wp));
+
+  route.waypoints ??= [];
+  route.waypoints.push(wp);
+});
+
+function findWaypointById(id) {
+  const r = routes[activeRouteIndex];
+  if (!r || !Array.isArray(r.waypoints)) return null;
+  return r.waypoints.find(w => w.id === id);
+}
+
+window.renameWaypoint = function(id) {
+  const wp = findWaypointById(id);
+  if (!wp) return;
+  const name = prompt('Nieuwe naam', wp.name);
+  if (!name) return;
+  wp.name = name;
+  wp.marker.setPopupContent(buildWaypointPopup(wp));
+};
+
+window.setWaypointType = function(id, type) {
+  const wp = findWaypointById(id);
+  if (!wp) return;
+  wp.type = type;
+  wp.marker.setIcon(waypointIcons[type] || waypointIcons.rest);
+  wp.marker.setPopupContent(buildWaypointPopup(wp));
+};
+
+window.deleteWaypoint = function(id) {
+  const r = routes[activeRouteIndex];
+  if (!r || !Array.isArray(r.waypoints)) return;
+  const wp = findWaypointById(id);
+  if (!wp) return;
+  map.removeLayer(wp.marker);
+  r.waypoints = r.waypoints.filter(w => w.id !== id);
+};
 /* ================= INIT ================= */
 
 document.getElementById('wisBtn')?.addEventListener('click', () => {
   drawnItems.clearLayers();
   activeRouteIndex = null;
   renderList();
+  renderUserBadge();
 });
 
 reloadCatalog();
