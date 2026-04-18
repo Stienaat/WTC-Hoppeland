@@ -626,11 +626,11 @@ window.deleteWaypoint = function(id) {
 
 	/*******************************************************/
 	
-	window.overwriteRoute = function(i){
+	window.overwriteRoute = async function(i){
   const r = routes[i];
   if (!r || !r.catalogId || !r.layer) return;
 
-  const ok = await confirmModal('Deze route overschrijven in de catalogus?');
+  const ok = await showModal('Deze route overschrijven in de catalogus?');
 	if (!ok) return;
 
   const geo = r.layer.toGeoJSON();
