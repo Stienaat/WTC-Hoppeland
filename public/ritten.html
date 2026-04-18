@@ -537,32 +537,49 @@ window.exportDrawnRouteToGPX = function(route) {
 /* =====================================================
    I. SAVE DRAWN ROUTE -> upload_do.php (JSON)
 ===================================================== */
-window.saveDrawnRoute = function(i) {
+window.saveDrawnRoute = async function(i) {
   const r = routes[i];
-  // Naam afdwingen vóór opslaan
-	let name = (r.naam || '').trim();
-	if (!name || name.toLowerCase() === 'nieuwe route') {
-	  name = prompt('Geef een naam voor deze route:', r.naam || 'Zondagrit')?.trim();
-	  if (!name) return; // gebruiker annuleert
-	  r.naam = name;
-	  renderList();
-}
-
   if (!r || r.type !== 'drawn') return;
 
-  // als hij uit catalogus komt, wil je meestal geen "opslaan als nieuw"
-  // (anders krijg je duplicaten). Als je wél duplicaten wil: haal deze check weg.
+  // Niet toelaten als dit al een catalogusroute is
   if (r.catalogId) {
-    
-	showModal("error", "❌", "Deze route komt al uit de catalogus. Opslaan als nieuw staat nu uit (voorkomt duplicaten! ");
+    showModal(
+      "error",
+      "❌",
+      "Deze route komt al uit de catalogus. Gebruik 'Opslaan' om ze bij te werken."
+    );
+    return;
+  }
+
+  // Naam controleren
+  let name = (r.naam || '').trim();
+  if (!name || name.toLowerCase() === 'nieuwe route') {
+    showModal(
+      "error",
+      "❌",
+      "Geef eerst een echte naam aan de route voor je ze opslaat."
+    );
+    return;
+  }
+
+  // Controle op geometry
+  if (!r.layer) {
+    showModal("error", "❌", "Geen route gevonden om op te slaan.");
     return;
   }
 
   const geo = r.layer.toGeoJSON();
+  const coords = geo?.geometry?.coordinates?.map(c => [c[1], c[0]]) || [];
+
+  if (!Array.isArray(coords) || coords.length < 2) {
+    showModal("error", "❌", "Route bevat te weinig punten om op te slaan.");
+    return;
+  }
+
   const payload = {
     naam: r.naam,
     groep: 'TEKEN',
-    coords: geo.geometry.coordinates.map(c => [c[1], c[0]]),
+    coords,
     waypoints: (r.waypoints || []).map(wp => ({
       lat: wp.lat,
       lon: wp.lon,
@@ -571,21 +588,36 @@ window.saveDrawnRoute = function(i) {
     }))
   };
 
-	fetch('/api/admin/rides/drawn', {
-	  method: 'POST',
-	  headers: { 'Content-Type': 'application/json' },
-	  body: JSON.stringify(payload)
-	})
-  .then(r => r.json())
-  .then(res => {
-    if (!res.ok) return 
-/*	showModal("error", "❌", "Opslaan mislukt! ");   */
-	showModal("success", "👌", "Route is opgeslagen!");
-   
-    return reloadCatalog();
-  })
+  try {
+    const response = await fetch('/api/admin/rides/drawn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
+    const res = await response.json();
 
+    if (!response.ok || !res.ok) {
+      showModal(
+        "error","❌",res?.error || res?.message || "Opslaan mislukt.");
+      return;
+    }
+
+    // Belangrijk: nieuw id terugkoppelen aan actieve route
+    if (res.id) {
+      r.catalogId = res.id;
+    } else if (res.ride?.id) {
+      r.catalogId = res.ride.id;
+    }
+
+    showModal("success", "👌", "Route is opgeslagen!");
+    await reloadCatalog();
+    renderList();
+
+  } catch (err) {
+    console.error(err);
+    showModal("error", "❌", "Serverfout bij opslaan.");
+  }
 };
 
 /* =====================================================
