@@ -15,9 +15,6 @@ function isAdminUser() {
   return localStorage.getItem('is_admin') === 'true';
 }
 
-function canUseAdminFeatures() {
-  return isAdminUser();
-}
 
 // helpers
 function joinUrl(base, file) {
@@ -173,12 +170,16 @@ map.on(L.Draw.Event.CREATED, async e => {
 function setRouteActive(index) {
   if (activeRouteIndex !== null) {
     const prev = routes[activeRouteIndex];
-    prev?.layer?.setStyle?.(ROUTE_STYLE_NORMAL);
+  if (prev && prev.layer && prev.layer.setStyle) {
+  prev.layer.setStyle(ROUTE_STYLE_NORMAL);
+}
   }
 
   activeRouteIndex = index;
   const curr = routes[index];
-  curr?.layer?.setStyle?.(ROUTE_STYLE_ACTIVE);
+ if (curr && curr.layer && curr.layer.setStyle) {
+  curr.layer.setStyle(ROUTE_STYLE_ACTIVE);
+}
 }
 
 /* ================= LOAD ================= */
@@ -236,7 +237,10 @@ window.saveDrawnRoute = async function(i) {
   }
 
   const geo = r.layer.toGeoJSON();
-  const coords = geo?.geometry?.coordinates?.map(c => [c[1], c[0]]) || [];
+let coords = [];
+if (geo && geo.geometry && geo.geometry.coordinates) {
+  coords = geo.geometry.coordinates.map(c => [c[1], c[0]]);
+}
 
   if (!Array.isArray(coords) || coords.length < 2) {
     showModal("error", "❌", "Route bevat te weinig punten.");
@@ -463,7 +467,7 @@ function renderList() {
     </div>
 
     <small>
-      ${r.start ?? ''}${r.start && r.afstand_km ? ' – ' : ''}
+      ${r.start || ''}${r.start && r.afstand_km ? ' – ' : ''}  
       ${r.afstand_km ? r.afstand_km + ' km' : ''}
       ${(!r.start && !r.afstand_km && Array.isArray(r.coords) && r.coords.length > 1) ? '(getekend)' : ''}
     </small>
@@ -577,13 +581,8 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
     const lon = parseFloat(wpt.getAttribute('lon'));
     if (isNaN(lat) || isNaN(lon)) return;
 
-    const type = wpt.querySelector('type')?.textContent || 'rest';
-    const wp = {
-      id: crypto.randomUUID(),
-      lat,
-      lon,
-      name: wpt.querySelector('name')?.textContent || 'Waypoint',
-      type
+   const type = wpt.querySelector('type')?.textContent || 'rest';
+const name = wpt.querySelector('name')?.textContent || 'Waypoint';
     };
 
     wp.marker = L.marker([lat, lon], {
@@ -596,7 +595,13 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
 
   const r = {
     type: 'gpx',
-    naam: metaNaam || (trk.querySelector('name')?.textContent ?? 'GPX route'),
+ let routeName = 'GPX route';
+const nameNode = trk.querySelector('name');
+if (nameNode && nameNode.textContent) {
+  routeName = nameNode.textContent;
+}
+
+naam: metaNaam || routeName,e'),
     layer,
     waypoints
   };
@@ -722,7 +727,7 @@ map.on('contextmenu', e => {
 
   wp.marker.bindPopup(buildWaypointPopup(wp));
 
-  route.waypoints ??= [];
+route.waypoints ??= [];
   route.waypoints.push(wp);
 });
 
@@ -773,7 +778,8 @@ function promptModal(title, defaultValue = '') {
       {
         text: "OK",
         action: () => {
-          const value = document.getElementById('modal-input-field')?.value ?? '';
+       const input = document.getElementById('modal-input-field');
+const value = input ? input.value : '';l-input-field')?.value ?? '';
           resolve(value.trim());
         }
       },
@@ -788,7 +794,10 @@ function promptModal(title, defaultValue = '') {
 function calculateDistanceKmFromLayer(layer) {
   if (!layer) return 0;
 
-  const latlngs = layer.getLatLngs?.() || [];
+ let latlngs = [];
+if (layer && layer.getLatLngs) {
+  latlngs = layer.getLatLngs();
+}
   if (!Array.isArray(latlngs) || latlngs.length < 2) return 0;
 
   let meters = 0;
@@ -801,14 +810,20 @@ function calculateDistanceKmFromLayer(layer) {
 
 /* ================= INIT ================= */
 
-document.getElementById('wisBtn')?.addEventListener('click', () => {
-  drawnItems.clearLayers();
-  activeRouteIndex = null;
-  renderList();
-  renderUserBadge();
-});
+const wisBtn = document.getElementById('wisBtn');
+if (wisBtn) {
+  wisBtn.addEventListener('click', () => {
+    drawnItems.clearLayers();
+    activeRouteIndex = null;
+    renderList();
+    renderUserBadge();
+  });
+}
 
-reloadCatalog();
+if (groepSelect) {
+  groepSelect.addEventListener('change', renderList);
+}
 
-groepSelect?.addEventListener('change', renderList);
-zoekInput?.addEventListener('input', renderList);
+if (zoekInput) {
+  zoekInput.addEventListener('input', renderList);
+}
