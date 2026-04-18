@@ -194,7 +194,7 @@ router.post('/admin/drawn', async (req, res) => {
   }
 });
 
-router.post('/admin/drawn', async (req, res) => {
+router.post('/admin/create', async (req, res) => {
   try {
     const supabase = req.supabase;
     const {
