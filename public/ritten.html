@@ -584,10 +584,10 @@ window.saveDrawnRoute = function(i) {
    
     return reloadCatalog();
   })
- .catch(() => 
+  .catch(err => {
     showModal("error", "❌", "Serverfout bij opslaan! ");
 
-};
+});
 
 /* =====================================================
    J. WAYPOINT ACTIONS (popup)
