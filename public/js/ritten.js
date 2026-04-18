@@ -170,6 +170,30 @@ function reloadCatalog() {
       renderList();
     });
 }
+/* ================= AVTIVE ROUTE WISSEN ================= */
+
+function clearActiveRoute() {
+  routes.filter(r => r.type !== 'catalog').forEach(r => {
+    if (r.layer) drawnItems.removeLayer(r.layer);
+    if (Array.isArray(r.waypoints)) {
+      r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+    }
+  });
+
+  routes = routes.filter(r => r.type === 'catalog');
+  activeRouteIndex = null;
+}
+
+window.wisRoute = function () {
+  clearActiveRoute();
+  renderList();
+};
+
+function zoomToLayer(layer) {
+  try {
+    map.fitBounds(layer.getBounds());
+  } catch (e) {}
+}
 
 /* ================= SAVE ================= */
 
@@ -307,7 +331,153 @@ function renderList() {
 
   listEl.innerHTML = html;
 }
+/* ================= GPX PARSER ================= */
 
+function parseGpxToActiveRoute(gpxText, metaNaam) {
+  const xml = new DOMParser().parseFromString(gpxText, 'application/xml');
+
+  const trk = xml.querySelector('trk');
+  if (!trk) return null;
+
+  const latlngs = [];
+  trk.querySelectorAll('trkpt').forEach(pt => {
+    const lat = parseFloat(pt.getAttribute('lat'));
+    const lon = parseFloat(pt.getAttribute('lon'));
+    if (!isNaN(lat) && !isNaN(lon)) latlngs.push([lat, lon]);
+  });
+
+  if (latlngs.length < 2) return null;
+
+  const layer = L.polyline(latlngs, ROUTE_STYLE_NORMAL);
+  drawnItems.addLayer(layer);
+
+  const waypoints = [];
+  xml.querySelectorAll('wpt').forEach(wpt => {
+    const lat = parseFloat(wpt.getAttribute('lat'));
+    const lon = parseFloat(wpt.getAttribute('lon'));
+    if (isNaN(lat) || isNaN(lon)) return;
+
+    const type = wpt.querySelector('type')?.textContent || 'rest';
+    const wp = {
+      id: crypto.randomUUID(),
+      lat,
+      lon,
+      name: wpt.querySelector('name')?.textContent || 'Waypoint',
+      type
+    };
+
+    wp.marker = L.marker([lat, lon], {
+      icon: waypointIcons[type] || waypointIcons.rest
+    }).addTo(map);
+
+    wp.marker.bindPopup(buildWaypointPopup(wp));
+    waypoints.push(wp);
+  });
+
+  const r = {
+    type: 'gpx',
+    naam: metaNaam || (trk.querySelector('name')?.textContent ?? 'GPX route'),
+    layer,
+    waypoints
+  };
+
+  layer.on('click', () => {
+    const idx = routes.indexOf(r);
+    if (idx >= 0) setRouteActive(idx);
+    renderList();
+  });
+
+  return r;
+}
+
+/* ================= TOON btn ================= */
+
+window.loadCatalogRouteById = function(id) {
+  const meta = routes.find(r => r.type === 'catalog' && String(r.id) === String(id));
+
+  if (!meta) {
+    showModal("error", "❌", "Route niet gevonden");
+    return;
+  }
+
+  clearActiveRoute();
+
+  // 1) catalogusitem met coords
+  if (Array.isArray(meta.coords) && meta.coords.length >= 2) {
+    const layer = L.polyline(meta.coords, ROUTE_STYLE_NORMAL);
+    drawnItems.addLayer(layer);
+
+    const r = {
+      type: 'drawn',
+      naam: meta.naam,
+      layer,
+      waypoints: Array.isArray(meta.waypoints)
+        ? meta.waypoints.map(w => ({ ...w, id: w.id || crypto.randomUUID() }))
+        : [],
+      catalogId: meta.id
+    };
+
+    r.waypoints.forEach(wp => {
+      wp.marker = L.marker([wp.lat, wp.lon], {
+        icon: waypointIcons[wp.type] || waypointIcons.rest
+      }).addTo(map);
+
+      wp.marker.bindPopup(buildWaypointPopup(wp));
+    });
+
+    layer.on('click', () => {
+      const idx = routes.indexOf(r);
+      if (idx >= 0) setRouteActive(idx);
+      renderList();
+    });
+
+    routes.push(r);
+    activeRouteIndex = routes.length - 1;
+    setRouteActive(activeRouteIndex);
+    zoomToLayer(layer);
+    renderList();
+    return;
+  }
+
+  // 2) catalogusitem met GPX bestand
+  if (meta.bestand) {
+    if (String(meta.bestand).includes('/')) {
+      showModal("error", "❌", "Bestand mag geen pad bevatten");
+      return;
+    }
+
+    const url = `/api/rides/${encodeURIComponent(meta.id)}/gpx`;
+
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.text();
+      })
+      .then(txt => {
+        const active = parseGpxToActiveRoute(txt, meta.naam);
+
+        if (!active) {
+          showModal("error", "❌", "GPX bevat geen track");
+          return;
+        }
+
+        active.catalogId = meta.id;
+        routes.push(active);
+        activeRouteIndex = routes.length - 1;
+        setRouteActive(activeRouteIndex);
+        zoomToLayer(active.layer);
+        renderList();
+      })
+      .catch(err => {
+        console.error(err);
+        showModal("error", "❌", "GPX laden mislukt");
+      });
+
+    return;
+  }
+
+  showModal("error", "❌", "Deze catalogusroute heeft geen coords en geen bestand");
+};
 /* ================= INIT ================= */
 
 document.getElementById('wisBtn')?.addEventListener('click', () => {
