@@ -670,7 +670,7 @@ window.deleteWaypoint = function(id) {
 /* =====================================================
    K. DELETE ACTIVE ROUTE
 ===================================================== */
-window.deleteActiveRoute = function(i) {
+window.deleteActiveRoute = async function(i) {
   const r = routes[i];
   if (!r) {
     showModal("error", "❌", "Interne fout, route niet gevonden! ");
@@ -686,10 +686,13 @@ function confirmModal(message) {
     ]);
   });
 }
+
   // ============================
   // 1️ ROUTE KOMT UIT CATALOGUS
   // ============================
+  
   // (geldt voor GPX én opgeslagen getekende routes)
+  
   if (r.catalogId) {
     const ok = await confirmModal('Deze route definitief verwijderen uit de catalogus?');
 	if (!ok) return;
