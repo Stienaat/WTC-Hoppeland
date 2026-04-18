@@ -53,6 +53,18 @@ function buildWaypointPopup(wp) {
   `;
 }
 
+function populateGroepen() {
+  const groepen = [...new Set(routes
+    .filter(r => r.type === 'catalog')
+    .map(r => r.groep)
+    .filter(Boolean)
+  )].sort();
+
+  groepSelect.innerHTML =
+    '<option value="ALL">Alle</option>' +
+    groepen.map(g => `<option value="${g}">${g}</option>`).join('');
+}
+
 function confirmModal(message) {
   return new Promise(resolve => {
     showModal("confirm", "❓", message, [
@@ -154,6 +166,7 @@ function reloadCatalog() {
       const catalog = (data || []).map(x => ({ ...x, type: 'catalog' }));
       routes = [...active, ...catalog];
 
+      populateGroepen();
       renderList();
     });
 }
@@ -203,29 +216,94 @@ window.deleteActiveRoute = async function(i) {
 function renderList() {
   let html = '';
 
+  // ACTIEF
   html += '<div class="row"><em>Actief</em></div>';
 
   routes.filter(r => r.type !== 'catalog').forEach(r => {
     const i = routes.indexOf(r);
 
+    const canDownload = !!r.layer;
+    const canOverwrite = !!r.catalogId;
+    const canSaveNew = !r.catalogId && r.type === 'drawn';
+
     html += `
       <div class="row">
         <strong>${r.naam}</strong><br/>
-        <button onclick="saveDrawnRoute(${i})">Opslaan</button>
+
+        ${canSaveNew ? `
+          <button type="button"
+                  class="wtc-button"
+                  onclick="saveDrawnRoute(${i})">
+            Opslaan als nieuw
+          </button>
+        ` : ''}
+
+        ${canOverwrite ? `
+          <button type="button"
+                  class="wtc-button"
+                  onclick="overwriteRoute(${i})">
+            Opslaan
+          </button>
+        ` : ''}
+
+        ${canDownload ? `
+          <button type="button"
+                  class="wtc-button"
+                  style="padding: 4px 5px 4px 5px"
+                  onclick="exportDrawnRouteToGPX(routes[${i}])">
+            Download GPX
+          </button>
+        ` : ''}
+
+        <button type="button"
+                class="wtc-button"
+                onclick="deleteActiveRoute(${i})">
+          Verwijder
+        </button>
       </div>
     `;
   });
 
+  // CATALOGUS
   html += '<hr/><div class="row"><em>Catalogus</em></div>';
 
-  routes.filter(r => r.type === 'catalog').forEach(r => {
-    html += `
-      <div class="row">
-        <strong>${r.naam}</strong><br/>
-        <button onclick="deleteActiveRoute(${routes.indexOf(r)})">Delete</button>
-      </div>
-    `;
-  });
+  const groep = groepSelect ? groepSelect.value : 'ALL';
+  const zoek  = zoekInput ? zoekInput.value.toLowerCase() : '';
+
+  routes
+    .filter(r => r.type === 'catalog')
+    .filter(r => groep === 'ALL' || r.groep === groep)
+    .filter(r => !zoek || (r.naam || '').toLowerCase().includes(zoek))
+    .forEach(r => {
+      const hasGpx = !!r.bestand;
+      const hasCoords = Array.isArray(r.coords) && r.coords.length > 1;
+
+      html += `
+        <div class="row">
+          <strong>${r.naam}</strong><br/>
+          <small>
+            ${r.start ?? ''}${r.start && r.afstand_km ? ' – ' : ''}
+            ${r.afstand_km ? r.afstand_km + ' km' : ''}
+            ${(!r.start && !r.afstand_km && hasCoords) ? '(getekend)' : ''}
+          </small><br/>
+
+          <button type="button"
+                  class="wtc-button"
+                  onclick="loadCatalogRouteById('${r.id}')">
+            Toon
+          </button>
+
+          ${hasGpx ? `
+            <a class="wtc-button"
+               style="padding: 4px 5px 4px 5px"
+               href="${joinUrl(getGpxBaseUrl(r), r.bestand)}"
+               download>
+              Download GPX
+            </a>
+          ` : ''}
+        </div>
+      `;
+    });
 
   listEl.innerHTML = html;
 }
@@ -239,3 +317,6 @@ document.getElementById('wisBtn')?.addEventListener('click', () => {
 });
 
 reloadCatalog();
+
+groepSelect?.addEventListener('change', renderList);
+zoekInput?.addEventListener('input', renderList);
