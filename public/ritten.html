@@ -169,6 +169,15 @@ function buildWaypointPopup(wp) {
   `;
 }
 
+function confirmModal(message) {
+  return new Promise(resolve => {
+    showModal("confirm", "❓", message, [
+      { text: "Ja", action: () => resolve(true) },
+      { text: "Nee", action: () => resolve(false) }
+    ]);
+  });
+}
+
 /* =====================================================
    B. MAP SETUP
 ===================================================== */
@@ -655,11 +664,13 @@ window.deleteWaypoint = function(id) {
 
 	/*******************************************************/
 	
-	window.overwriteRoute = function(i){
+	window.overwriteRoute = async function(i){
   const r = routes[i];
   if (!r || !r.catalogId || !r.layer) return;
 
-  if (!confirm('Deze route overschrijven in de catalogus?')) return;
+ 	const ok = await confirmModal('Deze route overschrijven in de catalogus?');
+	if (!ok) return;
+
 
   const geo = r.layer.toGeoJSON();
 
