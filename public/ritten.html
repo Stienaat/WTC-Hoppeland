@@ -667,6 +667,14 @@ window.overwriteRoute = async function(i){
 
 };  
 
+function confirmModal(message) {
+  return new Promise(resolve => {
+    showModal("confirm", "❓", message, [
+      { text: "Ja", action: () => resolve(true) },
+      { text: "Nee", action: () => resolve(false) }
+    ]);
+  });
+}
 
 /* =====================================================
    K. DELETE ACTIVE ROUTE
