@@ -132,21 +132,38 @@ map.addControl(new L.Control.Draw({
 map.on('draw:drawstart', () => { isDrawing = true; });
 map.on('draw:drawstop', () => { isDrawing = false; });
 
-map.on(L.Draw.Event.CREATED, e => {
+map.on(L.Draw.Event.CREATED, async e => {
   drawnItems.addLayer(e.layer);
 
-  let naam = prompt('Naam van de route:', 'Nieuwe route') || 'Nieuwe route';
+  const naam = await promptModal('Naam van de route', 'Nieuwe route');
+  if (!naam) {
+    drawnItems.removeLayer(e.layer);
+    return;
+  }
+
+  const start = await promptModal('Startplaats', '');
+  const einde = await promptModal('Eindplaats', '');
+
+  const afstand_km = calculateDistanceKmFromLayer(e.layer);
 
   const r = {
     type: 'drawn',
     naam,
+    start: start || '',
+    einde: einde || '',
+    afstand_km,
     layer: e.layer,
     waypoints: []
   };
 
+  e.layer.on('click', () => {
+    const idx = routes.indexOf(r);
+    if (idx >= 0) setRouteActive(idx);
+    renderList();
+  });
+
   routes.push(r);
   activeRouteIndex = routes.length - 1;
-
   setRouteActive(activeRouteIndex);
   renderList();
 });
@@ -226,17 +243,20 @@ window.saveDrawnRoute = async function(i) {
     return;
   }
 
-  const payload = {
-    naam: r.naam,
-    groep: 'TEKEN',
-    coords,
-    waypoints: (r.waypoints || []).map(wp => ({
-      lat: wp.lat,
-      lon: wp.lon,
-      name: wp.name,
-      type: wp.type
-    }))
-  };
+const payload = {
+  naam: r.naam,
+  groep: 'TEKEN',
+  start: r.start || null,
+  einde: r.einde || null,
+  afstand_km: r.afstand_km || null,
+  coords,
+  waypoints: (r.waypoints || []).map(wp => ({
+    lat: wp.lat,
+    lon: wp.lon,
+    name: wp.name,
+    type: wp.type
+  }))
+};
 
   try {
     const res = await fetch('/api/rides/admin/drawn', {
@@ -319,22 +339,7 @@ window.deleteActiveRoute = async function(i) {
   const ok = await confirmModal('Deze route van de kaart verwijderen?');
   if (!ok) return;
 
-  if (r.layer) drawnItems.removeLayer(r.layer);
-
-  if (Array.isArray(r.waypoints)) {
-    r.waypoints.forEach(wp => {
-      if (wp.marker) map.removeLayer(wp.marker);
-    });
-  }
-
-  routes.splice(i, 1);
-
-  if (activeRouteIndex === i) {
-    activeRouteIndex = null;
-  } else if (activeRouteIndex > i) {
-    activeRouteIndex--;
-  }
-
+  clearActiveRoute();
   renderList();
 };
 
@@ -447,20 +452,23 @@ function renderList() {
       const hasCoords = Array.isArray(r.coords) && r.coords.length > 1;
 
       html += `
-        <div class="row">
-          <strong>${r.naam}</strong><br/>
-          <small>
-            ${r.start ?? ''}${r.start && r.afstand_km ? ' – ' : ''}
-            ${r.afstand_km ? r.afstand_km + ' km' : ''}
-            ${(!r.start && !r.afstand_km && hasCoords) ? '(getekend)' : ''}
-          </small><br/>
+  <div class="row route-row">
+    <div class="route-row-top">
+      <strong>${r.naam}</strong>
+      <button type="button"
+              class="wtc-button"
+              onclick="loadCatalogRouteById('${r.id}')">
+        Toon
+      </button>
+    </div>
 
-          <button type="button"
-                  class="wtc-button"
-                  onclick="loadCatalogRouteById('${r.id}')">
-            Toon
-          </button>
-        </div>
+    <small>
+      ${r.start ?? ''}${r.start && r.afstand_km ? ' – ' : ''}
+      ${r.afstand_km ? r.afstand_km + ' km' : ''}
+      ${(!r.start && !r.afstand_km && Array.isArray(r.coords) && r.coords.length > 1) ? '(getekend)' : ''}
+    </small>
+  </div>
+`;
       `;
     });
 
@@ -749,6 +757,48 @@ window.deleteWaypoint = function(id) {
   map.removeLayer(wp.marker);
   r.waypoints = r.waypoints.filter(w => w.id !== id);
 };
+
+/* ================= TEKST INPUT-MODAL ================= */
+
+function promptModal(title, defaultValue = '') {
+  return new Promise(resolve => {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <input id="modal-input-field" type="text" value="${defaultValue.replace(/"/g, '&quot;')}" style="padding:8px;">
+      </div>
+    `;
+
+    showModal("custom", "✏️", title, [
+      {
+        text: "OK",
+        action: () => {
+          const value = document.getElementById('modal-input-field')?.value ?? '';
+          resolve(value.trim());
+        }
+      },
+      {
+        text: "Annuleer",
+        action: () => resolve(null)
+      }
+    ], wrapper);
+  });
+}
+
+function calculateDistanceKmFromLayer(layer) {
+  if (!layer) return 0;
+
+  const latlngs = layer.getLatLngs?.() || [];
+  if (!Array.isArray(latlngs) || latlngs.length < 2) return 0;
+
+  let meters = 0;
+  for (let i = 1; i < latlngs.length; i++) {
+    meters += latlngs[i - 1].distanceTo(latlngs[i]);
+  }
+
+  return Math.round((meters / 1000) * 10) / 10;
+}
+
 /* ================= INIT ================= */
 
 document.getElementById('wisBtn')?.addEventListener('click', () => {
