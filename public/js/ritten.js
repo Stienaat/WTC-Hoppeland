@@ -366,6 +366,8 @@ const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
 
 /* ================= DELETE ================= */
 
+// VERWIJDEREN 
+
 window.deleteActiveRoute = async function (i) {
   const r = routes[i];
   if (!r || r.type === 'catalog') return;
@@ -376,6 +378,8 @@ window.deleteActiveRoute = async function (i) {
   clearActiveRoute();
   renderList();
 };
+
+// DELETE
 
 window.deleteCatalogRoute = async function (i) {
   const r = routes[i];
@@ -390,17 +394,13 @@ window.deleteCatalogRoute = async function (i) {
   if (!ok) return;
 
   try {
-const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
-  method: 'DELETE',
-  credentials: 'include'
-});
+   
+  const j = await res.json();
 
-    const j = await res.json();
-
-    if (!res.ok || !j.ok) {
-      showModal('error', '❌', j.error || 'Verwijderen mislukt.');
-      return;
-    }
+  if (!res.ok || !j.ok) {
+    showModal('error', '❌', j.error || 'Verwijderen mislukt.');
+    return;
+  }
 
     if (r.layer) drawnItems.removeLayer(r.layer);
     if (Array.isArray(r.waypoints)) {
