@@ -288,12 +288,12 @@ window.saveDrawnRoute = async function (i) {
   };
 
   try {
-    const res = await fetch('/api/rides/admin/drawn', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
+const res = await fetch('/api/rides/admin/drawn', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+});
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
@@ -346,11 +346,12 @@ window.overwriteRoute = async function (i) {
   };
 
   try {
-    const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
+  method: 'PUT',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+});
 
     const j = await res.json();
 
@@ -394,9 +395,10 @@ window.deleteCatalogRoute = async function (i) {
   if (!ok) return;
 
   try {
-    const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
-      method: 'DELETE'
-    });
+const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
+  method: 'DELETE',
+  credentials: 'include'
+});
 
     const j = await res.json();
 
