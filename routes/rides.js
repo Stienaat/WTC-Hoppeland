@@ -254,7 +254,7 @@ router.post('/admin/drawn', requireAdmin, async (req, res) => {
       year: new Date().getFullYear(),
       group_code: groep ? String(groep).trim() : 'TEKEN',
       start_place: String(start_place ?? start ?? '').trim() || null,
-      end_place: String(end_place ?? einde ?? '').trim() || null,
+     
       distance_km: parseNumeric(afstand_km),
       ride_kind: 'drawn',
       coords: normalizedCoords,
