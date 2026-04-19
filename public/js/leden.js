@@ -295,10 +295,11 @@ if (btnUploadRoute) {
     fd.append('gpxfile', file);
 
     try {
-      const res = await fetch('/api/routes/upload-gpx', {
-        method: 'POST',
-        body: fd
-      });
+   const res = await fetch('/api/routes/upload-gpx', {
+	  method: 'POST',
+	  credentials: 'include',
+	  body: fd
+	});
 
       const j = await res.json();
 
