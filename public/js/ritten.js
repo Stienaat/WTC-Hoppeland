@@ -81,13 +81,7 @@ function populateGroepen() {
 }
 
 function confirmModal(message) {
-  return new Promise(function (resolve) {
-    showModal('confirm','❓',message,
-      [{text: 'Ja',action: function () {resolve(true);}},
-        {text: 'Nee',action: function () {resolve(false);}}
-      ]
-    );
-  });
+  return Promise.resolve(window.confirm(message));
 }
 
 /* ================= MAP ================= */
@@ -289,13 +283,12 @@ window.saveDrawnRoute = async function (i) {
   };
 
   try {
-    const res = await fetch('/api/rides/admin/drawn', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
+const res = await fetch('/api/rides/admin/drawn', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+});
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
@@ -348,12 +341,12 @@ window.overwriteRoute = async function (i) {
   };
 
   try {
-    const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
-      method: 'PUT',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
+  method: 'PUT',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+});
 
     const j = await res.json();
 
@@ -373,6 +366,8 @@ window.overwriteRoute = async function (i) {
 
 /* ================= DELETE ================= */
 
+// VERWIJDEREN 
+
 window.deleteActiveRoute = async function (i) {
   const r = routes[i];
   if (!r || r.type === 'catalog') return;
@@ -383,6 +378,8 @@ window.deleteActiveRoute = async function (i) {
   clearActiveRoute();
   renderList();
 };
+
+// DELETE
 
 window.deleteCatalogRoute = async function (i) {
   const r = routes[i];
@@ -554,20 +551,10 @@ function exportRouteToGPX(route) {
   gpx += '</gpx>';
 
   const blob = new Blob([gpx], { type: 'application/gpx+xml' });
-  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-
-  a.href = url;
+  a.href = URL.createObjectURL(blob);
   a.download = (route.naam || 'route') + '.gpx';
-  a.style.display = 'none';
-
-  document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-
-  setTimeout(function () {
-    URL.revokeObjectURL(url);
-  }, 1000);
 }
 
 window.exportDrawnRouteToGPX = function (route) {
@@ -832,101 +819,42 @@ window.deleteWaypoint = function (id) {
 };
 
 /* ================= TEKST INPUT-MODAL ================= */
-
+function promptModal(title, defaultValue) {
+  if (defaultValue === undefined) defaultValue = '';
+  return Promise.resolve(window.prompt(title, defaultValue));
+}
+/*
 function promptModal(title, defaultValue) {
   if (defaultValue === undefined) defaultValue = '';
 
   return new Promise(function (resolve) {
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.top = '0';
-    overlay.style.left = '0';
-    overlay.style.right = '0';
-    overlay.style.bottom = '0';
-    overlay.style.background = 'rgba(0,0,0,0.45)';
-    overlay.style.display = 'flex';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.zIndex = '99999';
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML =
+      '<div style="display:flex;flex-direction:column;gap:10px;">' +
+        '<input id="modal-input-field" type="text" value="' +
+        String(defaultValue).replace(/"/g, '&quot;') +
+        '" style="padding:8px;">' +
+      '</div>';
 
-    const box = document.createElement('div');
-    box.style.background = '#fff';
-    box.style.padding = '20px';
-    box.style.borderRadius = '10px';
-    box.style.minWidth = '320px';
-    box.style.maxWidth = '90vw';
-    box.style.boxShadow = '0 10px 30px rgba(0,0,0,0.25)';
-    box.style.display = 'flex';
-    box.style.flexDirection = 'column';
-    box.style.gap = '12px';
-
-    const titleEl = document.createElement('div');
-    titleEl.textContent = title;
-    titleEl.style.fontWeight = 'bold';
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = defaultValue;
-    input.style.padding = '10px';
-    input.style.fontSize = '16px';
-
-    const buttons = document.createElement('div');
-    buttons.style.display = 'flex';
-    buttons.style.justifyContent = 'flex-end';
-    buttons.style.gap = '10px';
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.textContent = 'Annuleer';
-
-    const okBtn = document.createElement('button');
-    okBtn.type = 'button';
-    okBtn.textContent = 'OK';
-
-    buttons.appendChild(cancelBtn);
-    buttons.appendChild(okBtn);
-
-    box.appendChild(titleEl);
-    box.appendChild(input);
-    box.appendChild(buttons);
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-
-    setTimeout(function () {
-      input.focus();
-      input.select();
-    }, 0);
-
-    function close(value) {
-      if (overlay && overlay.parentNode) {
-        overlay.parentNode.removeChild(overlay);
+    showModal('custom', '✏️', title, [
+      {
+        text: 'OK',
+        action: function () {
+          const input = document.getElementById('modal-input-field');
+          const value = input ? input.value : '';
+          resolve(value.trim());
+        }
+      },
+      {
+        text: 'Annuleer',
+        action: function () {
+          resolve(null);
+        }
       }
-      resolve(value);
-    }
-
-    okBtn.onclick = function () {
-      close(input.value.trim());
-    };
-
-    cancelBtn.onclick = function () {
-      close(null);
-    };
-
-    overlay.onclick = function (e) {
-      if (e.target === overlay) {
-        close(null);
-      }
-    };
-
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        close(input.value.trim());
-      } else if (e.key === 'Escape') {
-        close(null);
-      }
-    });
+    ], wrapper);
   });
 }
+*/
 
 function calculateDistanceKmFromLayer(layer) {
   if (!layer) return 0;
@@ -967,3 +895,4 @@ if (zoekInput) {
 }
 
 reloadCatalog();
+renderUserBadge();
