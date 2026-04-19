@@ -93,6 +93,8 @@ function requireAdmin(req, res, next) {
   if (!isAdmin) {
     return res.status(403).json({ ok: false, error: 'NOT_ADMIN' });
   }
+  console.log('SESSION:', req.session);
+console.log('is_admin:', req.session?.is_admin);
 
   next();
 }
