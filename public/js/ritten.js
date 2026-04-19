@@ -818,7 +818,11 @@ window.deleteWaypoint = function (id) {
 };
 
 /* ================= TEKST INPUT-MODAL ================= */
-
+function promptModal(title, defaultValue) {
+  if (defaultValue === undefined) defaultValue = '';
+  return Promise.resolve(window.prompt(title, defaultValue));
+}
+/*
 function promptModal(title, defaultValue) {
   if (defaultValue === undefined) defaultValue = '';
 
@@ -849,6 +853,7 @@ function promptModal(title, defaultValue) {
     ], wrapper);
   });
 }
+*/
 
 function calculateDistanceKmFromLayer(layer) {
   if (!layer) return 0;
