@@ -79,7 +79,7 @@ function populateGroepen() {
       return '<option value="' + g + '">' + g + '</option>';
     }).join('');
 }
-console.log('END FILE');
+
 function confirmModal(message) {
   return new Promise(function (resolve) {
     showModal('confirm','❓',message,
@@ -967,4 +967,3 @@ if (zoekInput) {
 }
 
 reloadCatalog();
-renderUserBadge();delete
