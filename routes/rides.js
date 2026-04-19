@@ -85,20 +85,23 @@ function normalizeWaypoints(waypoints) {
 }
 
 function requireAdmin(req, res, next) {
+  console.log('SESSION:', req.session);
+  console.log('is_admin:', req.session?.is_admin);
+  console.log('req.user:', req.user);
+  console.log('req.isAdmin:', req.isAdmin);
+
   const isAdmin =
     req.session?.is_admin === true ||
     req.user?.role === 'admin' ||
     req.isAdmin === true;
 
   if (!isAdmin) {
+    console.warn('NOT_ADMIN triggered');
     return res.status(403).json({ ok: false, error: 'NOT_ADMIN' });
   }
-  console.log('SESSION:', req.session);
-console.log('is_admin:', req.session?.is_admin);
 
   next();
 }
-
 /* -----------------------------
    GET /api/rides
    publiek
