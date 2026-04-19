@@ -81,12 +81,7 @@ function populateGroepen() {
 }
 
 function confirmModal(message) {
-  return new Promise(function (resolve) {
-    showModal('confirm', '❓', message, [
-      { text: 'Ja', action: function () { resolve(true); } },
-      { text: 'Nee', action: function () { resolve(false); } }
-    ]);
-  });
+  return Promise.resolve(window.confirm(message));
 }
 
 /* ================= MAP ================= */
