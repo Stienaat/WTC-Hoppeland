@@ -5,11 +5,15 @@ const noticeStatus = document.getElementById('loginStatus');
 
 async function ajax(url, options = {}) {
   options.headers = {
-    ...(options.headers || {}),
-    Accept: 'application/json'
+    Accept: 'application/json',
+    ...(options.headers || {})
   };
 
-  const res = await fetch(url, options);
+  const res = await fetch(url, {
+    credentials: 'include',
+    ...options
+  });
+
   const ct = res.headers.get('content-type') || '';
 
   if (!ct.includes('application/json')) {
