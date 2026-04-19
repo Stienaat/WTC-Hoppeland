@@ -15,7 +15,6 @@ function isAdminUser() {
   return localStorage.getItem('is_admin') === 'true';
 }
 
-
 // helpers
 function joinUrl(base, file) {
   if (!base.endsWith('/')) base += '/';
@@ -24,57 +23,68 @@ function joinUrl(base, file) {
 }
 
 function escapeXml(str) {
-  return String(str).replace(/[<>&'"]/g, c => ({
-    '<': '&lt;',
-    '>': '&gt;',
-    '&': '&amp;',
-    "'": '&apos;',
-    '"': '&quot;'
-  }[c]));
+  return String(str).replace(/[<>&'"]/g, function (c) {
+    return {
+      '<': '&lt;',
+      '>': '&gt;',
+      '&': '&amp;',
+      "'": '&apos;',
+      '"': '&quot;'
+    }[c];
+  });
 }
 
 function getGpxBaseUrl(meta) {
-  return `${BASE_URL}/gpx/${meta.jaar}/${meta.groep}/`;
+  return BASE_URL + '/gpx/' + meta.jaar + '/' + meta.groep + '/';
 }
 
 function buildWaypointPopup(wp) {
-  return `
-    <div>
-      <strong>${wp.name}</strong><br/><br/>
+  return (
+    '<div>' +
+      '<strong>' + wp.name + '</strong><br/><br/>' +
 
-      <button onclick="renameWaypoint('${wp.id}')">Naam wijzigen</button><br/><br/>
+      '<button onclick="renameWaypoint(\'' + wp.id + '\')">Naam wijzigen</button><br/><br/>' +
 
-      <button onclick="setWaypointType('${wp.id}','rest')">Rust</button>
-      <button onclick="setWaypointType('${wp.id}','food')">Horeca</button>
-      <button onclick="setWaypointType('${wp.id}','water')">Water</button><br/>
+      '<button onclick="setWaypointType(\'' + wp.id + '\',\'rest\')">Rust</button> ' +
+      '<button onclick="setWaypointType(\'' + wp.id + '\',\'food\')">Horeca</button> ' +
+      '<button onclick="setWaypointType(\'' + wp.id + '\',\'water\')">Water</button><br/>' +
 
-      <button onclick="setWaypointType('${wp.id}','danger')">Gevaar</button>
-      <button onclick="setWaypointType('${wp.id}','climb')">Klim</button>
-      <button onclick="setWaypointType('${wp.id}','sprint')">Sprint</button>
+      '<button onclick="setWaypointType(\'' + wp.id + '\',\'danger\')">Gevaar</button> ' +
+      '<button onclick="setWaypointType(\'' + wp.id + '\',\'climb\')">Klim</button> ' +
+      '<button onclick="setWaypointType(\'' + wp.id + '\',\'sprint\')">Sprint</button>' +
 
-      <br/><br/>
-      <button onclick="deleteWaypoint('${wp.id}')">Verwijder</button>
-    </div>
-  `;
+      '<br/><br/>' +
+      '<button onclick="deleteWaypoint(\'' + wp.id + '\')">Verwijder</button>' +
+    '</div>'
+  );
 }
 
 function populateGroepen() {
-  const groepen = [...new Set(routes
-    .filter(r => r.type === 'catalog')
-    .map(r => r.groep)
-    .filter(Boolean)
-  )].sort();
+  const groepen = [];
+  routes
+    .filter(function (r) { return r.type === 'catalog'; })
+    .forEach(function (r) {
+      if (r.groep && groepen.indexOf(r.groep) === -1) {
+        groepen.push(r.groep);
+      }
+    });
+
+  groepen.sort();
+
+  if (!groepSelect) return;
 
   groepSelect.innerHTML =
     '<option value="ALL">Alle</option>' +
-    groepen.map(g => `<option value="${g}">${g}</option>`).join('');
+    groepen.map(function (g) {
+      return '<option value="' + g + '">' + g + '</option>';
+    }).join('');
 }
 
 function confirmModal(message) {
-  return new Promise(resolve => {
-    showModal("confirm", "❓", message, [
-      { text: "Ja", action: () => resolve(true) },
-      { text: "Nee", action: () => resolve(false) }
+  return new Promise(function (resolve) {
+    showModal('confirm', '❓', message, [
+      { text: 'Ja', action: function () { resolve(true); } },
+      { text: 'Nee', action: function () { resolve(false); } }
     ]);
   });
 }
@@ -96,8 +106,8 @@ const drawnItems = new L.FeatureGroup().addTo(map);
 let routes = [];
 let activeRouteIndex = null;
 
-const ROUTE_STYLE_NORMAL = { color:'#3388ff', weight:4, opacity:0.8 };
-const ROUTE_STYLE_ACTIVE = { color:'#e74c3c', weight:6, opacity:1 };
+const ROUTE_STYLE_NORMAL = { color: '#3388ff', weight: 4, opacity: 0.8 };
+const ROUTE_STYLE_ACTIVE = { color: '#e74c3c', weight: 6, opacity: 1 };
 
 /* ================= ICONS ================= */
 
@@ -111,11 +121,11 @@ function makeIcon(file) {
 }
 
 const waypointIcons = {
-  rest:   makeIcon('rest.png'),
-  food:   makeIcon('food.png'),
-  water:  makeIcon('water.png'),
+  rest: makeIcon('rest.png'),
+  food: makeIcon('food.png'),
+  water: makeIcon('water.png'),
   danger: makeIcon('danger.png'),
-  climb:  makeIcon('climb.png'),
+  climb: makeIcon('climb.png'),
   sprint: makeIcon('sprint.png')
 };
 
@@ -126,10 +136,10 @@ map.addControl(new L.Control.Draw({
   edit: { featureGroup: drawnItems }
 }));
 
-map.on('draw:drawstart', () => { isDrawing = true; });
-map.on('draw:drawstop', () => { isDrawing = false; });
+map.on('draw:drawstart', function () { isDrawing = true; });
+map.on('draw:drawstop', function () { isDrawing = false; });
 
-map.on(L.Draw.Event.CREATED, async e => {
+map.on(L.Draw.Event.CREATED, async function (e) {
   drawnItems.addLayer(e.layer);
 
   const naam = await promptModal('Naam van de route', 'Nieuwe route');
@@ -145,15 +155,15 @@ map.on(L.Draw.Event.CREATED, async e => {
 
   const r = {
     type: 'drawn',
-    naam,
+    naam: naam,
     start: start || '',
     einde: einde || '',
-    afstand_km,
+    afstand_km: afstand_km,
     layer: e.layer,
     waypoints: []
   };
 
-  e.layer.on('click', () => {
+  e.layer.on('click', function () {
     const idx = routes.indexOf(r);
     if (idx >= 0) setRouteActive(idx);
     renderList();
@@ -170,43 +180,54 @@ map.on(L.Draw.Event.CREATED, async e => {
 function setRouteActive(index) {
   if (activeRouteIndex !== null) {
     const prev = routes[activeRouteIndex];
-  if (prev && prev.layer && prev.layer.setStyle) {
-  prev.layer.setStyle(ROUTE_STYLE_NORMAL);
-}
+    if (prev && prev.layer && prev.layer.setStyle) {
+      prev.layer.setStyle(ROUTE_STYLE_NORMAL);
+    }
   }
 
   activeRouteIndex = index;
   const curr = routes[index];
- if (curr && curr.layer && curr.layer.setStyle) {
-  curr.layer.setStyle(ROUTE_STYLE_ACTIVE);
-}
+  if (curr && curr.layer && curr.layer.setStyle) {
+    curr.layer.setStyle(ROUTE_STYLE_ACTIVE);
+  }
 }
 
 /* ================= LOAD ================= */
 
 function reloadCatalog() {
   return fetch('/api/rides')
-    .then(r => r.json())
-    .then(data => {
-      const active = routes.filter(r => r.type !== 'catalog');
-      const catalog = (data || []).map(x => ({ ...x, type: 'catalog' }));
-      routes = [...active, ...catalog];
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      const active = routes.filter(function (r) { return r.type !== 'catalog'; });
+      const catalog = (data || []).map(function (x) {
+        const y = {};
+        for (const k in x) y[k] = x[k];
+        y.type = 'catalog';
+        return y;
+      });
+
+      routes = active.concat(catalog);
 
       populateGroepen();
       renderList();
     });
 }
-/* ================= AVTIVE ROUTE WISSEN ================= */
+
+/* ================= ACTIVE ROUTE WISSEN ================= */
 
 function clearActiveRoute() {
-  routes.filter(r => r.type !== 'catalog').forEach(r => {
-    if (r.layer) drawnItems.removeLayer(r.layer);
+  routes.filter(function (r) { return r.type !== 'catalog'; }).forEach(function (r) {
+    if (r.layer) {
+      drawnItems.removeLayer(r.layer);
+    }
     if (Array.isArray(r.waypoints)) {
-      r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+      r.waypoints.forEach(function (wp) {
+        if (wp.marker) map.removeLayer(wp.marker);
+      });
     }
   });
 
-  routes = routes.filter(r => r.type === 'catalog');
+  routes = routes.filter(function (r) { return r.type === 'catalog'; });
   activeRouteIndex = null;
 }
 
@@ -223,12 +244,12 @@ function zoomToLayer(layer) {
 
 /* ================= SAVE ================= */
 
-window.saveDrawnRoute = async function(i) {
+window.saveDrawnRoute = async function (i) {
   const r = routes[i];
   if (!r || r.type !== 'drawn') return;
 
   if (!isAdminUser()) {
-    showModal("error", "❌", "Alleen admin mag routes opslaan in de catalogus.");
+    showModal('error', '❌', 'Alleen admin mag routes opslaan in de catalogus.');
     return;
   }
 
@@ -237,30 +258,34 @@ window.saveDrawnRoute = async function(i) {
   }
 
   const geo = r.layer.toGeoJSON();
-let coords = [];
-if (geo && geo.geometry && geo.geometry.coordinates) {
-  coords = geo.geometry.coordinates.map(c => [c[1], c[0]]);
-}
+  let coords = [];
+  if (geo && geo.geometry && geo.geometry.coordinates) {
+    coords = geo.geometry.coordinates.map(function (c) {
+      return [c[1], c[0]];
+    });
+  }
 
   if (!Array.isArray(coords) || coords.length < 2) {
-    showModal("error", "❌", "Route bevat te weinig punten.");
+    showModal('error', '❌', 'Route bevat te weinig punten.');
     return;
   }
 
-const payload = {
-  naam: r.naam,
-  groep: 'TEKEN',
-  start: r.start || null,
-  einde: r.einde || null,
-  afstand_km: r.afstand_km || null,
-  coords,
-  waypoints: (r.waypoints || []).map(wp => ({
-    lat: wp.lat,
-    lon: wp.lon,
-    name: wp.name,
-    type: wp.type
-  }))
-};
+  const payload = {
+    naam: r.naam,
+    groep: 'TEKEN',
+    start: r.start || null,
+    einde: r.einde || null,
+    afstand_km: r.afstand_km || null,
+    coords: coords,
+    waypoints: (r.waypoints || []).map(function (wp) {
+      return {
+        lat: wp.lat,
+        lon: wp.lon,
+        name: wp.name,
+        type: wp.type
+      };
+    })
+  };
 
   try {
     const res = await fetch('/api/rides/admin/drawn', {
@@ -272,27 +297,27 @@ const payload = {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      showModal("error", "❌", j.error || "Opslaan mislukt.");
+      showModal('error', '❌', j.error || 'Opslaan mislukt.');
       return;
     }
 
-    r.catalogId = j.id || j.ride?.id || null;
+    r.catalogId = j.id || (j.ride && j.ride.id) || null;
 
-    showModal("success", "👌", "Route opgeslagen in catalogus.");
+    showModal('success', '👌', 'Route opgeslagen in catalogus.');
     await reloadCatalog();
     renderList();
   } catch (err) {
     console.error(err);
-    showModal("error", "❌", "Serverfout bij opslaan.");
+    showModal('error', '❌', 'Serverfout bij opslaan.');
   }
 };
 
-window.overwriteRoute = async function(i) {
+window.overwriteRoute = async function (i) {
   const r = routes[i];
   if (!r || !r.catalogId || !r.layer) return;
 
   if (!isAdminUser()) {
-    showModal("error", "❌", "Alleen admin mag catalogusroutes bijwerken.");
+    showModal('error', '❌', 'Alleen admin mag catalogusroutes bijwerken.');
     return;
   }
 
@@ -300,20 +325,28 @@ window.overwriteRoute = async function(i) {
   if (!ok) return;
 
   const geo = r.layer.toGeoJSON();
+  let coords = [];
+  if (geo && geo.geometry && geo.geometry.coordinates) {
+    coords = geo.geometry.coordinates.map(function (c) {
+      return [c[1], c[0]];
+    });
+  }
 
   const payload = {
     naam: r.naam,
-    coords: geo.geometry.coordinates.map(c => [c[1], c[0]]),
-    waypoints: (r.waypoints || []).map(wp => ({
-      lat: wp.lat,
-      lon: wp.lon,
-      name: wp.name,
-      type: wp.type
-    }))
+    coords: coords,
+    waypoints: (r.waypoints || []).map(function (wp) {
+      return {
+        lat: wp.lat,
+        lon: wp.lon,
+        name: wp.name,
+        type: wp.type
+      };
+    })
   };
 
   try {
-    const res = await fetch(`/api/rides/admin/${encodeURIComponent(r.catalogId)}`, {
+    const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -322,21 +355,22 @@ window.overwriteRoute = async function(i) {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      showModal("error", "❌", j.error || "Opslaan mislukt.");
+      showModal('error', '❌', j.error || 'Opslaan mislukt.');
       return;
     }
 
-    showModal("success", "👌", "Route bijgewerkt.");
+    showModal('success', '👌', 'Route bijgewerkt.');
     await reloadCatalog();
     renderList();
   } catch (err) {
     console.error(err);
-    showModal("error", "❌", "Serverfout bij opslaan.");
+    showModal('error', '❌', 'Serverfout bij opslaan.');
   }
 };
+
 /* ================= DELETE ================= */
 
-window.deleteActiveRoute = async function(i) {
+window.deleteActiveRoute = async function (i) {
   const r = routes[i];
   if (!r || r.type === 'catalog') return;
 
@@ -347,16 +381,12 @@ window.deleteActiveRoute = async function(i) {
   renderList();
 };
 
-function isAdminUser() {
-  return localStorage.getItem('is_admin') === 'true';
-}
-
-window.deleteCatalogRoute = async function(i) {
+window.deleteCatalogRoute = async function (i) {
   const r = routes[i];
   if (!r || !r.catalogId) return;
 
   if (!isAdminUser()) {
-    showModal("error", "❌", "Alleen admin mag catalogusroutes verwijderen.");
+    showModal('error', '❌', 'Alleen admin mag catalogusroutes verwijderen.');
     return;
   }
 
@@ -364,173 +394,160 @@ window.deleteCatalogRoute = async function(i) {
   if (!ok) return;
 
   try {
-    const res = await fetch(`/api/rides/admin/${encodeURIComponent(r.catalogId)}`, {
+    const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
       method: 'DELETE'
     });
 
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      showModal("error", "❌", j.error || "Verwijderen mislukt.");
+      showModal('error', '❌', j.error || 'Verwijderen mislukt.');
       return;
     }
 
     if (r.layer) drawnItems.removeLayer(r.layer);
     if (Array.isArray(r.waypoints)) {
-      r.waypoints.forEach(wp => wp.marker && map.removeLayer(wp.marker));
+      r.waypoints.forEach(function (wp) {
+        if (wp.marker) map.removeLayer(wp.marker);
+      });
     }
 
     activeRouteIndex = null;
     await reloadCatalog();
     renderList();
 
-    showModal("success", "👌", "Route uit catalogus verwijderd.");
+    showModal('success', '👌', 'Route uit catalogus verwijderd.');
   } catch (err) {
     console.error(err);
-    showModal("error", "❌", "Serverfout bij verwijderen.");
+    showModal('error', '❌', 'Serverfout bij verwijderen.');
   }
 };
+
 /* ================= UI ================= */
 
 function renderList() {
   let html = '';
 
-  // ACTIEF
   html += '<div class="row"><em>Actief</em></div>';
 
-  routes.filter(r => r.type !== 'catalog').forEach(r => {
+  routes.filter(function (r) { return r.type !== 'catalog'; }).forEach(function (r) {
     const i = routes.indexOf(r);
     const canDownload = !!r.layer;
     const canSave = isAdminUser() && r.type === 'drawn';
     const canDeleteCatalog = isAdminUser() && !!r.catalogId;
 
-    html += `
-      <div class="row">
-        <strong>${r.naam}</strong><br/>
+    html += '<div class="row">';
+    html += '<strong>' + r.naam + '</strong><br/>';
 
-        ${canSave ? `
-          <button type="button"
-                  class="wtc-button"
-                  onclick="${r.catalogId ? `overwriteRoute(${i})` : `saveDrawnRoute(${i})`}">
-            Opslaan
-          </button>
-        ` : ''}
+    if (canSave) {
+      html +=
+        '<button type="button" class="wtc-button" onclick="' +
+        (r.catalogId ? ('overwriteRoute(' + i + ')') : ('saveDrawnRoute(' + i + ')')) +
+        '">Opslaan</button> ';
+    }
 
-        ${canDownload ? `
-          <button type="button"
-                  class="wtc-button"
-                  style="padding: 4px 5px 4px 5px"
-                  onclick="exportDrawnRouteToGPX(routes[${i}])">
-            Download
-          </button>
-        ` : ''}
+    if (canDownload) {
+      html +=
+        '<button type="button" class="wtc-button" style="padding: 4px 5px 4px 5px" onclick="exportDrawnRouteToGPX(routes[' +
+        i +
+        '])">Download</button> ';
+    }
 
-        <button type="button"
-                class="wtc-button"
-                onclick="deleteActiveRoute(${i})">
-          Verwijder
-        </button>
+    html +=
+      '<button type="button" class="wtc-button" onclick="deleteActiveRoute(' +
+      i +
+      ')">Verwijder</button> ';
 
-        ${canDeleteCatalog ? `
-          <button type="button"
-                  class="wtc-button"
-                  onclick="deleteCatalogRoute(${i})">
-            delete
-          </button>
-        ` : ''}
-      </div>
-    `;
+    if (canDeleteCatalog) {
+      html +=
+        '<button type="button" class="wtc-button" onclick="deleteCatalogRoute(' +
+        i +
+        ')">delete</button>';
+    }
+
+    html += '</div>';
   });
 
-  // CATALOGUS
   html += '<hr/><div class="row"><em>Catalogus</em></div>';
 
   const groep = groepSelect ? groepSelect.value : 'ALL';
   const zoek = zoekInput ? zoekInput.value.toLowerCase() : '';
 
   routes
-    .filter(r => r.type === 'catalog')
-    .filter(r => groep === 'ALL' || r.groep === groep)
-    .filter(r => !zoek || (r.naam || '').toLowerCase().includes(zoek))
-    .forEach(r => {
-      const hasCoords = Array.isArray(r.coords) && r.coords.length > 1;
+    .filter(function (r) { return r.type === 'catalog'; })
+    .filter(function (r) { return groep === 'ALL' || r.groep === groep; })
+    .filter(function (r) {
+      return !zoek || ((r.naam || '').toLowerCase().indexOf(zoek) !== -1);
+    })
+    .forEach(function (r) {
+      html += '<div class="row route-row">';
+      html += '  <div class="route-row-top">';
+      html += '    <strong>' + r.naam + '</strong>';
+      html += '    <button type="button" class="wtc-button" onclick="loadCatalogRouteById(\'' + r.id + '\')">Toon</button>';
+      html += '  </div>';
 
-      html += `
-  <div class="row route-row">
-    <div class="route-row-top">
-      <strong>${r.naam}</strong>
-      <button type="button"
-              class="wtc-button"
-              onclick="loadCatalogRouteById('${r.id}')">
-        Toon
-      </button>
-    </div>
-
-    <small>
-      ${r.start || ''}${r.start && r.afstand_km ? ' – ' : ''}  
-      ${r.afstand_km ? r.afstand_km + ' km' : ''}
-      ${(!r.start && !r.afstand_km && Array.isArray(r.coords) && r.coords.length > 1) ? '(getekend)' : ''}
-    </small>
-  </div>
-`;
-      `;
+      html += '  <small>';
+      html += (r.start || '');
+      html += (r.start && r.afstand_km ? ' – ' : '');
+      html += (r.afstand_km ? (r.afstand_km + ' km') : '');
+      if (!r.start && !r.afstand_km && Array.isArray(r.coords) && r.coords.length > 1) {
+        html += '(getekend)';
+      }
+      html += '  </small>';
+      html += '</div>';
     });
 
-  listEl.innerHTML = html;
+  if (listEl) {
+    listEl.innerHTML = html;
+  }
 }
 
 function exportRouteToGPX(route) {
   if (!route || !route.layer) return;
 
   const geo = route.layer.toGeoJSON();
-  const coords = geo.geometry.coordinates || [];
+  const coords = (geo && geo.geometry && geo.geometry.coordinates) ? geo.geometry.coordinates : [];
 
   if (coords.length < 2) {
-    showModal("error", "❌", "Route bevat te weinig punten!");
+    showModal('error', '❌', 'Route bevat te weinig punten!');
     return;
   }
 
   const wpMap = {
-    rest:   { sym: 'Restroom',       type: 'rest' },
-    food:   { sym: 'Food & Drink',   type: 'food' },
-    water:  { sym: 'Drinking Water', type: 'water' },
-    danger: { sym: 'Danger Area',    type: 'danger' },
-    climb:  { sym: 'Summit',         type: 'climb' },
-    sprint: { sym: 'Flag',           type: 'sprint' }
+    rest: { sym: 'Restroom', type: 'rest' },
+    food: { sym: 'Food & Drink', type: 'food' },
+    water: { sym: 'Drinking Water', type: 'water' },
+    danger: { sym: 'Danger Area', type: 'danger' },
+    climb: { sym: 'Summit', type: 'climb' },
+    sprint: { sym: 'Flag', type: 'sprint' }
   };
 
-  let gpx = `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1"
-     creator="Clubroutes"
-     xmlns="http://www.topografix.com/GPX/1/1">
-<trk>
-  <name>${escapeXml(route.naam)}</name>
-  <trkseg>
-`;
+  let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<gpx version="1.1" creator="Clubroutes" xmlns="http://www.topografix.com/GPX/1/1">\n' +
+    '<trk>\n' +
+    '  <name>' + escapeXml(route.naam) + '</name>\n' +
+    '  <trkseg>\n';
 
-  coords.forEach(c => {
-    gpx += `    <trkpt lat="${c[1]}" lon="${c[0]}"></trkpt>\n`;
+  coords.forEach(function (c) {
+    gpx += '    <trkpt lat="' + c[1] + '" lon="' + c[0] + '"></trkpt>\n';
   });
 
-  gpx += `  </trkseg>
-</trk>
-`;
+  gpx += '  </trkseg>\n</trk>\n';
 
   if (Array.isArray(route.waypoints)) {
-    route.waypoints.forEach(wp => {
-      const map = wpMap[wp.type] || {};
-      gpx += `
-<wpt lat="${wp.lat}" lon="${wp.lon}">
-  <name>${escapeXml(wp.name)}</name>
-  <desc>${escapeXml(wp.type)}</desc>
-  ${map.sym ? `<sym>${map.sym}</sym>` : ''}
-  ${map.type ? `<type>${map.type}</type>` : ''}
-</wpt>
-`;
+    route.waypoints.forEach(function (wp) {
+      const mapItem = wpMap[wp.type] || {};
+      gpx +=
+        '<wpt lat="' + wp.lat + '" lon="' + wp.lon + '">\n' +
+        '  <name>' + escapeXml(wp.name) + '</name>\n' +
+        '  <desc>' + escapeXml(wp.type) + '</desc>\n' +
+        (mapItem.sym ? ('  <sym>' + mapItem.sym + '</sym>\n') : '') +
+        (mapItem.type ? ('  <type>' + mapItem.type + '</type>\n') : '') +
+        '</wpt>\n';
     });
   }
 
-  gpx += `</gpx>`;
+  gpx += '</gpx>';
 
   const blob = new Blob([gpx], { type: 'application/gpx+xml' });
   const a = document.createElement('a');
@@ -539,7 +556,7 @@ function exportRouteToGPX(route) {
   a.click();
 }
 
-window.exportDrawnRouteToGPX = function(route) {
+window.exportDrawnRouteToGPX = function (route) {
   exportRouteToGPX(route);
 };
 
@@ -553,8 +570,9 @@ function renderUserBadge() {
     sessionStorage.getItem('user_name') ||
     '';
 
-  el.textContent = name ? `${role}: ${name}` : role;
+  el.textContent = name ? (role + ': ' + name) : role;
 }
+
 /* ================= GPX PARSER ================= */
 
 function parseGpxToActiveRoute(gpxText, metaNaam) {
@@ -564,10 +582,12 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
   if (!trk) return null;
 
   const latlngs = [];
-  trk.querySelectorAll('trkpt').forEach(pt => {
+  trk.querySelectorAll('trkpt').forEach(function (pt) {
     const lat = parseFloat(pt.getAttribute('lat'));
     const lon = parseFloat(pt.getAttribute('lon'));
-    if (!isNaN(lat) && !isNaN(lon)) latlngs.push([lat, lon]);
+    if (!isNaN(lat) && !isNaN(lon)) {
+      latlngs.push([lat, lon]);
+    }
   });
 
   if (latlngs.length < 2) return null;
@@ -576,13 +596,23 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
   drawnItems.addLayer(layer);
 
   const waypoints = [];
-  xml.querySelectorAll('wpt').forEach(wpt => {
+  xml.querySelectorAll('wpt').forEach(function (wpt) {
     const lat = parseFloat(wpt.getAttribute('lat'));
     const lon = parseFloat(wpt.getAttribute('lon'));
     if (isNaN(lat) || isNaN(lon)) return;
 
-   const type = wpt.querySelector('type')?.textContent || 'rest';
-const name = wpt.querySelector('name')?.textContent || 'Waypoint';
+    const typeNode = wpt.querySelector('type');
+    const nameNode = wpt.querySelector('name');
+
+    const type = typeNode && typeNode.textContent ? typeNode.textContent : 'rest';
+    const name = nameNode && nameNode.textContent ? nameNode.textContent : 'Waypoint';
+
+    const wp = {
+      id: crypto.randomUUID(),
+      lat: lat,
+      lon: lon,
+      name: name,
+      type: type
     };
 
     wp.marker = L.marker([lat, lon], {
@@ -593,20 +623,20 @@ const name = wpt.querySelector('name')?.textContent || 'Waypoint';
     waypoints.push(wp);
   });
 
+  let routeName = 'GPX route';
+  const trkNameNode = trk.querySelector('name');
+  if (trkNameNode && trkNameNode.textContent) {
+    routeName = trkNameNode.textContent;
+  }
+
   const r = {
     type: 'gpx',
- let routeName = 'GPX route';
-const nameNode = trk.querySelector('name');
-if (nameNode && nameNode.textContent) {
-  routeName = nameNode.textContent;
-}
-
-naam: metaNaam || routeName,e'),
-    layer,
-    waypoints
+    naam: metaNaam || routeName,
+    layer: layer,
+    waypoints: waypoints
   };
 
-  layer.on('click', () => {
+  layer.on('click', function () {
     const idx = routes.indexOf(r);
     if (idx >= 0) setRouteActive(idx);
     renderList();
@@ -617,11 +647,13 @@ naam: metaNaam || routeName,e'),
 
 /* ================= TOON btn ================= */
 
-window.loadCatalogRouteById = function(id) {
-  const meta = routes.find(r => r.type === 'catalog' && String(r.id) === String(id));
+window.loadCatalogRouteById = function (id) {
+  const meta = routes.find(function (r) {
+    return r.type === 'catalog' && String(r.id) === String(id);
+  });
 
   if (!meta) {
-    showModal("error", "❌", "Route niet gevonden");
+    showModal('error', '❌', 'Route niet gevonden');
     return;
   }
 
@@ -635,14 +667,22 @@ window.loadCatalogRouteById = function(id) {
     const r = {
       type: 'drawn',
       naam: meta.naam,
-      layer,
+      start: meta.start || '',
+      einde: meta.einde || '',
+      afstand_km: meta.afstand_km || null,
+      layer: layer,
       waypoints: Array.isArray(meta.waypoints)
-        ? meta.waypoints.map(w => ({ ...w, id: w.id || crypto.randomUUID() }))
+        ? meta.waypoints.map(function (w) {
+            const copy = {};
+            for (const k in w) copy[k] = w[k];
+            copy.id = w.id || crypto.randomUUID();
+            return copy;
+          })
         : [],
       catalogId: meta.id
     };
 
-    r.waypoints.forEach(wp => {
+    r.waypoints.forEach(function (wp) {
       wp.marker = L.marker([wp.lat, wp.lon], {
         icon: waypointIcons[wp.type] || waypointIcons.rest
       }).addTo(map);
@@ -650,7 +690,7 @@ window.loadCatalogRouteById = function(id) {
       wp.marker.bindPopup(buildWaypointPopup(wp));
     });
 
-    layer.on('click', () => {
+    layer.on('click', function () {
       const idx = routes.indexOf(r);
       if (idx >= 0) setRouteActive(idx);
       renderList();
@@ -666,23 +706,23 @@ window.loadCatalogRouteById = function(id) {
 
   // 2) catalogusitem met GPX bestand
   if (meta.bestand) {
-    if (String(meta.bestand).includes('/')) {
-      showModal("error", "❌", "Bestand mag geen pad bevatten");
+    if (String(meta.bestand).indexOf('/') !== -1) {
+      showModal('error', '❌', 'Bestand mag geen pad bevatten');
       return;
     }
 
-    const url = `/api/rides/${encodeURIComponent(meta.id)}/gpx`;
+    const url = '/api/rides/' + encodeURIComponent(meta.id) + '/gpx';
 
     fetch(url)
-      .then(res => {
+      .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.text();
       })
-      .then(txt => {
+      .then(function (txt) {
         const active = parseGpxToActiveRoute(txt, meta.naam);
 
         if (!active) {
-          showModal("error", "❌", "GPX bevat geen track");
+          showModal('error', '❌', 'GPX bevat geen track');
           return;
         }
 
@@ -693,20 +733,20 @@ window.loadCatalogRouteById = function(id) {
         zoomToLayer(active.layer);
         renderList();
       })
-      .catch(err => {
+      .catch(function (err) {
         console.error(err);
-        showModal("error", "❌", "GPX laden mislukt");
+        showModal('error', '❌', 'GPX laden mislukt');
       });
 
     return;
   }
 
-  showModal("error", "❌", "Deze catalogusroute heeft geen coords en geen bestand");
+  showModal('error', '❌', 'Deze catalogusroute heeft geen coords en geen bestand');
 };
 
 /* ================= WP's ================= */
 
-map.on('contextmenu', e => {
+map.on('contextmenu', function (e) {
   if (isDrawing) return;
   if (activeRouteIndex === null) return;
 
@@ -727,65 +767,84 @@ map.on('contextmenu', e => {
 
   wp.marker.bindPopup(buildWaypointPopup(wp));
 
-route.waypoints ??= [];
+  if (!route.waypoints) {
+    route.waypoints = [];
+  }
+
   route.waypoints.push(wp);
 });
 
 function findWaypointById(id) {
   const r = routes[activeRouteIndex];
   if (!r || !Array.isArray(r.waypoints)) return null;
-  return r.waypoints.find(w => w.id === id);
+
+  for (let i = 0; i < r.waypoints.length; i++) {
+    if (r.waypoints[i].id === id) return r.waypoints[i];
+  }
+  return null;
 }
 
-window.renameWaypoint = function(id) {
+window.renameWaypoint = function (id) {
   const wp = findWaypointById(id);
   if (!wp) return;
+
   const name = prompt('Nieuwe naam', wp.name);
   if (!name) return;
+
   wp.name = name;
   wp.marker.setPopupContent(buildWaypointPopup(wp));
 };
 
-window.setWaypointType = function(id, type) {
+window.setWaypointType = function (id, type) {
   const wp = findWaypointById(id);
   if (!wp) return;
+
   wp.type = type;
   wp.marker.setIcon(waypointIcons[type] || waypointIcons.rest);
   wp.marker.setPopupContent(buildWaypointPopup(wp));
 };
 
-window.deleteWaypoint = function(id) {
+window.deleteWaypoint = function (id) {
   const r = routes[activeRouteIndex];
   if (!r || !Array.isArray(r.waypoints)) return;
+
   const wp = findWaypointById(id);
   if (!wp) return;
+
   map.removeLayer(wp.marker);
-  r.waypoints = r.waypoints.filter(w => w.id !== id);
+  r.waypoints = r.waypoints.filter(function (w) {
+    return w.id !== id;
+  });
 };
 
 /* ================= TEKST INPUT-MODAL ================= */
 
-function promptModal(title, defaultValue = '') {
-  return new Promise(resolve => {
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <input id="modal-input-field" type="text" value="${defaultValue.replace(/"/g, '&quot;')}" style="padding:8px;">
-      </div>
-    `;
+function promptModal(title, defaultValue) {
+  if (defaultValue === undefined) defaultValue = '';
 
-    showModal("custom", "✏️", title, [
+  return new Promise(function (resolve) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML =
+      '<div style="display:flex;flex-direction:column;gap:10px;">' +
+        '<input id="modal-input-field" type="text" value="' +
+        String(defaultValue).replace(/"/g, '&quot;') +
+        '" style="padding:8px;">' +
+      '</div>';
+
+    showModal('custom', '✏️', title, [
       {
-        text: "OK",
-        action: () => {
-       const input = document.getElementById('modal-input-field');
-const value = input ? input.value : '';l-input-field')?.value ?? '';
+        text: 'OK',
+        action: function () {
+          const input = document.getElementById('modal-input-field');
+          const value = input ? input.value : '';
           resolve(value.trim());
         }
       },
       {
-        text: "Annuleer",
-        action: () => resolve(null)
+        text: 'Annuleer',
+        action: function () {
+          resolve(null);
+        }
       }
     ], wrapper);
   });
@@ -794,10 +853,11 @@ const value = input ? input.value : '';l-input-field')?.value ?? '';
 function calculateDistanceKmFromLayer(layer) {
   if (!layer) return 0;
 
- let latlngs = [];
-if (layer && layer.getLatLngs) {
-  latlngs = layer.getLatLngs();
-}
+  let latlngs = [];
+  if (layer && layer.getLatLngs) {
+    latlngs = layer.getLatLngs();
+  }
+
   if (!Array.isArray(latlngs) || latlngs.length < 2) return 0;
 
   let meters = 0;
@@ -812,7 +872,7 @@ if (layer && layer.getLatLngs) {
 
 const wisBtn = document.getElementById('wisBtn');
 if (wisBtn) {
-  wisBtn.addEventListener('click', () => {
+  wisBtn.addEventListener('click', function () {
     drawnItems.clearLayers();
     activeRouteIndex = null;
     renderList();
@@ -827,3 +887,6 @@ if (groepSelect) {
 if (zoekInput) {
   zoekInput.addEventListener('input', renderList);
 }
+
+reloadCatalog();
+renderUserBadge();
