@@ -25,7 +25,7 @@ body {
 
 #list {
   flex:1;
-  max-height:420px;
+  max-height:450px;
   overflow:auto;
   border:1px solid #ddd;
   padding:10px;
