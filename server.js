@@ -150,3 +150,18 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Server draait op poort " + PORT);
 });
+
+app.get('/debug/session-check', (req, res) => {
+  res.json({
+    ok: true,
+    is_admin: req.session ? req.session.is_admin : null,
+    session_exists: !!req.session
+  });
+});
+
+app.get('/debug/make-admin', (req, res) => {
+  req.session.is_admin = true;
+  req.session.save(function () {
+    res.json({ ok: true, is_admin: req.session.is_admin });
+  });
+});
