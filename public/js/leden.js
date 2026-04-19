@@ -383,7 +383,7 @@ async function handlePinUnlock() {
   try {
     const j = await ajax('/api/admin/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+ //     headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin })
     });
 
