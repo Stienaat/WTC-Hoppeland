@@ -90,6 +90,14 @@ function requireAdmin(req, res, next) {
     req.user?.role === 'admin' ||
     req.isAdmin === true;
 
+  console.log('ADMIN CHECK', {
+    sessionIsAdmin: req.session?.is_admin,
+    userRole: req.user?.role,
+    reqIsAdmin: req.isAdmin,
+    hasSession: !!req.session,
+    user: req.user
+  });
+
   if (!isAdmin) {
     return res.status(403).json({ ok: false, error: 'NOT_ADMIN' });
   }
