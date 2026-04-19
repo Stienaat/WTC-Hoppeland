@@ -394,13 +394,17 @@ window.deleteCatalogRoute = async function (i) {
   if (!ok) return;
 
   try {
-   
-  const j = await res.json();
+    const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
+      method: 'DELETE',
+      credentials: 'include'
+    });
 
-  if (!res.ok || !j.ok) {
-    showModal('error', '❌', j.error || 'Verwijderen mislukt.');
-    return;
-  }
+    const j = await res.json();
+
+    if (!res.ok || !j.ok) {
+      showModal('error', '❌', j.error || 'Verwijderen mislukt.');
+      return;
+    }
 
     if (r.layer) drawnItems.removeLayer(r.layer);
     if (Array.isArray(r.waypoints)) {
