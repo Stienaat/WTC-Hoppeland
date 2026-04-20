@@ -151,7 +151,7 @@ map.on(L.Draw.Event.CREATED, async function (e) {
     return;
   }
 
- 	const naam = await Modal.prompt("Startplaats", {
+ 	const start = await Modal.prompt("Startplaats", {
     placeholder: "Geef een naam in"});
 
 	const afstand_km = calculateDistanceKmFromLayer(e.layer);
