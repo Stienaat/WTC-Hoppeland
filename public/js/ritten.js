@@ -131,8 +131,6 @@ const waypointIcons = {
 
 /* ================= DRAW ================= */
 
-clearActiveRoute();
-
 map.addControl(new L.Control.Draw({
   draw: { polyline: true },
   edit: { featureGroup: drawnItems }
@@ -156,6 +154,8 @@ map.on(L.Draw.Event.CREATED, async function (e) {
     placeholder: "Geef een naam in"});
 
 	const afstand_km = calculateDistanceKmFromLayer(e.layer);
+	
+	clearActiveRoute();
 
   const r = {
     type: 'drawn',
