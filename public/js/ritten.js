@@ -514,7 +514,7 @@ function renderList() {
   }
 }
 
-function exportRouteToGPX(route) {
+async function exportRouteToGPX(route) {
   if (!route || !route.layer) return;
 
   const geo = route.layer.toGeoJSON();
