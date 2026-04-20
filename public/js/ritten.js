@@ -829,25 +829,26 @@ window.deleteWaypoint = function (id) {
   return Promise.resolve(window.prompt(title, defaultValue));
 } */
 
-function promptModal(title, defaultValue) {
-  if (defaultValue === undefined) defaultValue = '';
-
+function promptModal(title, defaultValue = '') {
   return new Promise(function (resolve) {
     const wrapper = document.createElement('div');
-    wrapper.innerHTML =
-      '<div style="display:flex;flex-direction:column;gap:10px;">' +
-        '<input id="modal-input-field" type="text" value="' +
-        String(defaultValue).replace(/"/g, '&quot;') +
-        '" style="padding:8px;">' +
-      '</div>';
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.gap = '10px';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'modal-input-field';
+    input.value = defaultValue;
+    input.style.padding = '8px';
+
+    wrapper.appendChild(input);
 
     showModal('custom', '✏️', title, [
       {
         text: 'OK',
         action: function () {
-          const input = document.getElementById('modal-input-field');
-          const value = input ? input.value : '';
-          resolve(value.trim());
+          resolve(input.value.trim());
         }
       },
       {
@@ -857,6 +858,8 @@ function promptModal(title, defaultValue) {
         }
       }
     ], wrapper);
+
+    setTimeout(() => input.focus(), 0);
   });
 }
 
