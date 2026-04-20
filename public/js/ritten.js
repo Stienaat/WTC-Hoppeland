@@ -745,8 +745,13 @@ window.loadCatalogRouteById = async function (id) {
 
     try {
       const res = await fetch(url, {
-        credentials: 'include'
-      });
+         method,
+  credentials: 'include', // ✔ nodig
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify(payload)
+});
 
       if (!res.ok) {
         throw new Error('HTTP ' + res.status);
