@@ -287,12 +287,6 @@ const payload = {
 };
 
   try {
-	const res = await fetch('/api/rides/admin/drawn', {
-	  method: 'POST',
-	  credentials: 'include',
-	  headers: { 'Content-Type': 'application/json' },
-	  body: JSON.stringify(payload)
-	});
 	
 	const res = await fetch('/api/rides/admin/upload-gpx', {
 	  method: 'POST',
