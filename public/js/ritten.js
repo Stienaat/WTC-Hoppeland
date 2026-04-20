@@ -665,7 +665,7 @@ window.loadCatalogRouteById = async function (id) {
   });
 
   if (!meta) {
-  await Modal.error("❌", "Route niet  gevonden: " + err.message);
+    await Modal.error("❌", "Route niet gevonden.");
     return;
   }
 
@@ -720,37 +720,38 @@ window.loadCatalogRouteById = async function (id) {
   if (meta.gpx_filename) {
     const url = '/api/rides/' + encodeURIComponent(meta.id) + '/gpx';
 
-    fetch(url, {
-      credentials: 'include'
-    })
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.text();
-      })
-      .then(function (txt) {
-        const active = parseGpxToActiveRoute(txt, meta.naam || meta.title);
-
-        if (!active) {
-          await Modal.error("❌", "gpx bevat geen track " + err.message);
-          return;
-        }
-
-        active.catalogId = meta.id;
-        routes.push(active);
-        activeRouteIndex = routes.length - 1;
-        setRouteActive(activeRouteIndex);
-        zoomToLayer(active.layer);
-        renderList();
-      })
-      .catch(function (err) {
-        console.error(err);
-        await Modal.error("❌", "gpx laden mislukt. " + err.message);
+    try {
+      const res = await fetch(url, {
+        credentials: 'include'
       });
+
+      if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+      }
+
+      const txt = await res.text();
+      const active = parseGpxToActiveRoute(txt, meta.naam || meta.title);
+
+      if (!active) {
+        await Modal.error("❌", "GPX bevat geen track.");
+        return;
+      }
+
+      active.catalogId = meta.id;
+      routes.push(active);
+      activeRouteIndex = routes.length - 1;
+      setRouteActive(activeRouteIndex);
+      zoomToLayer(active.layer);
+      renderList();
+    } catch (err) {
+      console.error(err);
+      await Modal.error("❌", "GPX laden mislukt: " + err.message);
+    }
 
     return;
   }
 
-	await Modal.error("❌", "deze route heeft geen coords en geen bestand. " + err.message);
+  await Modal.error("❌", "Deze route heeft geen coords en geen bestand.");
 };
 
 /* ================= WP's ================= */
