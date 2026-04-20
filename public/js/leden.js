@@ -294,7 +294,7 @@ if (btnUploadRoute) {
     fd.append('start', start);
     fd.append('gpxfile', file);
 
-    try {
+try {
   const res = await fetch('/api/rides/admin/upload-gpx', {
     method: 'POST',
     credentials: 'include',
@@ -334,6 +334,8 @@ if (btnUploadRoute) {
 } catch (e) {
   console.error(e);
   setStatus(routeError, 'Technische fout bij upload.', 'error');
+}
+  });
 }
 
 /************************************************************
