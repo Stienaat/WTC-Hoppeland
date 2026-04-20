@@ -250,13 +250,10 @@ function zoomToLayer(layer) {
 
 window.saveDrawnRoute = async function (i) {
   const r = routes[i];
-  if (!r || r.type !== 'drawn') {
-    await Modal.warn("⚠️", "Geen geldige getekende route geselecteerd.");
-    return;
-  }
+  if (!r || r.type !== 'drawn') return;
 
   if (!isAdminUser()) {
-    await Modal.error("❌", "Alleen admin mag routes opslaan.");
+    await Modal.error("❌", "Alleen admin mag opslaan.");
     return;
   }
 
@@ -265,66 +262,50 @@ window.saveDrawnRoute = async function (i) {
 
   const trimmedNaam = String(naam).trim();
   if (!trimmedNaam) {
-    await Modal.warn("⚠️", "Geef een naam op voor de route.");
+    await Modal.warn("⚠️", "Geef een naam op.");
     return;
   }
 
-  const geo = r.layer && r.layer.toGeoJSON ? r.layer.toGeoJSON() : null;
-  let coords = [];
+  const geo = r.layer.toGeoJSON();
+  const coords = (geo?.geometry?.coordinates || []).map(function (c) {
+    return [c[1], c[0]];
+  });
 
-  if (geo && geo.geometry && Array.isArray(geo.geometry.coordinates)) {
-    coords = geo.geometry.coordinates.map(function (c) {
-      return [c[1], c[0]];
-    });
-  }
-
-  if (!Array.isArray(coords) || coords.length < 2) {
+  if (coords.length < 2) {
     await Modal.error("❌", "Route bevat te weinig punten.");
     return;
   }
 
-  const normalizedWaypoints = Array.isArray(r.waypoints)
+  const waypoints = Array.isArray(r.waypoints)
     ? r.waypoints.map(function (wp) {
         return {
-          id: wp.id || crypto.randomUUID(),
-          type: wp.type || 'rest',
-          naam: wp.naam || '',
           lat: Number(wp.lat),
           lon: Number(wp.lon),
-          info: wp.info || ''
+          name: wp.naam || wp.name || 'Waypoint',
+          type: wp.type || 'rest'
         };
       })
     : [];
 
+  const isUpdate = !!r.catalogId;
+  const url = isUpdate
+    ? '/api/rides/admin/' + encodeURIComponent(r.catalogId)
+    : '/api/rides/admin/drawn';
+
   const payload = {
-    title: trimmedNaam,
-    year: new Date().getFullYear(),
-    group_code: 'TEKEN',
-    start_place: String(r.start || '').trim() || null,
-    distance_km: r.afstand_km != null ? Number(r.afstand_km) : null,
-    ride_kind: 'drawn',
+    naam: trimmedNaam,
+    groep: r.groep || 'TEKEN',
+    start: r.start || '',
+    afstand_km: r.afstand_km ?? null,
     coords: coords,
-    waypoints: normalizedWaypoints,
-    gpx_filename: null,
-    gpx_original_name: null,
-    gpx_uploaded_at: null,
-    source: 'admin_drawn',
-    is_active: true
+    waypoints: waypoints
   };
 
   try {
-    const isUpdate = !!r.catalogId;
-    const url = isUpdate
-      ? '/api/rides/admin/' + encodeURIComponent(r.catalogId)
-      : '/api/rides/admin';
-    const method = isUpdate ? 'PUT' : 'POST';
-
     const res = await fetch(url, {
-      method: method,
+      method: isUpdate ? 'PUT' : 'POST',
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
 
@@ -336,9 +317,9 @@ window.saveDrawnRoute = async function (i) {
     }
 
     r.naam = trimmedNaam;
-    r.catalogId = j.id || (j.ride && j.ride.id) || r.catalogId || null;
+    r.catalogId = j.id || j.ride?.id || r.catalogId || null;
 
-    await Modal.success("👌", isUpdate ? "Route werd bijgewerkt!" : "Route opgeslagen in catalogus!");
+    await Modal.success("👌", isUpdate ? "Route bijgewerkt!" : "Route opgeslagen!");
     await reloadCatalog();
     renderList();
   } catch (err) {
