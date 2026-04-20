@@ -12,7 +12,7 @@ import contactRoutes from "./routes/contact.js";
 import authRoutes from "./routes/auth.js";
 import cycleRoutes from "./routes/cycleroutes.js";
 import ridesRouter from './routes/rides.js';
-
+import cors from 'cors';
 
 
 const __filename = fileURLToPath(import.meta.url);
