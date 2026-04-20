@@ -142,7 +142,7 @@ map.on('draw:drawstop', function () { isDrawing = false; });
 map.on(L.Draw.Event.CREATED, async function (e) {
   drawnItems.addLayer(e.layer);
 
-	const naam = await Modal.prompt("Nieuwe route, Naam ?", {
+	const naam = await Modal.prompt("Nieuwe route, {
     placeholder: "Geef een naam in"
 });
 
