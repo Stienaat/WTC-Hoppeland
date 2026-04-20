@@ -131,6 +131,8 @@ const waypointIcons = {
 
 /* ================= DRAW ================= */
 
+clearActiveRoute();
+
 map.addControl(new L.Control.Draw({
   draw: { polyline: true },
   edit: { featureGroup: drawnItems }
