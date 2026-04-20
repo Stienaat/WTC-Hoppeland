@@ -251,7 +251,7 @@ window.saveDrawnRoute = async function (i) {
   if (!r || r.type !== 'drawn') return;
 
   if (!isAdminUser()) {
-    await Modal.error("❌", "Alleen admin mag routes opslaan in de catalogus " + err.message);
+    await Modal.error("❌", "Alleen admin mag routes opslaan in de catalogus " );
     return;
   }
 
@@ -268,7 +268,7 @@ window.saveDrawnRoute = async function (i) {
   }
 
   if (!Array.isArray(coords) || coords.length < 2) {
-   	await Modal.error("❌", "Route bevat te weinig punten " + err.message);
+   	await Modal.error("❌", "Route bevat te weinig punten ");
     return;
   }
 
@@ -300,7 +300,7 @@ const payload = {
 
     if (!res.ok || !j.ok) {
      
-	  await Modal.error("❌", "opslaan mislukt: " + err.message);
+	  await Modal.error("❌", "opslaan mislukt: " );
       return;
     }
 
@@ -311,7 +311,7 @@ const payload = {
     renderList();
   } catch (err) {
     console.error(err);
-    await Modal.error("❌", "serverfout bij opslaan. " + err.message);
+    await Modal.error("❌", "serverfout bij opslaan. ");
   }
 };
 
@@ -320,7 +320,7 @@ window.overwriteRoute = async function (i) {
   if (!r || !r.catalogId || !r.layer) return;
 
   if (!isAdminUser()) {
-	await Modal.error("❌", "alleen de admin mag catalogus bijwerken. " + err.message);
+	await Modal.error("❌", "alleen de admin mag catalogus bijwerken. ");
     return;
   }
 
@@ -362,7 +362,7 @@ const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      await Modal.error("❌", "opslaan mislukt: " + err.message);
+      await Modal.error("❌", "opslaan mislukt: " );
       return;
     }
 
@@ -371,7 +371,7 @@ const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
     renderList();
   } catch (err) {
     console.error(err);
-    await Modal.error("❌", "serverfoyt bij opslaan. " + err.message);
+    await Modal.error("❌", "serverfoyt bij opslaan. " );
   }
 };
 
@@ -386,6 +386,7 @@ window.deleteActiveRoute = async function (i) {
 
   const ok = await Modal.confirm("Bevestigen", "Deze route van de kaart verwijderen?");
   if (!ok) return;
+  
    drawnItems.clearLayers();
     activeRouteIndex = null;
     renderList();
