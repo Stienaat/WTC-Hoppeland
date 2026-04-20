@@ -35,7 +35,7 @@ function mapRideRow(row) {
     bestand: row.gpx_filename,
     coords: row.coords,
     waypoints: row.waypoints || [],
-    type: 'catalog'
+    type: 'catalog',
 	gpx_filename: row.gpx_filename
   };
 }
