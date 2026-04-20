@@ -1,35 +1,24 @@
-function showModal(type, icon, title, buttons, content) {
+function showModal(type, title, message, onConfirm) {
     const modal = document.getElementById("app-modal");
     const t = document.getElementById("modal-title");
     const m = document.getElementById("modal-message");
     const btnBox = document.getElementById("modal-buttons");
 
-    t.textContent = `${icon ? icon + ' ' : ''}${title || ''}`;
+    t.textContent = title || "";
+    m.textContent = message || "";
 
-    // inhoud resetten
-    m.innerHTML = "";
-
-    if (typeof content === "string") {
-        m.innerHTML = content;
-    } else if (content instanceof HTMLElement) {
-        m.appendChild(content);
-    } else {
-        m.textContent = "";
-    }
-
-    // knoppen resetten
+    // Reset knoppen
     btnBox.innerHTML = "";
 
-    // classes resetten
-    modal.classList.remove("modal-success", "modal-error", "modal-confirm", "modal-custom");
+    // ❗ Eerst ALLE border‑classes verwijderen
+    modal.classList.remove("modal-success", "modal-error", "modal-confirm");
 
+    // ❗ Dan border‑class toevoegen op basis van type
     if (type === "success") modal.classList.add("modal-success");
-    if (type === "error") modal.classList.add("modal-error");
+    if (type === "error")   modal.classList.add("modal-error");
     if (type === "confirm") modal.classList.add("modal-confirm");
-    if (type === "custom") modal.classList.add("modal-custom");
 
-    // standaard knoppen
-    if ((type === "success" || type === "error") && (!buttons || !buttons.length)) {
+    if (type === "success" || type === "error") {
         const ok = document.createElement("button");
         ok.className = "wtc-button";
         ok.textContent = "OK";
@@ -37,34 +26,32 @@ function showModal(type, icon, title, buttons, content) {
         btnBox.appendChild(ok);
     }
 
-    if (type === "confirm" && (!buttons || !buttons.length)) {
+    if (type === "confirm") {
         const yes = document.createElement("button");
         yes.className = "wtc-button";
         yes.textContent = "Ja";
-        yes.onclick = () => closeModal();
+        yes.onclick = () => {
+            closeModal();
+            if (typeof onConfirm === "function") onConfirm(true);
+        };
 
         const no = document.createElement("button");
         no.className = "wtc-button";
         no.textContent = "Nee";
-        no.onclick = () => closeModal();
+        no.onclick = () => {
+            closeModal();
+            if (typeof onConfirm === "function") onConfirm(false);
+        };
 
         btnBox.appendChild(yes);
         btnBox.appendChild(no);
     }
 
-    // custom knoppen
-    if (Array.isArray(buttons)) {
-        buttons.forEach(btn => {
-            const button = document.createElement("button");
-            button.className = "wtc-button";
-            button.textContent = btn.text || "OK";
-            button.onclick = () => {
-                closeModal();
-                if (typeof btn.action === "function") btn.action();
-            };
-            btnBox.appendChild(button);
-        });
-    }
-
     modal.classList.remove("hidden");
 }
+
+
+function closeModal() {
+    document.getElementById("app-modal").classList.add("hidden");
+}
+

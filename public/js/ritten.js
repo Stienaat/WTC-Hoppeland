@@ -830,43 +830,37 @@ window.deleteWaypoint = function (id) {
 } */
 
 function promptModal(title, defaultValue = '') {
-    return new Promise(function (resolve) {
-        const wrapper = document.createElement('div');
-        wrapper.style.display = 'flex';
-        wrapper.style.flexDirection = 'column';
-        wrapper.style.gap = '10px';
+  return new Promise(function (resolve) {
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.flexDirection = 'column';
+    wrapper.style.gap = '10px';
 
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.id = 'modal-input-field';
-        input.value = defaultValue;
-        input.style.padding = '8px';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'modal-input-field';
+    input.value = defaultValue;
+    input.style.padding = '8px';
 
-        wrapper.appendChild(input);
+    wrapper.appendChild(input);
 
-        showModal(
-            'custom',
-            '✏️',
-            title,
-            [
-                {
-                    text: 'OK',
-                    action: function () {
-                        resolve(input.value.trim());
-                    }
-                },
-                {
-                    text: 'Annuleer',
-                    action: function () {
-                        resolve(null);
-                    }
-                }
-            ],
-            wrapper
-        );
+    showModal('custom', '✏️', title, [
+      {
+        text: 'OK',
+        action: function () {
+          resolve(input.value.trim());
+        }
+      },
+      {
+        text: 'Annuleer',
+        action: function () {
+          resolve(null);
+        }
+      }
+    ], wrapper);
 
-        setTimeout(() => input.focus(), 0);
-    });
+    setTimeout(() => input.focus(), 0);
+  });
 }
 
 
