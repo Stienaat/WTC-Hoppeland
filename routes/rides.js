@@ -279,10 +279,10 @@ router.post('/admin/drawn', requireAdmin, async (req, res) => {
       coords: null,
       waypoints: [],
       gpx_filename: storagePath,
-      gpx_original_name: originalName,
+      gpx_original_nam: originalName,
       gpx_uploaded_at: new Date().toISOString(),
       source: 'admin_gpx',
-      notes
+      notes: null
     };
 
     const { data, error } = await supabase
@@ -363,8 +363,22 @@ router.post('/admin/upload-gpx', requireAdmin, upload.single('gpxfile'), async (
     }
 
     const payload = {
-c
-
+      title: naam,
+      year,
+      group_code: groep,
+      start_place: start,
+      distance_km: afstand_km,
+      ride_kind: 'gpx',
+      is_active: true,
+      coords: null,
+      waypoints: [],
+      gpx_filename: storagePath,
+      gpx_original_nam: originalName,
+      gpx_uploaded_at: new Date().toISOString(),
+      source: 'admin_gpx',
+      notes: null
+    };
+	
     const { data, error } = await supabase
       .from('club_rides')
       .insert([payload])
