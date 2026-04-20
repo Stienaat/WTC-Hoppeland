@@ -659,7 +659,7 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
 
 /* ================= TOON btn ================= */
 
-window.loadCatalogRouteById = function (id) {
+window.loadCatalogRouteById = async function (id) {
   const meta = routes.find(function (r) {
     return r.type === 'catalog' && String(r.id) === String(id);
   });
