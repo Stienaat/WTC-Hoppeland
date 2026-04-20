@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import multer from 'multer';
 
 const router = express.Router();
-const GPX_BASE_DIR = path.join(process.cwd(), 'data', 'gpx');
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -40,12 +40,6 @@ function mapRideRow(row) {
   };
 }
 
-function sanitizeFilename(filename) {
-  if (!filename) return null;
-  const base = path.basename(filename);
-  if (base !== filename) return null;
-  return base;
-}
 
 function parseNumeric(value) {
   if (value === null || value === undefined || value === '') return null;
@@ -194,44 +188,40 @@ router.get('/:id/gpx', async (req, res) => {
     const supabase = req.supabase;
     const { id } = req.params;
 
-    const { data, error } = await supabase
+    const { data: ride, error } = await supabase
       .from('club_rides')
-      .select('id, title, year, group_code, gpx_filename')
+      .select('gpx_filename')
       .eq('id', id)
       .eq('is_active', true)
       .single();
 
-    if (error || !data) {
-      return res.status(404).json({ ok: false, error: 'Rit niet gevonden' });
+    if (error || !ride) {
+      return res.status(404).send('Rit niet gevonden');
     }
 
-    if (!data.gpx_filename) {
-      return res.status(404).json({ ok: false, error: 'Geen GPX-bestand beschikbaar' });
+    if (!ride.gpx_filename) {
+      return res.status(404).send('Geen GPX beschikbaar');
     }
 
-    const safeFilename = sanitizeFilename(data.gpx_filename);
-    if (!safeFilename) {
-      return res.status(400).json({ ok: false, error: 'Ongeldige bestandsnaam' });
+    const bucket = 'club-rides-gpx';
+
+    const { data, error: downloadError } = await supabase.storage
+      .from(bucket)
+      .download(ride.gpx_filename);
+
+    if (downloadError) {
+      console.error('GPX download error:', downloadError);
+      return res.status(500).send('GPX download mislukt');
     }
 
-    const fullPath = path.join(
-      GPX_BASE_DIR,
-      String(data.year || 'unknown'),
-      String(data.group_code || 'unknown'),
-      safeFilename
-    );
+    const text = await data.text();
 
-    try {
-      await fs.access(fullPath);
-    } catch {
-      console.error('GPX file ontbreekt:', fullPath);
-      return res.status(404).json({ ok: false, error: 'GPX bestand niet gevonden op server' });
-    }
+    res.setHeader('Content-Type', 'application/gpx+xml');
+    return res.send(text);
 
-    return res.download(fullPath, safeFilename);
   } catch (err) {
     console.error('GET /api/rides/:id/gpx crash:', err);
-    return res.status(500).json({ ok: false, error: 'Serverfout' });
+    return res.status(500).send('Serverfout');
   }
 });
 
