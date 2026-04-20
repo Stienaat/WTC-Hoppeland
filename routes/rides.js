@@ -4,8 +4,13 @@ import fs from 'fs/promises';
 import multer from 'multer';
 
 const router = express.Router();
-
 const GPX_BASE_DIR = path.join(process.cwd(), 'data', 'gpx');
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB
+  }
+});
 
 /* -----------------------------
    helpers
