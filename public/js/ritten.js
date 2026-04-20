@@ -145,8 +145,6 @@ map.on(L.Draw.Event.CREATED, async function (e) {
 	const naam = await Modal.prompt("Nieuwe route","naam", {
 		placeholder: "Geef een naam in" });
 	
-	console.log("NAAM =", naam);
-
   if (!naam) {
     drawnItems.removeLayer(e.layer);
     return;
@@ -277,7 +275,7 @@ window.saveDrawnRoute = async function (i) {
    	await Modal.error("❌", "Route bevat te weinig punten ");
     return;
   }
-
+console.log("NAAM =", naam);
 const payload = {
   title: String(naam).trim(),
   year: new Date().getFullYear(),
