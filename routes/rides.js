@@ -258,22 +258,23 @@ router.post('/admin/drawn', requireAdmin, async (req, res) => {
       return res.status(400).json({ ok: false, error: 'Ongeldige route-data' });
     }
 
-    const payload = {
-      title: naam,
-      year,
-      group_code: groep,
-      start_place: start,
-      distance_km: afstand_km,
-      ride_kind: 'gpx',
-      is_active: true,
-      coords: null,
-      waypoints: [],
-      gpx_filename: storagePath,
-      gpx_original_name: originalName,
-      gpx_uploaded_at: new Date().toISOString(),
-      source: 'admin_gpx',
-      notes: null
-    };
+const payload = {
+  title: String(naam).trim(),
+  year: new Date().getFullYear(),
+  group_code: String(groep || 'TEKEN').trim() || 'TEKEN',
+  start_place: String(start_place ?? start ?? '').trim() || null,
+  end_place: String(end_place ?? einde ?? '').trim() || null,
+  distance_km: parseNumeric(afstand_km),
+  ride_kind: 'drawn',
+  is_active: true,
+  coords: normalizedCoords,
+  waypoints: normalizedWaypoints,
+  gpx_filename: null,
+  gpx_original_name: null,
+  gpx_uploaded_at: null,
+  source: 'admin_drawn',
+  notes: null
+};
 
     const { data, error } = await supabase
       .from('club_rides')
