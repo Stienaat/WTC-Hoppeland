@@ -261,6 +261,11 @@ window.saveDrawnRoute = async function (i) {
     return window.overwriteRoute(i);
   }
 
+  const naam = await Modal.prompt("Naam van de route", r.naam || "Nieuwe route");
+  if (naam === null || naam.trim() === "") {
+    return;
+  }
+  
   const geo = r.layer.toGeoJSON();
   let coords = [];
   if (geo && geo.geometry && geo.geometry.coordinates) {
