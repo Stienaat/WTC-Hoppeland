@@ -714,21 +714,18 @@ window.loadCatalogRouteById = function (id) {
   }
 
   // 2) catalogusitem met GPX bestand
-  if (meta.bestand) {
-    if (String(meta.bestand).indexOf('/') !== -1) {
-      showModal('error', '❌', 'Bestand mag geen pad bevatten');
-      return;
-    }
-
+  if (meta.gpx_filename) {
     const url = '/api/rides/' + encodeURIComponent(meta.id) + '/gpx';
 
-    fetch(url)
+    fetch(url, {
+      credentials: 'include'
+    })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.text();
       })
       .then(function (txt) {
-        const active = parseGpxToActiveRoute(txt, meta.naam);
+        const active = parseGpxToActiveRoute(txt, meta.naam || meta.title);
 
         if (!active) {
           showModal('error', '❌', 'GPX bevat geen track');
