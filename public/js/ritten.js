@@ -79,14 +79,14 @@ function populateGroepen() {
       return '<option value="' + g + '">' + g + '</option>';
     }).join('');
 }
-
+/*
 function confirmModal(message) {
   return new Promise(function (resolve) {
     showModal('confirm', '❓', message, function (result) {
       resolve(result);
     });
   });
-}
+}*/
 
 
 /* ================= MAP ================= */
@@ -251,7 +251,7 @@ window.saveDrawnRoute = async function (i) {
   if (!r || r.type !== 'drawn') return;
 
   if (!isAdminUser()) {
-    showModal('error', '❌', 'Alleen admin mag routes opslaan in de catalogus.');
+    await Modal.error("❌", "Alleen admin mag routes opslaan in de catalogus " + err.message);
     return;
   }
 
@@ -268,7 +268,7 @@ window.saveDrawnRoute = async function (i) {
   }
 
   if (!Array.isArray(coords) || coords.length < 2) {
-    showModal('error', '❌', 'Route bevat te weinig punten.');
+   	await Modal.error("❌", "Route bevat te weinig punten " + err.message);
     return;
   }
 
@@ -299,18 +299,19 @@ const payload = {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      showModal('error', '❌', j.error || 'Opslaan mislukt.');
+     
+	  await Modal.error("❌", "opslaan mislukt: " + err.message);
       return;
     }
 
     r.catalogId = j.id || (j.ride && j.ride.id) || null;
 
-    showModal('success', '👌', 'Route opgeslagen in catalogus.');
+    await Modal.success("👌", "Route opgeslagen in catalogus!");
     await reloadCatalog();
     renderList();
   } catch (err) {
     console.error(err);
-    showModal('error', '❌', 'Serverfout bij opslaan.');
+    await Modal.error("❌", "serverfout bij opslaan. " + err.message);
   }
 };
 
@@ -319,7 +320,7 @@ window.overwriteRoute = async function (i) {
   if (!r || !r.catalogId || !r.layer) return;
 
   if (!isAdminUser()) {
-    showModal('error', '❌', 'Alleen admin mag catalogusroutes bijwerken.');
+	await Modal.error("❌", "alleen de admin mag catalogus bijwerken. " + err.message);
     return;
   }
 
@@ -361,16 +362,16 @@ const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      showModal('error', '❌', j.error || 'Opslaan mislukt.');
+      await Modal.error("❌", "opslaan mislukt: " + err.message);
       return;
     }
 
-    showModal('success', '👌', 'Route bijgewerkt.');
+   await Modal.success("👌", "Route is bijgewerkt!");
     await reloadCatalog();
     renderList();
   } catch (err) {
     console.error(err);
-    showModal('error', '❌', 'Serverfout bij opslaan.');
+    await Modal.error("❌", "serverfoyt bij opslaan. " + err.message);
   }
 };
 
@@ -396,7 +397,7 @@ window.deleteCatalogRoute = async function (i) {
   if (!r || !r.catalogId) return;
 
   if (!isAdminUser()) {
-    showModal('error', '❌', 'Alleen admin mag catalogusroutes verwijderen.');
+    await Modal.error("❌", "alleen de admin mag routes verwijderen. " + err.message);
     return;
   }
 
@@ -412,7 +413,7 @@ window.deleteCatalogRoute = async function (i) {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      showModal('error', '❌', j.error || 'Verwijderen mislukt.');
+      await Modal.error("❌", "verwijderen mislukt: " + err.message);
       return;
     }
 
@@ -427,10 +428,10 @@ window.deleteCatalogRoute = async function (i) {
     await reloadCatalog();
     renderList();
 
-    showModal('success', '👌', 'Route uit catalogus verwijderd.');
+   await Modal.success("👌", "Route is uit catalogus verwijderd!");
   } catch (err) {
     console.error(err);
-    showModal('error', '❌', 'Serverfout bij verwijderen.');
+    await Modal.error("❌", "serverfout bij verzenden.: " + err.message);
   }
 };
 
@@ -520,7 +521,7 @@ function exportRouteToGPX(route) {
   const coords = (geo && geo.geometry && geo.geometry.coordinates) ? geo.geometry.coordinates : [];
 
   if (coords.length < 2) {
-    showModal('error', '❌', 'Route bevat te weinig punten!');
+    await Modal.error("❌", "Route bevat te weinig punten." + err.message);
     return;
   }
 
@@ -664,7 +665,7 @@ window.loadCatalogRouteById = function (id) {
   });
 
   if (!meta) {
-    showModal('error', '❌', 'Route niet gevonden');
+  await Modal.error("❌", "Route niet  gevonden: " + err.message);
     return;
   }
 
@@ -730,7 +731,7 @@ window.loadCatalogRouteById = function (id) {
         const active = parseGpxToActiveRoute(txt, meta.naam || meta.title);
 
         if (!active) {
-          showModal('error', '❌', 'GPX bevat geen track');
+          await Modal.error("❌", "gpx bevat geen track " + err.message);
           return;
         }
 
@@ -743,13 +744,13 @@ window.loadCatalogRouteById = function (id) {
       })
       .catch(function (err) {
         console.error(err);
-        showModal('error', '❌', 'GPX laden mislukt');
+        await Modal.error("❌", "gpx laden mislukt. " + err.message);
       });
 
     return;
   }
 
-  showModal('error', '❌', 'Deze catalogusroute heeft geen coords en geen bestand');
+	await Modal.error("❌", "deze route heeft geen coords en geen bestand. " + err.message);
 };
 
 /* ================= WP's ================= */
