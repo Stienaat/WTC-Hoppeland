@@ -142,7 +142,7 @@ map.on('draw:drawstop', function () { isDrawing = false; });
 map.on(L.Draw.Event.CREATED, async function (e) {
   drawnItems.addLayer(e.layer);
 
- const naam = await Modal.prompt("Naam van de route", "Nieuwe route", {
+	const naam = await Modal.prompt("Nieuwe route, Naam ?", {
     placeholder: "Geef een naam in"
 });
 
@@ -151,10 +151,10 @@ map.on(L.Draw.Event.CREATED, async function (e) {
     return;
   }
 
-  const start = await promptModal('Startplaats', '');
-  const einde = await promptModal('Eindplaats', '');
+ 	const naam = await Modal.prompt("Startplaats", {
+    placeholder: "Geef een naam in"});
 
-  const afstand_km = calculateDistanceKmFromLayer(e.layer);
+	const afstand_km = calculateDistanceKmFromLayer(e.layer);
 
   const r = {
     type: 'drawn',
