@@ -829,7 +829,7 @@ window.deleteWaypoint = function (id) {
 /*function promptModal(title, defaultValue) {
   if (defaultValue === undefined) defaultValue = '';
   return Promise.resolve(window.prompt(title, defaultValue));
-} */
+} 
 
 function promptModal(title, defaultValue = '') {
   return new Promise(function (resolve) {
@@ -864,7 +864,7 @@ function promptModal(title, defaultValue = '') {
     setTimeout(() => input.focus(), 0);
   });
 }
-
+*/
 
 function calculateDistanceKmFromLayer(layer) {
   if (!layer) return 0;
