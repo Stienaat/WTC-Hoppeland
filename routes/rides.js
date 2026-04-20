@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs/promises';
+import multer from 'multer';
 
 const router = express.Router();
 
@@ -9,6 +10,14 @@ const GPX_BASE_DIR = path.join(process.cwd(), 'data', 'gpx');
 /* -----------------------------
    helpers
 ----------------------------- */
+function safeSlug(input) {
+  return String(input || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\-]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-+/g, '-');
+}
 
 function mapRideRow(row) {
   return {
@@ -286,6 +295,107 @@ router.post('/admin/drawn', requireAdmin, async (req, res) => {
   }
 });
 
+/* -----------------------------
+   POST /api/rides/admin/upload-gpx
+   admin
+----------------------------- */
+
+router.post('/admin/upload-gpx', requireAdmin, upload.single('gpxfile'), async (req, res) => {
+  try {
+    const supabase = req.supabase;
+
+    const naam = String(req.body?.naam || '').trim();
+    const groep = String(req.body?.groep || '').trim();
+    const start = String(req.body?.start || '').trim();
+    const afstand_km = parseNumeric(req.body?.afstand);
+    const notes = String(req.body?.notes || '').trim() || null;
+    const file = req.file;
+
+    if (!naam) {
+      return res.status(400).json({ ok: false, error: 'Naam is verplicht' });
+    }
+
+    if (!groep) {
+      return res.status(400).json({ ok: false, error: 'Groep is verplicht' });
+    }
+
+    if (!start) {
+      return res.status(400).json({ ok: false, error: 'Startplaats is verplicht' });
+    }
+
+    if (!file) {
+      return res.status(400).json({ ok: false, error: 'Geen GPX-bestand ontvangen' });
+    }
+
+    const originalName = String(file.originalname || '');
+    if (!originalName.toLowerCase().endsWith('.gpx')) {
+      return res.status(400).json({ ok: false, error: 'Alleen .gpx bestanden zijn toegestaan' });
+    }
+
+    const year = new Date().getFullYear();
+    const safeName = safeSlug(naam) || 'route';
+    const fileName = `${crypto.randomUUID()}-${safeName}.gpx`;
+
+    // Kies hier je bucketnaam
+    const bucket = 'club-rides-gpx';
+
+    // Bewaar liever pad dan alleen losse filename
+    const storagePath = `${year}/${groep}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(storagePath, file.buffer, {
+        contentType: 'application/gpx+xml',
+        upsert: false
+      });
+
+    if (uploadError) {
+      console.error('POST /api/rides/admin/upload-gpx storage error:', uploadError);
+      return res.status(500).json({ ok: false, error: 'GPX upload mislukt' });
+    }
+
+    const payload = {
+      title: naam,
+      year,
+      group_code: groep,
+      start_place: start,
+      distance_km: afstand_km,
+      ride_kind: 'gpx',
+      is_active: true,
+      coords: null,
+      waypoints: [],
+      gpx_filename: storagePath,
+      gpx_original_nam: originalName,
+      gpx_uploaded_at: new Date().toISOString(),
+      source: 'admin_gpx',
+      notes
+    };
+
+    const { data, error } = await supabase
+      .from('club_rides')
+      .insert([payload])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('POST /api/rides/admin/upload-gpx insert error:', error);
+
+      // rollback storage als DB insert faalt
+      await supabase.storage.from(bucket).remove([storagePath]);
+
+      return res.status(500).json({ ok: false, error: 'Opslaan in database mislukt' });
+    }
+
+    return res.json({
+      ok: true,
+      id: data.id,
+      ride: mapRideRow(data)
+    });
+  } catch (err) {
+    console.error('POST /api/rides/admin/upload-gpx crash:', err);
+    return res.status(500).json({ ok: false, error: 'Serverfout' });
+  }
+});
 /* -----------------------------
    PUT /api/rides/admin/:id
    admin
