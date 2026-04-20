@@ -270,30 +270,36 @@ window.saveDrawnRoute = async function (i) {
     return;
   }
 
-  const payload = {
-    naam: r.naam,
-    groep: 'TEKEN',
-    start: r.start || null,
-    einde: r.einde || null,
-    afstand_km: r.afstand_km || null,
-    coords: coords,
-    waypoints: (r.waypoints || []).map(function (wp) {
-      return {
-        lat: wp.lat,
-        lon: wp.lon,
-        name: wp.name,
-        type: wp.type
-      };
-    })
-  };
+const payload = {
+  title: String(naam).trim(),
+  year: new Date().getFullYear(),
+  group_code: groep ? String(groep).trim() : 'TEKEN',
+  start_place: String(start_place ?? start ?? '').trim() || null,
+  distance_km: parseNumeric(afstand_km),
+  ride_kind: 'drawn',
+  coords: normalizedCoords,
+  waypoints: normalizedWaypoints,
+  gpx_filename: null,
+  gpx_original_name: null,
+  gpx_uploaded_at: null,
+  source: 'admin_drawn',
+  is_active: true
+};
 
   try {
-const res = await fetch('/api/rides/admin/drawn', {
-  method: 'POST',
-  credentials: 'include',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(payload)
-});
+	const res = await fetch('/api/rides/admin/drawn', {
+	  method: 'POST',
+	  credentials: 'include',
+	  headers: { 'Content-Type': 'application/json' },
+	  body: JSON.stringify(payload)
+	});
+	
+	const res = await fetch('/api/rides/admin/upload-gpx', {
+	  method: 'POST',
+	  credentials: 'include',
+	  body: fd
+	});
+
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
@@ -332,18 +338,21 @@ window.overwriteRoute = async function (i) {
     });
   }
 
-  const payload = {
-    naam: r.naam,
-    coords: coords,
-    waypoints: (r.waypoints || []).map(function (wp) {
-      return {
-        lat: wp.lat,
-        lon: wp.lon,
-        name: wp.name,
-        type: wp.type
-      };
-    })
-  };
+const payload = {
+  title: String(naam).trim(),
+  year: new Date().getFullYear(),
+  group_code: groep ? String(groep).trim() : 'TEKEN',
+  start_place: String(start_place ?? start ?? '').trim() || null,
+  distance_km: parseNumeric(afstand_km),
+  ride_kind: 'drawn',
+  coords: normalizedCoords,
+  waypoints: normalizedWaypoints,
+  gpx_filename: null,
+  gpx_original_name: null,
+  gpx_uploaded_at: null,
+  source: 'admin_drawn',
+  is_active: true
+};
 
   try {
 const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
