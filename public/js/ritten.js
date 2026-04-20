@@ -159,7 +159,7 @@ map.on(L.Draw.Event.CREATED, async function (e) {
     type: 'drawn',
     naam: naam,
     start: start || '',
-    einde: einde || '',
+  
     afstand_km: afstand_km,
     layer: e.layer,
     waypoints: []
@@ -383,7 +383,13 @@ window.deleteActiveRoute = async function (i) {
   const r = routes[i];
   if (!r || r.type === 'catalog') return;
 
-  const ok = await confirmModal('Deze route van de kaart verwijderen?');
+const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");
+if (result) {
+    console.log("Gebruiker koos JA");
+} else {
+    console.log("Gebruiker koos NEE");
+}
+
   if (!ok) return;
 
   clearActiveRoute();
@@ -397,7 +403,7 @@ window.deleteCatalogRoute = async function (i) {
   if (!r || !r.catalogId) return;
 
   if (!isAdminUser()) {
-    await Modal.error("❌", "alleen de admin mag routes verwijderen. " + err.message);
+    await Modal.error("❌", "alleen de admin mag routes verwijderen. ");
     return;
   }
 
