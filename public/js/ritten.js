@@ -124,7 +124,7 @@ const waypointIcons = {
   rest: makeIcon('rest.png'),
   food: makeIcon('food.png'),
   water: makeIcon('water.png'),
-  sight: makeIcon('bez.png'),
+  danger: makeIcon('bez.png'),
   climb: makeIcon('climb.png'),
   sprint: makeIcon('sprint.png')
 };
