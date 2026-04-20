@@ -384,12 +384,17 @@ window.deleteActiveRoute = async function (i) {
   const r = routes[i];
   if (!r || r.type === 'catalog') return;
 
-  const ok = await confirmModal('Deze route van de kaart verwijderen?');
+  const ok = await Modal.confirm("Bevestigen", "Deze route van de kaart verwijderen?");
   if (!ok) return;
+   drawnItems.clearLayers();
+    activeRouteIndex = null;
+    renderList();
+    renderUserBadge();
 
-  clearActiveRoute();
-  renderList();
+/*  clearActiveRoute();
+  renderList();*/
 };
+
 // DELETE 
 
 window.deleteCatalogRoute = async function (i) {
