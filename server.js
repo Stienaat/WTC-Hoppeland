@@ -34,13 +34,12 @@ app.use((req, res, next) => {
 app.use("/api/routes", cycleRoutes);
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || "dev-only-change-me",
+  secret: 'secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: false
+    secure: true,       // ⚠️ bij HTTPS verplicht
+    sameSite: 'none'    // ⚠️ bij cross-site verplicht
   }
 }));
 
@@ -151,3 +150,7 @@ app.listen(PORT, () => {
   console.log("Server draait op poort " + PORT);
 });
 
+app.use(cors({
+  origin: 'https://wtc-hoppeland.onrender.com',
+  credentials: true
+}));
