@@ -257,15 +257,12 @@ window.saveDrawnRoute = async function (i) {
     return;
   }
 
+/*
   if (r.catalogId) {
     return window.overwriteRoute(i);
   }
+*/
 
-  const naam = await Modal.prompt("Naam van de route", r.naam || "Nieuwe route");
-  if (naam === null || naam.trim() === "") {
-    return;
-  }
-  
   const geo = r.layer.toGeoJSON();
   let coords = [];
   if (geo && geo.geometry && geo.geometry.coordinates) {
@@ -321,6 +318,8 @@ const payload = {
     await Modal.error("❌", "serverfout bij opslaan. ");
   }
 };
+
+/* ================= UPDATE ROUTE ================= */
 
 window.overwriteRoute = async function (i) {
   const r = routes[i];
@@ -469,7 +468,7 @@ function renderList() {
     if (canSave) {
       html +=
         '<button type="button" class="wtc-button" onclick="' +
-        (r.catalogId ? ('overwriteRoute(' + i + ')') : ('saveDrawnRoute(' + i + ')')) +
+        (r.catalogId ? ('saveDrawnRoute(' + i + ')') : ('saveDrawnRoute(' + i + ')')) +
         '">Opslaan</button> ';
     }
 
