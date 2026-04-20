@@ -246,35 +246,40 @@
         });
     }
 
-    function prompt(title, defaultValue, options) {
-        options = options || {};
-
-        return show({
-            type: "prompt",
-            title: title,
-            message: options.message || "",
-            input: {
-                type: options.inputType || "text",
-                value: defaultValue || "",
-                placeholder: options.placeholder || "",
-                id: options.id || "modal-input-field",
-                className: options.className || "modal-input",
-                maxLength: options.maxLength || null
-            },
-            buttons: [
-                {
-                    text: options.okText || "OK",
-                    getValue: function (ctx) {
-                        return ctx.input ? ctx.input.value.trim() : "";
-                    }
-                },
-                {
-                    text: options.cancelText || "Annuleer",
-                    value: null
-                }
-            ]
-        });
+function prompt(title, defaultValue, options) {
+    if (defaultValue && typeof defaultValue === "object" && !Array.isArray(defaultValue)) {
+        options = defaultValue;
+        defaultValue = options.value || "";
     }
+
+    options = options || {};
+
+    return show({
+        type: "prompt",
+        title: title,
+        message: options.message || "",
+        input: {
+            type: options.inputType || "text",
+            value: defaultValue || "",
+            placeholder: options.placeholder || "",
+            id: options.id || "modal-input-field",
+            className: options.className || "modal-input",
+            maxLength: options.maxLength || null
+        },
+        buttons: [
+            {
+                text: options.okText || "OK",
+                getValue: function (ctx) {
+                    return ctx.input ? ctx.input.value.trim() : "";
+                }
+            },
+            {
+                text: options.cancelText || "Annuleer",
+                value: null
+            }
+        ]
+    });
+}
 
     function content(title, contentNodeOrHtml, buttons, options) {
         options = options || {};
