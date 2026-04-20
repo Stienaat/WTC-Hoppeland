@@ -379,35 +379,16 @@ const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
 
 // VERWIJDEREN 
 
-window.deleteActiveRoute = async function (i) {
-  const r = routes[i];
-  if (!r || r.type === 'catalog') return;
-
-const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");
-if (result) {
-    console.log("Gebruiker koos JA");
-} else {
-    console.log("Gebruiker koos NEE");
-}
-
-  if (!ok) return;
-
-  clearActiveRoute();
-  renderList();
-};
-
-// DELETE
-
 window.deleteCatalogRoute = async function (i) {
   const r = routes[i];
   if (!r || !r.catalogId) return;
 
   if (!isAdminUser()) {
-    await Modal.error("❌", "alleen de admin mag routes verwijderen. ");
+    await Modal.error("❌", "Alleen de admin mag routes verwijderen.");
     return;
   }
 
-  const ok = await confirmModal('Deze route uit de catalogus verwijderen?');
+  const ok = await Modal.confirm("Bevestigen", "Deze route uit de catalogus verwijderen?");
   if (!ok) return;
 
   try {
@@ -419,28 +400,30 @@ window.deleteCatalogRoute = async function (i) {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      await Modal.error("❌", "verwijderen mislukt: " + err.message);
+      await Modal.error("❌", "Verwijderen mislukt: " + (j.error || j.message || ('HTTP ' + res.status)));
       return;
     }
 
     if (r.layer) drawnItems.removeLayer(r.layer);
+
     if (Array.isArray(r.waypoints)) {
       r.waypoints.forEach(function (wp) {
         if (wp.marker) map.removeLayer(wp.marker);
       });
     }
 
+    routes.splice(i, 1);
     activeRouteIndex = null;
+
     await reloadCatalog();
     renderList();
 
-   await Modal.success("👌", "Route is uit catalogus verwijderd!");
+    await Modal.success("👌", "Route is uit catalogus verwijderd!");
   } catch (err) {
     console.error(err);
-    await Modal.error("❌", "serverfout bij verzenden.: " + err.message);
+    await Modal.error("❌", "Serverfout bij verwijderen: " + err.message);
   }
 };
-
 /* ================= UI ================= */
 
 function renderList() {
