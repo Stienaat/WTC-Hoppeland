@@ -142,30 +142,7 @@ map.on('draw:drawstop', function () { isDrawing = false; });
 map.on(L.Draw.Event.CREATED, async function (e) {
   drawnItems.addLayer(e.layer);
 
-	const naam = await Modal.prompt("Nieuwe route","naam", {
-		placeholder: "Geef een naam in" });
 
-  if (!naam) {
-    drawnItems.removeLayer(e.layer);
-    return;
-  }
-
- 	const start = await Modal.prompt("Startplaats",{
-    placeholder: "Geef een naam in"});
-
-	const afstand_km = calculateDistanceKmFromLayer(e.layer);
-	
-	clearActiveRoute();
-
-  const r = {
-    type: 'drawn',
-    naam: naam,
-    start: start || '',
-  
-    afstand_km: afstand_km,
-    layer: e.layer,
-    waypoints: []
-  };
 
   e.layer.on('click', function () {
     const idx = routes.indexOf(r);
@@ -257,6 +234,30 @@ window.saveDrawnRoute = async function (i) {
     return;
   }
 
+	const naam = await Modal.prompt("Nieuwe route","naam", {
+		placeholder: "Geef een naam in" });
+
+  if (!naam) {
+    drawnItems.removeLayer(e.layer);
+    return;
+  }
+
+ 	const start = await Modal.prompt("Startplaats",{
+    placeholder: "Geef een naam in"});
+
+	const afstand_km = calculateDistanceKmFromLayer(e.layer);
+	
+	clearActiveRoute();
+
+  const r = {
+    type: 'drawn',
+    naam: naam,
+    start: start || '',
+  
+    afstand_km: afstand_km,
+    layer: e.layer,
+    waypoints: []
+  };
 /*
   if (r.catalogId) {
     return window.overwriteRoute(i);
