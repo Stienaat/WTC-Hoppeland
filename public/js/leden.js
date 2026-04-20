@@ -295,42 +295,45 @@ if (btnUploadRoute) {
     fd.append('gpxfile', file);
 
     try {
-   const res = await fetch('/', {
-	  method: 'POST',
-	  credentials: 'include',
-	  body: fd
-	});
-
-      const j = await res.json();
-
-      if (!res.ok || !j.ok) {
-        setStatus(routeError, j.error || 'Upload mislukt.', 'error');
-        return;
-      }
-
-      closeRouteOverlay();
-      setStatus(routeError, '✔ Route toegevoegd.', 'ok');
-
-      // optioneel: velden leegmaken
-      const naamEl = document.getElementById('routeNaam');
-      const afstandEl = document.getElementById('routeAfstand');
-      const startEl = document.getElementById('routeStart');
-      const fileEl = document.getElementById('routeFile');
-
-      if (naamEl) naamEl.value = '';
-      if (afstandEl) afstandEl.value = '';
-      if (startEl) startEl.value = '';
-      if (fileEl) fileEl.value = '';
-
-      // optioneel: catalogus herladen als je op dezelfde pagina zit
-      if (typeof reloadCatalog === 'function') {
-        await reloadCatalog();
-      }
-    } catch (e) {
-      console.error(e);
-      setStatus(routeError, 'Technische fout bij upload.', 'error');
-    }
+  const res = await fetch('/api/rides/admin/upload-gpx', {
+    method: 'POST',
+    credentials: 'include',
+    body: fd
   });
+
+  const ct = res.headers.get('content-type') || '';
+
+  if (!ct.includes('application/json')) {
+    const text = await res.text();
+    throw new Error(`Server returned non-JSON (${res.status}): ${text.slice(0, 200)}`);
+  }
+
+  const j = await res.json();
+
+  if (!res.ok || !j.ok) {
+    setStatus(routeError, j.error || 'Upload mislukt.', 'error');
+    return;
+  }
+
+  closeRouteOverlay();
+  setStatus(routeError, '✔ Route toegevoegd.', 'ok');
+
+  const naamEl = document.getElementById('routeNaam');
+  const afstandEl = document.getElementById('routeAfstand');
+  const startEl = document.getElementById('routeStart');
+  const fileEl = document.getElementById('routeFile');
+
+  if (naamEl) naamEl.value = '';
+  if (afstandEl) afstandEl.value = '';
+  if (startEl) startEl.value = '';
+  if (fileEl) fileEl.value = '';
+
+  if (typeof reloadCatalog === 'function') {
+    await reloadCatalog();
+  }
+} catch (e) {
+  console.error(e);
+  setStatus(routeError, 'Technische fout bij upload.', 'error');
 }
 
 /************************************************************
