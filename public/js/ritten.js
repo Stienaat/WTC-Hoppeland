@@ -49,7 +49,7 @@ function buildWaypointPopup(wp) {
       '<button onclick="setWaypointType(\'' + wp.id + '\',\'food\')">Horeca</button> ' +
       '<button onclick="setWaypointType(\'' + wp.id + '\',\'water\')">Water</button><br/>' +
 
-      '<button onclick="setWaypointType(\'' + wp.id + '\',\'danger\')">Gevaar</button> ' +
+      '<button onclick="setWaypointType(\'' + wp.id + '\',\'view\')">Zicht</button> ' +
       '<button onclick="setWaypointType(\'' + wp.id + '\',\'climb\')">Klim</button> ' +
       '<button onclick="setWaypointType(\'' + wp.id + '\',\'sprint\')">Sprint</button>' +
 
@@ -124,7 +124,7 @@ const waypointIcons = {
   rest: makeIcon('rest.png'),
   food: makeIcon('food.png'),
   water: makeIcon('water.png'),
-  danger: makeIcon('bez.png'),
+  view: makeIcon('bez.png'),
   climb: makeIcon('climb.png'),
   sprint: makeIcon('sprint.png')
 };
@@ -526,7 +526,7 @@ function exportRouteToGPX(route) {
     rest: { sym: 'Restroom', type: 'rest' },
     food: { sym: 'Food & Drink', type: 'food' },
     water: { sym: 'Drinking Water', type: 'water' },
-    danger: { sym: 'Danger Area', type: 'danger' },
+    view: { sym: 'view Area', type: 'view' },
     climb: { sym: 'Summit', type: 'climb' },
     sprint: { sym: 'Flag', type: 'sprint' }
   };
