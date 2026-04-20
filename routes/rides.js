@@ -279,7 +279,7 @@ router.post('/admin/drawn', requireAdmin, async (req, res) => {
       coords: null,
       waypoints: [],
       gpx_filename: storagePath,
-      gpx_original_nam: originalName,
+      gpx_original_name: originalName,
       gpx_uploaded_at: new Date().toISOString(),
       source: 'admin_gpx',
       notes: null
@@ -373,7 +373,7 @@ router.post('/admin/upload-gpx', requireAdmin, upload.single('gpxfile'), async (
       coords: null,
       waypoints: [],
       gpx_filename: storagePath,
-      gpx_original_nam: originalName,
+      gpx_original_name: originalName,
       gpx_uploaded_at: new Date().toISOString(),
       source: 'admin_gpx',
       notes: null
