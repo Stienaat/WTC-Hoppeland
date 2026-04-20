@@ -31,10 +31,9 @@ function mapRideRow(row) {
     jaar: row.year,
     groep: row.group_code,
     start: row.start_place,
-   
     afstand_km: row.distance_km,
     bestand: row.gpx_filename,
-    coords: row.coords || [],
+    coords: row.coords,
     waypoints: row.waypoints || [],
     type: 'catalog'
   };
