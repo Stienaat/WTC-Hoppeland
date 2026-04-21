@@ -205,7 +205,7 @@ function initAdminConfigCard() {
       const j = await ajax('/api/admin/config');
 
       if (!j?.ok || !j.config) {
-        setStatus(confSaveStatus, 'Kon configuratie niet laden.', 'error');
+         await Modal.error("👎", "Kan configuratie niet laden! ❌");
         return;
       }
 
@@ -216,17 +216,16 @@ function initAdminConfigCard() {
 
       setStatus(confSaveStatus, '', 'info');
     } catch (e) {
-      setStatus(confSaveStatus, 'Kon configuratie niet laden.', 'error');
+     await Modal.error("👎", "Kan configuratie niet laden! ❌");
     }
   })();
 
   btnSave.onclick = async () => {
     if (!elName.value.trim()) {
-      setStatus(confSaveStatus, 'Naam is verplicht.', 'error');
+      await Modal.warn("⚠️", "Naam IS verplicht.");
+
       return;
     }
-
-    setStatus(confSaveStatus, 'Opslaan...', 'info');
 
     try {
       const j = await ajax('/api/admin/config', {
