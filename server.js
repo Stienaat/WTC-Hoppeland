@@ -37,10 +37,10 @@ app.use(session({
   secret: 'secret',
   resave: false,
   saveUninitialized: false,
-  cookie: {
-    secure: true,       // ⚠️ bij HTTPS verplicht
-    sameSite: 'none'    // ⚠️ bij cross-site verplicht
-  }
+	cookie: {
+	  secure: false,
+	  sameSite: 'lax'
+	}
 }));
 
 app.use('/api/rides', ridesRouter);
