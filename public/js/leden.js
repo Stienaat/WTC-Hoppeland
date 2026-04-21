@@ -370,87 +370,17 @@ function closeAdminPan() {
   window.history.replaceState({}, '', url);
 }
 
-
-/************************************************************
- * PIN WIJZIGEN
- ************************************************************
-const btnPinChange = document.getElementById('btnPinChange');
-const pinChangeOverlay = document.getElementById('pinChangeOverlay');
-const btnChangeCode = document.getElementById('btnChangeCode');
-const oldPinInput = document.getElementById('oldPinInput');
-const newPinInput = document.getElementById('newPinInput');
-const newPinInput2 = document.getElementById('newPinInput2');
-const pinError2 = document.getElementById('pinError2');
-
-function openPinChangePopup() {
-  if (!pinChangeOverlay) return;
-
-  pinChangeOverlay.classList.add('show');
-  pinChangeOverlay.style.display = 'flex';
-
-  if (oldPinInput) oldPinInput.value = '';
-  if (newPinInput) newPinInput.value = '';
-  if (newPinInput2) newPinInput2.value = '';
-
-  setStatus(pinError2, '', 'info');
-  oldPinInput && oldPinInput.focus();
-}
-
-function closePinChangePopup() {
-  if (!pinChangeOverlay) return;
-
-  pinChangeOverlay.classList.remove('show');
-  pinChangeOverlay.style.display = 'none';
-}
-
-async function handlePinChange() {
-  const oldPin = oldPinInput?.value.trim() || '';
-  const newPin = newPinInput?.value.trim() || '';
-  const newPin2 = newPinInput2?.value.trim() || '';
-
-  if (!oldPin || !newPin || newPin !== newPin2) {
-    setStatus(pinError2, 'PIN ongeldig.', 'error');
-    return;
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('noticeBox')) {
+    loadNotice();
   }
+});
 
-  try {
-    const j = await ajax('/api/admin/change-pin', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ oldPin, newPin })
-    });
-
-    if (!j.ok) {
-      setStatus(pinError2, j.message || 'Wijzigen mislukt.', 'error');
-      return;
-    }
-
-    setStatus(pinError2, '✔ PIN gewijzigd.', 'ok');
-    setTimeout(closePinChangePopup, 800);
-  } catch (err) {
-    setStatus(pinError2, 'Serverfout.', 'error');
-  }
-}
-*/
-
-/************************************************************
- * EVENTS / BINDINGS
- ************************************************************/
 btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
 btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
 
-/*
-logo && logo.addEventListener('dblclick', e => {
-  e.preventDefault();
-  openAdminPhase1();
-  pinInput && pinInput.focus();
-});
-*/
-
 document.getElementById('btnCloseAdmin')?.addEventListener('click', closeAdminUI);
 document.getElementById('btnCloseAdmin2')?.addEventListener('click', closeAdminPan);
-
-
 
 document.addEventListener('DOMContentLoaded', function () {
   const params = new URLSearchParams(window.location.search);
