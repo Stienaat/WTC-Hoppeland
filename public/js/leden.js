@@ -393,3 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 50);
   }
 });
+
+  if (typeof loadNotice === "function") {
+    loadNotice();
+  }
