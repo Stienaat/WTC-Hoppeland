@@ -1,7 +1,7 @@
 /************************************************************
  * CORE HELPERS
  ************************************************************/
-
+const noticeStatus = document.getElementById('loginStatus');
 
 async function ajax(url, options = {}) {
   options.headers = {
@@ -30,12 +30,21 @@ function setStatus(el, message = '', type = 'info') {
   el.classList.remove('ok', 'error', 'info');
   el.classList.add(type);
 }
+
+/************************************************************
+ * BASIS DOM
+ ************************************************************/
+const logo = document.getElementById('Image1');
+const adminOverlay = document.getElementById('adminOverlay');
+const adminStatus = document.getElementById('admin-status');
+
 /************************************************************
  * NOTICE
  ************************************************************/
 const box = document.getElementById('noticeBox');
 const btnEditNotice = document.getElementById('btnEditNotice');
 const btnNoticeClose = document.getElementById('btnNoticeClose');
+const btnMedSave = document.getElementById('btnMedSave');
 
 function setRaw(text) {
   if (box) box.dataset.raw = String(text || '');
@@ -171,8 +180,11 @@ async function saveNotice() {
       return;
     }
 
-	await Modal.success("👌", "Uw tekst werd opgeslagen!");
-  } 
+   await Modal.success("👌", "Uw tekst werd opgeslagen!");
+  } catch (err) {
+    await Modal.error("👎", "Serverfout. ❌");
+
+  }
 }
 
 /************************************************************
