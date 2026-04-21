@@ -257,7 +257,8 @@ if (actie === "login") {
 	  localStorage.setItem("member", JSON.stringify(data.user));
 	  localStorage.setItem("is_admin", data.user.is_admin ? "true" : "false");
 
-	  showModal("success", "Welkom", "Je bent ingelogd. ✔️");
+	 
+	  await Modal.success("👌", "Welkom", "Je bent ingelogd. ✔️");
 	  setTimeout(() => {
 		window.location.href = "leden-dashboard.html";
 	  }, 1500);
