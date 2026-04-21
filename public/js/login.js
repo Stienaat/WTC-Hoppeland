@@ -67,51 +67,60 @@ async function handleAdminLogin(pin) {
 /************************************************************
  * PIN WIJZIGEN
  ************************************************************/
-const btnPinChange = document.getElementById("btnPinChange");
-const pinChangeOverlay = document.getElementById("pinChangeOverlay");
-const btnChangeCode = document.getElementById("btnChangeCode");
-
-const oldPinInput  = document.getElementById("oldPinInput");
-const newPinInput  = document.getElementById("newPinInput");
-const newPinInput2 = document.getElementById("newPinInput2");
+const btnPinChange = document.getElementById('btnPinChange');
+const pinChangeOverlay = document.getElementById('pinChangeOverlay');
+const btnChangeCode = document.getElementById('btnChangeCode');
+const oldPinInput = document.getElementById('oldPinInput');
+const newPinInput = document.getElementById('newPinInput');
+const newPinInput2 = document.getElementById('newPinInput2');
+const pinError2 = document.getElementById('pinError2');
 
 function openPinChangePopup() {
-  pinChangeOverlay?.classList.add("show");
+  if (!pinChangeOverlay) return;
+
+  pinChangeOverlay.classList.add('show');
+  pinChangeOverlay.style.display = 'flex';
+
+  if (oldPinInput) oldPinInput.value = '';
+  if (newPinInput) newPinInput.value = '';
+  if (newPinInput2) newPinInput2.value = '';
+
+  setStatus(pinError2, '', 'info');
+  oldPinInput && oldPinInput.focus();
 }
 
 function closePinChangePopup() {
-  pinChangeOverlay?.classList.remove("show");
+  if (!pinChangeOverlay) return;
+
+  pinChangeOverlay.classList.remove('show');
+  pinChangeOverlay.style.display = 'none';
 }
 
 async function handlePinChange() {
-  const oldPin = oldPinInput.value.trim();
-  const newPin = newPinInput.value.trim();
-  const newPin2 = newPinInput2.value.trim();
+  const oldPin = oldPinInput?.value.trim() || '';
+  const newPin = newPinInput?.value.trim() || '';
+  const newPin2 = newPinInput2?.value.trim() || '';
 
   if (!oldPin || !newPin || newPin !== newPin2) {
-    await Modal.error("👎", "Pin is ongeldig. ❌");
+    await Modal.error("👎", "Pin ongeldig! ❌";)
     return;
   }
 
   try {
-    const res = await fetch("/api/admin/change-pin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const j = await ajax('/api/admin/change-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ oldPin, newPin })
     });
 
-    const data = await res.json();
-
-    if (!data.ok) {
-      await Modal.error("👎", "Wijzigen mislukt. ❌");
+    if (!j.ok) {
+      await Modal.error("👎", "Pin wijzigen is mislukt! ❌";)
       return;
     }
 
-    await Modal.success("👌", "PIN gewijzigd! ✔");
-    setTimeout(closePinChangePopup, 800);
-
+   await Modal.success("👌", "Pin is gewijzigd!");
   } catch (err) {
-    await Modal.error("👎", "Serverfout.");
+    await Modal.warn("⚠️", "Serverfout.");
   }
 }
 
