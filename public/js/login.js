@@ -1,116 +1,82 @@
-/************************************************************
- * 1) ADMIN UI OPEN / CLOSE
- ************************************************************/
- 
 document.addEventListener("DOMContentLoaded", () => {
- 
-const adminLogin   = document.getElementById("adminLogin");
-const adminFase2   = document.getElementById("adminFase2");
-const adminStatus  = document.getElementById("admin-status");
-const adminLogo = document.getElementById("adminLogo");
 
+const pinInput   = document.getElementById("pinInput");
+const btnOk      = document.getElementById("btnOk");
+const pinError   = document.getElementById("pinError");
+const adminLogo  = document.getElementById("adminLogo");
+
+const adminLogin = document.getElementById("adminLogin");
+const adminFase2 = document.getElementById("adminFase2");
+
+/************************************************************
+ * ADMIN UI
+ ************************************************************/
 function openAdminPhase1() {
-  if (adminLogin) adminLogin.style.display = "block";
-  if (adminFase2) adminFase2.classList.remove("open");
+  adminLogin && (adminLogin.style.display = "block");
+  adminFase2 && adminFase2.classList.remove("open");
 }
 
 function openAdminPhase2() {
-  if (adminLogin) adminLogin.style.display = "none";
-  if (adminFase2) adminFase2.classList.add("open");
+  adminLogin && (adminLogin.style.display = "none");
+  adminFase2 && adminFase2.classList.add("open");
+
   if (typeof initAdminConfigCard === "function") {
     initAdminConfigCard();
   }
 }
 
 function closeAdminUI() {
-  if (adminLogin) adminLogin.style.display = "none";
-  if (adminFase2) adminFase2.classList.remove("open");
+  adminLogin && (adminLogin.style.display = "none");
+  adminFase2 && adminFase2.classList.remove("open");
 }
 
-function closeAdminPan() {
-  if (adminFase2) adminFase2.style.display = "none";
-
-  const url = new URL(window.location);
-  url.searchParams.delete("overlay");
-  window.history.replaceState({}, "", url);
-}
-
- document.getElementById('btnCloseAdmin2');
- btnCloseAdmin2?.addEventListener('click', closeAdminPan);
- 
 /************************************************************
- * 2) ADMIN LOGIN (PIN)
- ************************************************************
-const pinInput = document.getElementById("pinInput");
-const btnOk    = document.getElementById("btnOk");
-const pinError = document.getElementById("pinError");
-
+ * ADMIN LOGIN (PIN)
+ ************************************************************/
 async function handleAdminLogin(pin) {
   if (!pin || pin.length !== 6) {
     await Modal.error("👎", "Pin moet 6 cijfers zijn. ❌");
-
     return;
   }
 
   try {
-    const res = await fetch("/admin-login", {
+    const res = await fetch("/api/admin/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ pin })
     });
 
     const data = await res.json();
 
     if (!data.ok) {
-      await Modal.error("👎", "Pin is onjuist. ❌");
-
+      await Modal.error("👎", data.message || "Pin is onjuist. ❌");
       return;
     }
 
-    // Admin authenticated
     localStorage.setItem("is_admin", "true");
     pinError.textContent = "";
     pinInput.value = "";
     openAdminPhase2();
 
   } catch (err) {
-   
-	await Modal.error("👎", "Login is mislukt. ❌");
-    setStatus(pinError, "Serverfout.");
+    await Modal.error("👎", "Login is mislukt. ❌");
   }
 }
 
-btnOk?.addEventListener("click", () => {
-  handleAdminLogin(pinInput.value.trim());
-});
-
-adminLogo?.addEventListener("dblclick", e => {
-  e.preventDefault();
-  openAdminPhase1();
-  pinInput?.focus();
-})*************************************************/
-
 /************************************************************
- * 3) PIN WIJZIGEN
+ * PIN WIJZIGEN
  ************************************************************/
-const btnPinChange      = document.getElementById("btnPinChange");
-const pinChangeOverlay  = document.getElementById("pinChangeOverlay");
-const btnChangeCode     = document.getElementById("btnChangeCode");
-const btnClosePinChange = document.getElementById("btnClosePinChange");
+const btnPinChange = document.getElementById("btnPinChange");
+const pinChangeOverlay = document.getElementById("pinChangeOverlay");
+const btnChangeCode = document.getElementById("btnChangeCode");
 
 const oldPinInput  = document.getElementById("oldPinInput");
 const newPinInput  = document.getElementById("newPinInput");
 const newPinInput2 = document.getElementById("newPinInput2");
-const pinChangeErr = document.getElementById("pinChangeError");
-const pinError2    = document.getElementById("pinError2");
 
 function openPinChangePopup() {
   pinChangeOverlay?.classList.add("show");
-  oldPinInput.value = "";
-  newPinInput.value = "";
-  newPinInput2.value = "";
-  pinChangeErr.textContent = "";
-  oldPinInput.focus();
 }
 
 function closePinChangePopup() {
@@ -124,12 +90,11 @@ async function handlePinChange() {
 
   if (!oldPin || !newPin || newPin !== newPin2) {
     await Modal.error("👎", "Pin is ongeldig. ❌");
-
     return;
   }
 
   try {
-    const res = await fetch("/admin-change-pin", {
+    const res = await fetch("/api/admin/change-pin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ oldPin, newPin })
@@ -138,25 +103,35 @@ async function handlePinChange() {
     const data = await res.json();
 
     if (!data.ok) {
-      await Modal.error("👎", "Wijzigen is mislukt. ❌");
-
+      await Modal.error("👎", "Wijzigen mislukt. ❌");
       return;
     }
-	await Modal.success("👌", "PIN is gewijzigd! ✔");
-   
+
+    await Modal.success("👌", "PIN gewijzigd! ✔");
     setTimeout(closePinChangePopup, 800);
 
- :/* } catch (err) {
-    console.error("PIN change error:", err);
-    setStatus(pinError2, "Serverfout.");
-  }*/
+  } catch (err) {
+    await Modal.error("👎", "Serverfout.");
+  }
 }
 
+/************************************************************
+ * EVENTS
+ ************************************************************/
+btnOk?.addEventListener("click", () => {
+  handleAdminLogin(pinInput.value.trim());
+});
 
+adminLogo?.addEventListener("dblclick", e => {
+  e.preventDefault();
+  openAdminPhase1();
+  pinInput?.focus();
+});
 
 btnPinChange?.addEventListener("click", openPinChangePopup);
 btnChangeCode?.addEventListener("click", handlePinChange);
-btnClosePinChange?.addEventListener("click", closePinChangePopup);
+
+});
 
 /************************************************************
  * 4) LOGIN / REGISTRATIE UI

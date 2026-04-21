@@ -370,46 +370,10 @@ function closeAdminPan() {
   window.history.replaceState({}, '', url);
 }
 
-/************************************************************
- * ADMIN LOGIN (PIN)
- ************************************************************
-const pinInput = document.getElementById('pinInput');
-const btnOk = document.getElementById('btnOk');
-const pinError = document.getElementById('pinError');
-
-async function handlePinUnlock() {
-  const pin = pinInput?.value?.trim() || '';
-
-  if (pin.length !== 6) {
-    setStatus(pinError, 'PIN moet 6 cijfers zijn.', 'error');
-    return;
-  }
-
-  try {
-    const j = await ajax('/api/admin/login', {
-      method: 'POST',
- //     headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin })
-    });
-
-    if (!j.ok) {
-      setStatus(pinError, j.message || 'PIN onjuist.', 'error');
-      return;
-    }
-
-    localStorage.setItem('is_admin', 'true');
-    setStatus(pinError, '', 'info');
-    if (pinInput) pinInput.value = '';
-    openAdminPhase2();
-  } catch (e) {
-    console.error('PIN unlock error:', e);
-    setStatus(pinError, 'Serverfout.', 'error');
-  }
-} ***********************************************************************/
 
 /************************************************************
  * PIN WIJZIGEN
- ************************************************************/
+ ************************************************************
 const btnPinChange = document.getElementById('btnPinChange');
 const pinChangeOverlay = document.getElementById('pinChangeOverlay');
 const btnChangeCode = document.getElementById('btnChangeCode');
@@ -467,45 +431,7 @@ async function handlePinChange() {
     setStatus(pinError2, 'Serverfout.', 'error');
   }
 }
-
-/************************************************************
- * LOGIN / REGISTRATIE INIT
- ************************************************************/
-(function initLoginRegister() {
-  const regOnlyFields = document.querySelectorAll('.reg-only');
-  const loginBtn = document.getElementById('Button1');
-  const regBtn = document.getElementById('Button2');
-  const goReg = document.getElementById('GoRegister');
-  const goLogin = document.getElementById('GoLogin');
-  const forgot = document.getElementById('ForgotLink');
-
-  function setMode(mode) {
-    const isLogin = mode === 'login';
-
-    regOnlyFields.forEach(el => {
-      el.style.display = isLogin ? 'none' : 'block';
-    });
-
-    if (loginBtn) loginBtn.style.display = isLogin ? 'inline-block' : 'none';
-    if (regBtn) regBtn.style.display = isLogin ? 'none' : 'inline-block';
-    if (goReg) goReg.style.display = isLogin ? 'inline' : 'none';
-    if (goLogin) goLogin.style.display = isLogin ? 'none' : 'inline';
-  }
-
-  setMode('login');
-
-  goReg && goReg.addEventListener('click', e => {
-    e.preventDefault();
-    setMode('registreer');
-  });
-
-  goLogin && goLogin.addEventListener('click', e => {
-    e.preventDefault();
-    setMode('login');
-  });
-
-  loadNotice();
-})();
+*/
 
 /************************************************************
  * EVENTS / BINDINGS
@@ -513,12 +439,13 @@ async function handlePinChange() {
 btnEditNotice && btnEditNotice.addEventListener('click', startEditNotice);
 btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
 
-btnOk && btnOk.addEventListener('click', handlePinUnlock);
+/*
 logo && logo.addEventListener('dblclick', e => {
   e.preventDefault();
   openAdminPhase1();
   pinInput && pinInput.focus();
 });
+*/
 
 document.getElementById('btnCloseAdmin')?.addEventListener('click', closeAdminUI);
 document.getElementById('btnCloseAdmin2')?.addEventListener('click', closeAdminPan);
