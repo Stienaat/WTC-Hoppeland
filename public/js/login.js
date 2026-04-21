@@ -49,7 +49,8 @@ const pinError = document.getElementById("pinError");
 
 async function handleAdminLogin(pin) {
   if (!pin || pin.length !== 6) {
-    setStatus(pinError, "PIN moet 6 cijfers zijn.");
+    await Modal.error("👎", "Pin moet 6 cijfers zijn. ❌ ";
+
     return;
   }
 
@@ -63,7 +64,8 @@ async function handleAdminLogin(pin) {
     const data = await res.json();
 
     if (!data.ok) {
-      setStatus(pinError, data.error || "PIN onjuist.");
+      await Modal.error("👎", "Pin is onjuist. ❌ ";
+
       return;
     }
 
@@ -74,8 +76,8 @@ async function handleAdminLogin(pin) {
     openAdminPhase2();
 
   } catch (err) {
-    showModal("error", "❌", "Verzenden mislukt: " + err.message);
-
+   
+	await Modal.error("👎", "Verzenden is mislukt. ❌ ";
     setStatus(pinError, "Serverfout.");
   }
 }
@@ -123,7 +125,8 @@ async function handlePinChange() {
   const newPin2 = newPinInput2.value.trim();
 
   if (!oldPin || !newPin || newPin !== newPin2) {
-    setStatus(pinError2, "PIN ongeldig.");
+    await Modal.error("👎", "Pin is ongeldig. ❌ ";
+
     return;
   }
 
@@ -137,10 +140,11 @@ async function handlePinChange() {
     const data = await res.json();
 
     if (!data.ok) {
-      setStatus(pinError2, data.error || "Wijzigen mislukt.");
+      await Modal.error("👎", "Wijzigen is mislukt. ❌ ";
+
       return;
     }
-
+	await Modal.success("👌", "PIN is gewijzigd! ✔");
     pinChangeErr.textContent = "✔ PIN gewijzigd";
     setTimeout(closePinChangePopup, 800);
 
@@ -220,7 +224,9 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
   if (actie === "registreer") {
 
     if (password !== codeRepeat) {
-      showModal("error", "👎", "Paswoorden komen niet overeen.");
+ 
+	  await Modal.error("👎", "Paswoorden komen niet overeen! ❌";
+
       return;
     }
 
@@ -231,8 +237,8 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     });
 
     const data = await res.json();
-	
-     showModal("success", "Welkom", "Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
+	 await Modal.success("👌", "Welkom", "Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
+
 	 setTimeout(() => {
 		window.location.href = "leden.html";
 	  }, 5000);
@@ -264,7 +270,9 @@ if (actie === "login") {
 	  }, 1500);
 	}
 	else {
-		showModal("error","👎","Login mislukt. ❌");
+		
+		await Modal.error("👎", "Verzenden mislukt: ❌";
+
 	  }
 }
 
