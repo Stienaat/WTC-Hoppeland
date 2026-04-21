@@ -95,7 +95,49 @@ function closePinChangePopup() {
   pinChangeOverlay.classList.remove('show');
   pinChangeOverlay.style.display = 'none';
 }
+async function handlePinChange() {
+  const oldPin = oldPinInput?.value.trim() || "";
+  const newPin = newPinInput?.value.trim() || "";
+  const newPin2 = newPinInput2?.value.trim() || "";
 
+  if (!oldPin || !newPin || newPin !== newPin2) {
+    await Modal.error("👎", "PIN ongeldig. ❌");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/admin/change-pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ oldPin, newPin })
+    });
+
+    const text = await res.text();
+    console.log("PIN change raw response:", res.status, text);
+
+    let j;
+    try {
+      j = JSON.parse(text);
+    } catch {
+      await Modal.error("👎", "Server gaf geen geldige JSON terug.");
+      return;
+    }
+
+    if (!res.ok || !j.ok) {
+      await Modal.error("👎", j.message || j.error || "Wijzigen mislukt. ❌");
+      return;
+    }
+
+    await Modal.success("👌", "PIN gewijzigd! ✔");
+    setTimeout(closePinChangePopup, 800);
+
+  } catch (err) {
+    console.error("PIN change error:", err);
+    await Modal.error("👎", "Serverfout.");
+  }
+}
+/*
 async function handlePinChange() {
   const oldPin = oldPinInput?.value.trim() || '';
   const newPin = newPinInput?.value.trim() || '';
@@ -124,7 +166,7 @@ async function handlePinChange() {
     await Modal.warn("⚠️", "Serverfout.");
   }
 }
-
+*/
 /************************************************************
  * EVENTS
  ************************************************************/
