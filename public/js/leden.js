@@ -247,7 +247,7 @@ function initAdminConfigCard() {
         return;
       }
 
-      setStatus(confSaveStatus, '✔ Opgeslagen.', 'ok');
+      await Modal.success("👌", "Opslag gelukt! ✔");
     } catch (e) {
       setStatus(confSaveStatus, 'Technische fout: ' + e.message, 'error');
     }
