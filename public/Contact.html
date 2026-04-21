@@ -139,7 +139,7 @@ window.addEventListener('DOMContentLoaded', function () {
     const consent = document.getElementById('consent');
 
     if (!consent.checked){
-      showModal("error", "⚠️", "Je moet toestemming geven om te verzenden.");
+      await Modal.warn("⚠️", "Je moet toestemming geven om te kunnen versturen!");
       return;
     }
 
@@ -155,7 +155,7 @@ window.addEventListener('DOMContentLoaded', function () {
     };
 
     if (!payload.name || !payload.message){
-      showModal("error", "⚠️", "Naam en bericht zijn verplicht.");
+      await Modal.warn("⚠️", "Naam en bericht zijn verplicht.");
       return;
     }
 
@@ -186,43 +186,17 @@ window.addEventListener('DOMContentLoaded', function () {
         URL.revokeObjectURL(url);
       }
 
-      showModal("success", "👌", "Uw vraag werd verzonden!");
+      await Modal.success("👌", "Uw boodschap werd verzonden! ✔");
       form.reset();
 
     }catch(err){
-      showModal("error", "❌", "Verzenden mislukt: " + err.message);
+     await Modal.error("👎", "Verzenden mislukt. ❌");
     }
   }
 
   form.addEventListener('submit', onSubmit);
 });
 </script>
-
-<!--
-<script>
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const res = await fetch("/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-
-  const data = await res.json();
-
-  if (data.ok) {
-    // later kan je hier een echte ledenzone tonen
-    alert("Welkom " + data.naam);
-  } else {
-    alert(data.error);
-  }
-});
-</script>
--->
 
 <link href="./css/WTC.css" rel="stylesheet">
 <link href="./css/Contact.css" rel="stylesheet">
