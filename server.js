@@ -19,6 +19,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 
+app.use(cors({
+  origin: 'https://wtc-hoppeland.onrender.com',
+  credentials: true
+}));
+
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,9 +44,9 @@ app.use(session({
   secret: 'secret',
   resave: false,
   saveUninitialized: false,
-	cookie: {
-	  secure: false,
-	  sameSite: 'lax'
+  cookie: {
+  secure: true,
+  sameSite: 'none'
 	}
 }));
 
@@ -149,8 +156,3 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Server draait op poort " + PORT);
 });
-
-app.use(cors({
-  origin: 'https://wtc-hoppeland.onrender.com',
-  credentials: true
-}));
