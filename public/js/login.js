@@ -40,14 +40,14 @@ function closeAdminPan() {
  
 /************************************************************
  * 2) ADMIN LOGIN (PIN)
- ************************************************************/
+ ************************************************************
 const pinInput = document.getElementById("pinInput");
 const btnOk    = document.getElementById("btnOk");
 const pinError = document.getElementById("pinError");
 
 async function handleAdminLogin(pin) {
   if (!pin || pin.length !== 6) {
-    await Modal.error("👎", "Pin moet 6 cijfers zijn. ❌ ");
+    await Modal.error("👎", "Pin moet 6 cijfers zijn. ❌");
 
     return;
   }
@@ -62,7 +62,7 @@ async function handleAdminLogin(pin) {
     const data = await res.json();
 
     if (!data.ok) {
-      await Modal.error("👎", "Pin is onjuist. ❌ ");
+      await Modal.error("👎", "Pin is onjuist. ❌");
 
       return;
     }
@@ -75,7 +75,7 @@ async function handleAdminLogin(pin) {
 
   } catch (err) {
    
-	await Modal.error("👎", "Verzenden is mislukt. ❌ ");
+	await Modal.error("👎", "Login is mislukt. ❌");
     setStatus(pinError, "Serverfout.");
   }
 }
@@ -88,7 +88,7 @@ adminLogo?.addEventListener("dblclick", e => {
   e.preventDefault();
   openAdminPhase1();
   pinInput?.focus();
-});
+})*************************************************/
 
 /************************************************************
  * 3) PIN WIJZIGEN
@@ -123,7 +123,7 @@ async function handlePinChange() {
   const newPin2 = newPinInput2.value.trim();
 
   if (!oldPin || !newPin || newPin !== newPin2) {
-    await Modal.error("👎", "Pin is ongeldig. ❌ ");
+    await Modal.error("👎", "Pin is ongeldig. ❌");
 
     return;
   }
@@ -138,18 +138,18 @@ async function handlePinChange() {
     const data = await res.json();
 
     if (!data.ok) {
-      await Modal.error("👎", "Wijzigen is mislukt. ❌ ");
+      await Modal.error("👎", "Wijzigen is mislukt. ❌");
 
       return;
     }
 	await Modal.success("👌", "PIN is gewijzigd! ✔");
-    pinChangeErr.textContent = "✔ PIN gewijzigd";
+   
     setTimeout(closePinChangePopup, 800);
 
-  } catch (err) {
+ :/* } catch (err) {
     console.error("PIN change error:", err);
     setStatus(pinError2, "Serverfout.");
-  }
+  }*/
 }
 
 
@@ -235,7 +235,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     });
 
     const data = await res.json();
-	 await Modal.success("👌", "Welkom", "Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
+	 await Modal.success("👌", "Welkom? Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
 
 	 setTimeout(() => {
 		window.location.href = "leden.html";
@@ -260,16 +260,14 @@ if (actie === "login") {
 	  localStorage.setItem("user_email", data.user.email);
 	  localStorage.setItem("member", JSON.stringify(data.user));
 	  localStorage.setItem("is_admin", data.user.is_admin ? "true" : "false");
-
 	 
-	  await Modal.success("👌", "Welkom", "Je bent ingelogd. ✔️");
+	  await Modal.success("👌", "Welkom, Je bent ingelogd. ✔️");
 	  setTimeout(() => {
 		window.location.href = "leden-dashboard.html";
 	  }, 1500);
 	}
 	else {
-		
-		await Modal.error("👎", "Verzenden mislukt: ❌");
+		await Modal.error("👎", "Foute pincode! ❌");
 
 	  }
 }

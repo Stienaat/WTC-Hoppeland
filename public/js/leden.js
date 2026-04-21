@@ -372,7 +372,7 @@ function closeAdminPan() {
 
 /************************************************************
  * ADMIN LOGIN (PIN)
- ************************************************************/
+ ************************************************************
 const pinInput = document.getElementById('pinInput');
 const btnOk = document.getElementById('btnOk');
 const pinError = document.getElementById('pinError');
@@ -405,7 +405,7 @@ async function handlePinUnlock() {
     console.error('PIN unlock error:', e);
     setStatus(pinError, 'Serverfout.', 'error');
   }
-}
+} ***********************************************************************/
 
 /************************************************************
  * PIN WIJZIGEN
