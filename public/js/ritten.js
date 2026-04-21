@@ -1,4 +1,3 @@
-console.log('script start');
 
 // Basispad waar routes.html staat
 const BASE_URL = new URL('.', window.location.href).pathname.replace(/\/$/, '');
@@ -79,15 +78,6 @@ function populateGroepen() {
       return '<option value="' + g + '">' + g + '</option>';
     }).join('');
 }
-/*
-function confirmModal(message) {
-  return new Promise(function (resolve) {
-    showModal('confirm', '❓', message, function (result) {
-      resolve(result);
-    });
-  });
-}*/
-
 
 /* ================= MAP ================= */
 
@@ -253,7 +243,8 @@ window.saveDrawnRoute = async function (i) {
   if (!r || r.type !== 'drawn') return;
 
   if (!isAdminUser()) {
-    await Modal.error("❌", "Alleen admin mag opslaan.");
+    await Modal.error("👎", "Alleen de Admin mag opslaan. ❌");
+
     return;
   }
 
@@ -272,7 +263,8 @@ window.saveDrawnRoute = async function (i) {
   });
 
   if (coords.length < 2) {
-    await Modal.error("❌", "Route bevat te weinig punten.");
+    await Modal.error("👎", "Route bevat te weinig punten. ❌");
+
     return;
   }
 
@@ -312,7 +304,8 @@ window.saveDrawnRoute = async function (i) {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      await Modal.error("❌", "Opslaan mislukt: " + (j.error || j.message || ('HTTP ' + res.status)));
+      await Modal.error("👎", "Opslaan mislukt. ❌");
+
       return;
     }
 
@@ -324,7 +317,8 @@ window.saveDrawnRoute = async function (i) {
     renderList();
   } catch (err) {
     console.error(err);
-    await Modal.error("❌", "Serverfout bij opslaan: " + err.message);
+    await Modal.error("👎", "Serverfout. ❌");
+
   }
 };
 
@@ -335,7 +329,8 @@ window.overwriteRoute = async function (i) {
   if (!r || !r.catalogId || !r.layer) return;
 
   if (!isAdminUser()) {
-	await Modal.error("❌", "alleen de admin mag catalogus bijwerken. ");
+	await Modal.error("👎", "Alleen de Admin mag catalogus bijwerken. ❌");
+
     return;
   }
 
@@ -377,7 +372,8 @@ const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      await Modal.error("❌", "opslaan mislukt: " );
+      await Modal.error("👎", "Opslaan mislukt. ❌");
+
       return;
     }
 
@@ -386,7 +382,8 @@ const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
     renderList();
   } catch (err) {
     console.error(err);
-    await Modal.error("❌", "serverfoyt bij opslaan. " );
+    await Modal.error("👎", "Serverfout. ❌");
+
   }
 };
 
@@ -418,7 +415,8 @@ window.deleteCatalogRoute = async function (i) {
   if (!r || !r.catalogId) return;
 
   if (!isAdminUser()) {
-    await Modal.error("❌", "Alleen de admin mag routes verwijderen.");
+    await Modal.error("👎", "Alleen de Admin ma routes verwijderen. ❌");
+
     return;
   }
 
@@ -434,7 +432,8 @@ window.deleteCatalogRoute = async function (i) {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      await Modal.error("❌", "Verwijderen mislukt: " + (j.error || j.message || ('HTTP ' + res.status)));
+      await Modal.error("👎", "Verwijderen mislukt. ❌");
+
       return;
     }
 
@@ -455,7 +454,8 @@ window.deleteCatalogRoute = async function (i) {
     await Modal.success("👌", "Route is uit catalogus verwijderd!");
   } catch (err) {
     console.error(err);
-    await Modal.error("❌", "Serverfout bij verwijderen: " + err.message);
+    await Modal.error("👎", "Serverfout. ❌");
+
   }
 };
 /* ================= UI ================= */
@@ -544,7 +544,8 @@ async function exportRouteToGPX(route) {
   const coords = (geo && geo.geometry && geo.geometry.coordinates) ? geo.geometry.coordinates : [];
 
   if (coords.length < 2) {
-    await Modal.error("❌", "Route bevat te weinig punten." + err.message);
+    await Modal.error("👎", "Route bevat te weinig pnten. ❌");
+
     return;
   }
 
@@ -688,7 +689,8 @@ window.loadCatalogRouteById = async function (id) {
   });
 
   if (!meta) {
-    await Modal.error("❌", "Route niet gevonden.");
+    await Modal.error("👎", "Route niet gevonden. ❌");
+
     return;
   }
 
@@ -746,11 +748,11 @@ window.loadCatalogRouteById = async function (id) {
     try {
       const res = await fetch(url, {
          method,
-  credentials: 'include', // ✔ nodig
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(payload)
+	  credentials: 'include', // ✔ nodig
+	  headers: {
+		'Content-Type': 'application/json'
+	  },
+	body: JSON.stringify(payload)
 });
 
       if (!res.ok) {
@@ -761,7 +763,8 @@ window.loadCatalogRouteById = async function (id) {
       const active = parseGpxToActiveRoute(txt, meta.naam || meta.title);
 
       if (!active) {
-        await Modal.error("❌", "GPX bevat geen track.");
+        await Modal.error("👎", "GPX bevat geen track. ❌");
+
         return;
       }
 
@@ -773,13 +776,15 @@ window.loadCatalogRouteById = async function (id) {
       renderList();
     } catch (err) {
       console.error(err);
-      await Modal.error("❌", "GPX laden mislukt: " + err.message);
+      await Modal.error("👎", "GPX laden mislukt. ❌");
+
     }
 
     return;
   }
 
-  await Modal.error("❌", "Deze route heeft geen coords en geen bestand.");
+    await Modal.error("👎", "Deze route heeft geen coords en geen bestand! ❌");
+
 };
 
 /* ================= WP's ================= */
@@ -854,47 +859,6 @@ window.deleteWaypoint = function (id) {
     return w.id !== id;
   });
 };
-
-/* ================= TEKST INPUT-MODAL ================= */
-/*function promptModal(title, defaultValue) {
-  if (defaultValue === undefined) defaultValue = '';
-  return Promise.resolve(window.prompt(title, defaultValue));
-} 
-
-function promptModal(title, defaultValue = '') {
-  return new Promise(function (resolve) {
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'column';
-    wrapper.style.gap = '10px';
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = 'modal-input-field';
-    input.value = defaultValue;
-    input.style.padding = '8px';
-
-    wrapper.appendChild(input);
-
-    showModal('custom', '✏️', title, [
-      {
-        text: 'OK',
-        action: function () {
-          resolve(input.value.trim());
-        }
-      },
-      {
-        text: 'Annuleer',
-        action: function () {
-          resolve(null);
-        }
-      }
-    ], wrapper);
-
-    setTimeout(() => input.focus(), 0);
-  });
-}
-*/
 
 function calculateDistanceKmFromLayer(layer) {
   if (!layer) return 0;
