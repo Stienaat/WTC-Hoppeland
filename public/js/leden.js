@@ -449,10 +449,8 @@ logo && logo.addEventListener('dblclick', e => {
 
 document.getElementById('btnCloseAdmin')?.addEventListener('click', closeAdminUI);
 document.getElementById('btnCloseAdmin2')?.addEventListener('click', closeAdminPan);
-document.getElementById('btnClosePinChange')?.addEventListener('click', closePinChangePopup);
 
-btnPinChange && btnPinChange.addEventListener('click', openPinChangePopup);
-btnChangeCode && btnChangeCode.addEventListener('click', handlePinChange);
+
 
 document.addEventListener('DOMContentLoaded', function () {
   const params = new URLSearchParams(window.location.search);
