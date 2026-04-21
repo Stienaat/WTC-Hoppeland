@@ -114,7 +114,7 @@ async function handlePinChange() {
     });
 
     const text = await res.text();
-    console.log("PIN change raw response:", res.status, text);
+ 
 
     let j;
     try {
@@ -133,7 +133,7 @@ async function handlePinChange() {
     setTimeout(closePinChangePopup, 800);
 
   } catch (err) {
-    console.error("PIN change error:", err);
+   
     await Modal.error("👎", "Serverfout.");
   }
 }
@@ -161,7 +161,7 @@ async function handlePinChange() {
       return;
     }
 
-   await Modal.success("👌", "Pin is gewijzigd!");
+   await Modal.success("👌", "Pin is gewijzigd! ✔");
   } catch (err) {
     await Modal.warn("⚠️", "Serverfout.");
   }
@@ -179,6 +179,9 @@ adminLogo?.addEventListener("dblclick", e => {
   openAdminPhase1();
   pinInput?.focus();
 });
+
+const btnClosePinChange = document.getElementById("btnClosePinChange");
+btnClosePinChange?.addEventListener("click", closePinChangePopup);
 
 btnPinChange?.addEventListener("click", openPinChangePopup);
 btnChangeCode?.addEventListener("click", handlePinChange);
@@ -217,9 +220,7 @@ btnChangeCode?.addEventListener("click", handlePinChange);
     setMode("login");
   });
 
-  if (typeof loadNotice === "function") {
-    loadNotice();
-  }
+
 })();
 
 /************************************************************
