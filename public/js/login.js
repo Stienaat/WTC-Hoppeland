@@ -102,7 +102,7 @@ async function handlePinChange() {
   const newPin2 = newPinInput2?.value.trim() || '';
 
   if (!oldPin || !newPin || newPin !== newPin2) {
-    await Modal.error("👎", "Pin ongeldig! ❌";)
+    await Modal.error("👎", "Pin ongeldig! ❌");
     return;
   }
 
@@ -114,7 +114,7 @@ async function handlePinChange() {
     });
 
     if (!j.ok) {
-      await Modal.error("👎", "Pin wijzigen is mislukt! ❌";)
+      await Modal.error("👎", "Pin wijzigen is mislukt! ❌");
       return;
     }
 
