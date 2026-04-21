@@ -137,7 +137,8 @@ async function loadNotice() {
     setRaw(j.text);
     renderNotice();
   } catch (err) {
-    showModal("error", "❌", "Kon mededelingen niet laden: " + err.message);
+    await Modal.error("👎", "Kan mededelingen niet laden. ❌");
+
   }
 }
 
@@ -175,13 +176,14 @@ async function saveNotice() {
     const j = await res.json();
 
     if (!j.ok) {
-      showModal("error", "❌", "Opslaan mislukt.");
+      await Modal.error("👎", "Opslaan mislukt. ❌");
       return;
     }
 
     showModal("success", "👌", "Uw tekst werd opgeslagen!");
   } catch (err) {
-    showModal("error", "❌", "Serverfout bij opslaan.");
+    await Modal.error("👎", "Serverfout. ❌");
+
   }
 }
 
