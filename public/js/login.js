@@ -38,8 +38,6 @@ function closeAdminPan() {
  document.getElementById('btnCloseAdmin2');
  btnCloseAdmin2?.addEventListener('click', closeAdminPan);
  
-
-
 /************************************************************
  * 2) ADMIN LOGIN (PIN)
  ************************************************************/
@@ -49,7 +47,7 @@ const pinError = document.getElementById("pinError");
 
 async function handleAdminLogin(pin) {
   if (!pin || pin.length !== 6) {
-    await Modal.error("👎", "Pin moet 6 cijfers zijn. ❌ ";
+    await Modal.error("👎", "Pin moet 6 cijfers zijn. ❌ ");
 
     return;
   }
@@ -64,7 +62,7 @@ async function handleAdminLogin(pin) {
     const data = await res.json();
 
     if (!data.ok) {
-      await Modal.error("👎", "Pin is onjuist. ❌ ";
+      await Modal.error("👎", "Pin is onjuist. ❌ ");
 
       return;
     }
@@ -77,7 +75,7 @@ async function handleAdminLogin(pin) {
 
   } catch (err) {
    
-	await Modal.error("👎", "Verzenden is mislukt. ❌ ";
+	await Modal.error("👎", "Verzenden is mislukt. ❌ ");
     setStatus(pinError, "Serverfout.");
   }
 }
@@ -125,7 +123,7 @@ async function handlePinChange() {
   const newPin2 = newPinInput2.value.trim();
 
   if (!oldPin || !newPin || newPin !== newPin2) {
-    await Modal.error("👎", "Pin is ongeldig. ❌ ";
+    await Modal.error("👎", "Pin is ongeldig. ❌ ");
 
     return;
   }
@@ -140,7 +138,7 @@ async function handlePinChange() {
     const data = await res.json();
 
     if (!data.ok) {
-      await Modal.error("👎", "Wijzigen is mislukt. ❌ ";
+      await Modal.error("👎", "Wijzigen is mislukt. ❌ ");
 
       return;
     }
@@ -225,7 +223,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 
     if (password !== codeRepeat) {
  
-	  await Modal.error("👎", "Paswoorden komen niet overeen! ❌";
+	  await Modal.error("👎", "Paswoorden komen niet overeen! ❌");
 
       return;
     }
@@ -271,7 +269,7 @@ if (actie === "login") {
 	}
 	else {
 		
-		await Modal.error("👎", "Verzenden mislukt: ❌";
+		await Modal.error("👎", "Verzenden mislukt: ❌");
 
 	  }
 }
