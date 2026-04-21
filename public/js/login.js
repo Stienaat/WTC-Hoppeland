@@ -110,6 +110,7 @@ async function handlePinChange() {
     const j = await ajax('/api/admin/change-pin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+	  credentials: "include",
       body: JSON.stringify({ oldPin, newPin })
     });
 
@@ -251,7 +252,7 @@ if (actie === "login") {
 	  }, 1500);
 	}
 	else {
-		await Modal.error("👎", "Foute pincode! ❌");
+		await Modal.error("👎", "Foute email of pincode! ❌");
 
 	  }
 }
