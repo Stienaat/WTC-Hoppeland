@@ -126,26 +126,34 @@ map.addControl(new L.Control.Draw({
   edit: { featureGroup: drawnItems }
 }));
 
-map.on('draw:drawstart', function () { isDrawing = true; });
-map.on('draw:drawstop', function () { isDrawing = false; });
+map.on('draw:drawstart', function () {
+  isDrawing = true;
 
-map.on(L.Draw.Event.CREATED, async function (e) {
-  drawnItems.addLayer(e.layer);
+  // Zorg dat actief leeg is vóór een nieuwe route
+  clearActiveRoute();
+});
 
-	const afstand_km = calculateDistanceKmFromLayer(e.layer);
-	
-	clearActiveRoute();
+map.on('draw:drawstop', function () {
+  isDrawing = false;
+});
+
+map.on(L.Draw.Event.CREATED, function (e) {
+  const layer = e.layer;
+
+  drawnItems.addLayer(layer);
+
+  const afstand_km = calculateDistanceKmFromLayer(layer);
 
   const r = {
     type: 'drawn',
-    naam: naam,
-    start: start || '',  
+    naam: 'Nieuwe route',
+    start: '',
     afstand_km: afstand_km,
-    layer: e.layer,
+    layer: layer,
     waypoints: []
   };
 
-  e.layer.on('click', function () {
+  layer.on('click', function () {
     const idx = routes.indexOf(r);
     if (idx >= 0) setRouteActive(idx);
     renderList();
