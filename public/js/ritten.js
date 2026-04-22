@@ -54,7 +54,7 @@ function buildWaypointPopup(wp) {
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','rest')">🛑 Rust</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','food')">🍽️ Horeca</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','water')">💧 Water</button>
-        <button class="wp-chip" onclick="setWaypointType('${wp.id}','danger')">👁️ Zicht</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','danger')">⚠️ gevaar</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','climb')">⛰️ Klim</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','start')">⚡ start</button>
       </div>
@@ -113,9 +113,9 @@ const ROUTE_STYLE_ACTIVE = { color: '#e74c3c', weight: 6, opacity: 1 };
 
 const waypointIcons = {
   start: createWpIcon('🚩', '#2f6fed'),
-  water: createWpIcon('💧', '#2196f3'),
+  water: createWpIcon('💧', '#00FFFF'),
   food: createWpIcon('🍽️', '#ff9800'),
-  climb: createWpIcon('⛰️', '#795548'),
+  climb: createWpIcon('⛰️', '#F5DEB3'),
   danger: createWpIcon('⚠️', '#e53935'),
   rest: createWpIcon('🛑', '#4caf50'),
   supply: createWpIcon('📦', '#9c27b0')
