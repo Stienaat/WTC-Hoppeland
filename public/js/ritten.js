@@ -132,17 +132,6 @@ map.on('draw:drawstop', function () { isDrawing = false; });
 map.on(L.Draw.Event.CREATED, async function (e) {
   drawnItems.addLayer(e.layer);
 
-/*	const naam = await Modal.prompt("Nieuwe route","naam", {
-		placeholder: "Geef een naam in" });
-	
-  if (!naam) {
-    drawnItems.removeLayer(e.layer);
-    return;
-  }****/
-
- 	const start = await Modal.prompt("Nieuwe rouute",{
-    placeholder: "Geef een startplaats in"});
-
 	const afstand_km = calculateDistanceKmFromLayer(e.layer);
 	
 	clearActiveRoute();
@@ -150,8 +139,7 @@ map.on(L.Draw.Event.CREATED, async function (e) {
   const r = {
     type: 'drawn',
     naam: naam,
-    start: start || '',
-  
+    start: start || '',  
     afstand_km: afstand_km,
     layer: e.layer,
     waypoints: []
@@ -243,17 +231,61 @@ window.saveDrawnRoute = async function (i) {
   if (!r || r.type !== 'drawn') return;
 
   if (!isAdminUser()) {
-    await Modal.error("👎", "Alleen de Admin mag opslaan. ❌");
-
+    await Modal.error("❌", "Alleen admin mag opslaan.");
     return;
   }
 
-  const naam = await Modal.prompt("Naam van de route", r.naam || "Nieuwe route");
-  if (naam === null) return;
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.flexDirection = 'column';
+  wrapper.style.gap = '10px';
+  wrapper.style.marginTop = '10px';
 
-  const trimmedNaam = String(naam).trim();
-  if (!trimmedNaam) {
+  const naamInput = document.createElement('input');
+  naamInput.type = 'text';
+  naamInput.value = r.naam && r.naam !== 'Nieuwe route' ? r.naam : '';
+  naamInput.placeholder = 'Naam van de route';
+  naamInput.className = 'modal-input';
+
+  const startInput = document.createElement('input');
+  startInput.type = 'text';
+  startInput.value = r.start || '';
+  startInput.placeholder = 'Startplaats';
+  startInput.className = 'modal-input';
+
+  wrapper.appendChild(naamInput);
+  wrapper.appendChild(startInput);
+
+  const formData = await Modal.show({
+    type: 'prompt',
+    title: 'Route opslaan',
+    content: wrapper,
+    buttons: [
+      {
+        text: 'Opslaan',
+        getValue: function () {
+          return {
+            naam: naamInput.value.trim(),
+            start: startInput.value.trim()
+          };
+        }
+      },
+      {
+        text: 'Annuleer',
+        value: null
+      }
+    ]
+  });
+
+  if (formData === null) return;
+
+  if (!formData.naam) {
     await Modal.warn("⚠️", "Geef een naam op.");
+    return;
+  }
+
+  if (!formData.start) {
+    await Modal.warn("⚠️", "Geef een startplaats op.");
     return;
   }
 
@@ -263,8 +295,7 @@ window.saveDrawnRoute = async function (i) {
   });
 
   if (coords.length < 2) {
-    await Modal.error("👎", "Route bevat te weinig punten. ❌");
-
+    await Modal.error("❌", "Route bevat te weinig punten.");
     return;
   }
 
@@ -285,9 +316,9 @@ window.saveDrawnRoute = async function (i) {
     : '/api/rides/admin/drawn';
 
   const payload = {
-    naam: trimmedNaam,
+    naam: formData.naam,
     groep: r.groep || 'TEKEN',
-    start: r.start || '',
+    start: formData.start,
     afstand_km: r.afstand_km ?? null,
     coords: coords,
     waypoints: waypoints
@@ -304,12 +335,12 @@ window.saveDrawnRoute = async function (i) {
     const j = await res.json();
 
     if (!res.ok || !j.ok) {
-      await Modal.error("👎", "Opslaan mislukt. ❌");
-
+      await Modal.error("❌", "Opslaan mislukt: " + (j.error || j.message || ('HTTP ' + res.status)));
       return;
     }
 
-    r.naam = trimmedNaam;
+    r.naam = formData.naam;
+    r.start = formData.start;
     r.catalogId = j.id || j.ride?.id || r.catalogId || null;
 
     await Modal.success("👌", isUpdate ? "Route bijgewerkt!" : "Route opgeslagen!");
@@ -317,8 +348,7 @@ window.saveDrawnRoute = async function (i) {
     renderList();
   } catch (err) {
     console.error(err);
-    await Modal.error("👎", "Serverfout. ❌");
-
+    await Modal.error("❌", "Serverfout bij opslaan: " + err.message);
   }
 };
 
