@@ -614,19 +614,56 @@ function renderUserBadge() {
 function parseGpxToActiveRoute(gpxText, metaNaam) {
   const xml = new DOMParser().parseFromString(gpxText, 'application/xml');
 
+  const parserError = xml.querySelector('parsererror');
+  if (parserError) {
+    console.error('Ongeldige GPX XML', parserError.textContent);
+    return null;
+  }
+
+  let latlngs = [];
+  let routeName = 'GPX route';
+
+  // Eerst track proberen
   const trk = xml.querySelector('trk');
-  if (!trk) return null;
+  if (trk) {
+    trk.querySelectorAll('trkpt').forEach(function (pt) {
+      const lat = parseFloat(pt.getAttribute('lat'));
+      const lon = parseFloat(pt.getAttribute('lon'));
+      if (!isNaN(lat) && !isNaN(lon)) {
+        latlngs.push([lat, lon]);
+      }
+    });
 
-  const latlngs = [];
-  trk.querySelectorAll('trkpt').forEach(function (pt) {
-    const lat = parseFloat(pt.getAttribute('lat'));
-    const lon = parseFloat(pt.getAttribute('lon'));
-    if (!isNaN(lat) && !isNaN(lon)) {
-      latlngs.push([lat, lon]);
+    const trkNameNode = trk.querySelector('name');
+    if (trkNameNode && trkNameNode.textContent) {
+      routeName = trkNameNode.textContent;
     }
-  });
+  }
 
-  if (latlngs.length < 2) return null;
+  // Als geen trackpunten gevonden: route proberen
+  if (latlngs.length < 2) {
+    const rte = xml.querySelector('rte');
+    if (rte) {
+      latlngs = [];
+      rte.querySelectorAll('rtept').forEach(function (pt) {
+        const lat = parseFloat(pt.getAttribute('lat'));
+        const lon = parseFloat(pt.getAttribute('lon'));
+        if (!isNaN(lat) && !isNaN(lon)) {
+          latlngs.push([lat, lon]);
+        }
+      });
+
+      const rteNameNode = rte.querySelector('name');
+      if (rteNameNode && rteNameNode.textContent) {
+        routeName = rteNameNode.textContent;
+      }
+    }
+  }
+
+  if (latlngs.length < 2) {
+    console.warn('GPX bevat geen bruikbare trkpt of rtept');
+    return null;
+  }
 
   const layer = L.polyline(latlngs, ROUTE_STYLE_NORMAL);
   drawnItems.addLayer(layer);
@@ -647,7 +684,7 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
       id: crypto.randomUUID(),
       lat: lat,
       lon: lon,
-      name: name,
+      naam: name,
       type: type
     };
 
@@ -659,14 +696,8 @@ function parseGpxToActiveRoute(gpxText, metaNaam) {
     waypoints.push(wp);
   });
 
-  let routeName = 'GPX route';
-  const trkNameNode = trk.querySelector('name');
-  if (trkNameNode && trkNameNode.textContent) {
-    routeName = trkNameNode.textContent;
-  }
-
   const r = {
-    type: 'gpx',
+    type: 'drawn',
     naam: metaNaam || routeName,
     layer: layer,
     waypoints: waypoints
