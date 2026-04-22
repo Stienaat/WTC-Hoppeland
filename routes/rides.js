@@ -263,7 +263,7 @@ const payload = {
   year: new Date().getFullYear(),
   group_code: String(groep || 'TEKEN').trim() || 'TEKEN',
   start_place: String(start_place ?? start ?? '').trim() || null,
-  end_place: String(end_place ?? einde ?? '').trim() || null,
+  
   distance_km: parseNumeric(afstand_km),
   ride_kind: 'drawn',
   is_active: true,
