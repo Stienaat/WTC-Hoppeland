@@ -911,7 +911,7 @@ function findWaypointById(id) {
   return null;
 }
 
-window.renameWaypoint = function (id) {
+window.renameWaypoint = async function (id) {
   const wp = findWaypointById(id);
   if (!wp) return;
 
