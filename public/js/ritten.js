@@ -93,7 +93,7 @@ function populateGroepen() {
 
 let isDrawing = false;
 
-const map = L.map('map').setdanger([50.85, 2.73], 11);
+const map = L.map('map').setView([50.85, 2.73], 11);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19
