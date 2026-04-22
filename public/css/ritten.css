@@ -49,3 +49,70 @@ a.dl {
   align-items: center;
   gap: 12px;
 }
+
+.wp-popup {
+    min-width: 180px;
+    font-family: system-ui, sans-serif;
+}
+
+.wp-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.wp-section {
+    font-size: 12px;
+    color: #666;
+    margin: 10px 0 6px;
+}
+
+.wp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.wp-chip {
+    padding: 6px 6px;
+    font-size: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #f5f5f5;
+    cursor: pointer;
+    transition: 0.15s;
+}
+
+.wp-chip:hover {
+    background: #e8f0ff;
+    border-color: #2f6fed;
+}
+
+.wp-btn {
+    width: 100%;
+    padding: 8px;
+    margin-top: 6px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.wp-btn-main {
+    background: #2f6fed;
+    color: white;
+}
+
+.wp-btn-main:hover {
+    background: #2459c7;
+}
+
+.wp-btn-danger {
+    background: #e53935;
+    color: white;
+}
+
+.wp-btn-danger:hover {
+    background: #c62828;
+}
