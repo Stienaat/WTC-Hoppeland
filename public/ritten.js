@@ -113,9 +113,9 @@ const ROUTE_STYLE_ACTIVE = { color: '#e74c3c', weight: 6, opacity: 1 };
 
 const waypointIcons = {
   start: createWpIcon('🚩', '#2f6fed'),
-  water: createWpIcon('💧', '#2196f3'),
+  water: createWpIcon('💧', '#00FFFF'),
   food: createWpIcon('🍽️', '#ff9800'),
-  climb: createWpIcon('⛰️', '#795548'),
+  climb: createWpIcon('⛰️', '#F5DEB3'),
   danger: createWpIcon('⚠️', '#e53935'),
   rest: createWpIcon('🛑', '#4caf50'),
   supply: createWpIcon('📦', '#9c27b0')
