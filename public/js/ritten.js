@@ -391,21 +391,29 @@ const res = await fetch('/api/rides/admin/' + encodeURIComponent(r.catalogId), {
 
 // VERWIJDEREN 
 
-
 window.deleteActiveRoute = async function (i) {
   const r = routes[i];
   if (!r || r.type === 'catalog') return;
 
   const ok = await Modal.confirm("Bevestigen", "Deze route van de kaart verwijderen?");
   if (!ok) return;
-  
-   drawnItems.clearLayers();
-    activeRouteIndex = null;
-    renderList();
-    renderUserBadge();
 
-/*  clearActiveRoute();
-  renderList();*/
+  if (r.layer && drawnItems.hasLayer(r.layer)) {
+    drawnItems.removeLayer(r.layer);
+  }
+
+  if (Array.isArray(r.waypoints)) {
+    r.waypoints.forEach(function (wp) {
+      if (wp.marker && map.hasLayer(wp.marker)) {
+        map.removeLayer(wp.marker);
+      }
+    });
+  }
+
+  routes.splice(i, 1);
+  activeRouteIndex = null;
+  renderList();
+  renderUserBadge();
 };
 
 // DELETE 
@@ -777,9 +785,9 @@ window.loadCatalogRouteById = async function (id) {
     const url = '/api/rides/' + encodeURIComponent(meta.id) + '/gpx';
 
     try {
-const res = await fetch(url, {
-  credentials: 'include'
-});
+	const res = await fetch(url, {
+	  credentials: 'include'
+	});
       if (!res.ok) {
         throw new Error('HTTP ' + res.status);
       }
