@@ -54,9 +54,9 @@ function buildWaypointPopup(wp) {
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','rest')">🛑 Rust</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','food')">🍽️ Horeca</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','water')">💧 Water</button>
-        <button class="wp-chip" onclick="setWaypointType('${wp.id}','view')">👁️ Zicht</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','danger')">👁️ Zicht</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','climb')">⛰️ Klim</button>
-        <button class="wp-chip" onclick="setWaypointType('${wp.id}','sprint')">⚡ Sprint</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','start')">⚡ start</button>
       </div>
 
       <button class="wp-btn wp-btn-danger"
@@ -93,7 +93,7 @@ function populateGroepen() {
 
 let isDrawing = false;
 
-const map = L.map('map').setView([50.85, 2.73], 11);
+const map = L.map('map').setdanger([50.85, 2.73], 11);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19
@@ -111,23 +111,26 @@ const ROUTE_STYLE_ACTIVE = { color: '#e74c3c', weight: 6, opacity: 1 };
 
 /* ================= ICONS ================= */
 
-function makeIcon(file) {
-  return L.icon({
-    iconUrl: joinUrl(ICON_BASE, file),
-    iconSize: [28, 28],
-    iconAnchor: [14, 28],
-    popupAnchor: [0, -28]
+const waypointIcons = {
+  start: createWpIcon('🚩', '#2f6fed'),
+  water: createWpIcon('💧', '#2196f3'),
+  food: createWpIcon('🍽️', '#ff9800'),
+  climb: createWpIcon('⛰️', '#795548'),
+  danger: createWpIcon('⚠️', '#e53935'),
+  rest: createWpIcon('🛑', '#4caf50'),
+  supply: createWpIcon('📦', '#9c27b0')
+};
+
+function createWpIcon(symbol, color) {
+  return L.divIcon({
+    className: 'wp-icon-wrapper',
+    html: `<div class="wp-icon" style="background:${color}">
+             <span>${symbol}</span>
+           </div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
   });
 }
-
-const waypointIcons = {
-  rest: makeIcon('rest.png'),
-  food: makeIcon('food.png'),
-  water: makeIcon('water.png'),
-  view: makeIcon('bez.png'),
-  climb: makeIcon('climb.png'),
-  sprint: makeIcon('sprint.png')
-};
 
 /* ================= DRAW ================= */
 
@@ -609,9 +612,9 @@ async function exportRouteToGPX(route) {
     rest: { sym: 'Restroom', type: 'rest' },
     food: { sym: 'Food & Drink', type: 'food' },
     water: { sym: 'Drinking Water', type: 'water' },
-    view: { sym: 'view Area', type: 'view' },
+    danger: { sym: 'danger Area', type: 'danger' },
     climb: { sym: 'Summit', type: 'climb' },
-    sprint: { sym: 'Flag', type: 'sprint' }
+    start: { sym: 'Flag', type: 'start' }
   };
 
   let gpx = '<?xml version="1.0" encoding="UTF-8"?>\n' +
@@ -981,3 +984,6 @@ if (zoekInput) {
 
 reloadCatalog();
 renderUserBadge();
+
+
+
