@@ -777,15 +777,9 @@ window.loadCatalogRouteById = async function (id) {
     const url = '/api/rides/' + encodeURIComponent(meta.id) + '/gpx';
 
     try {
-      const res = await fetch(url, {
-         method,
-	  credentials: 'include', // ✔ nodig
-	  headers: {
-		'Content-Type': 'application/json'
-	  },
-	body: JSON.stringify(payload)
+const res = await fetch(url, {
+  credentials: 'include'
 });
-
       if (!res.ok) {
         throw new Error('HTTP ' + res.status);
       }
