@@ -916,8 +916,7 @@ window.renameWaypoint = async function (id) {
   if (!wp) return;
 
  /** const name = prompt('Nieuwe naam', wp.name); **/
-  const name = await Modal.prompt("Nieuwe naam?", "Nieuwe route", {
-    placeholder: "Nieuwe naam?", wp.name});
+  const name = await Modal.prompt('Nieuwe naam', wp.naam || wp.name);
 
   if (!name) return;
 
