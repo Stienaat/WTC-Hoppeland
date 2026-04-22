@@ -133,12 +133,12 @@ map.on(L.Draw.Event.CREATED, async function (e) {
   drawnItems.addLayer(e.layer);
 
 /*	const naam = await Modal.prompt("Nieuwe route","naam", {
-		placeholder: "Geef een naam in" });****/
+		placeholder: "Geef een naam in" });
 	
   if (!naam) {
     drawnItems.removeLayer(e.layer);
     return;
-  }
+  }****/
 
  	const start = await Modal.prompt("Nieuwe rouute",{
     placeholder: "Geef een startplaats in"});
