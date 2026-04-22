@@ -911,12 +911,13 @@ function findWaypointById(id) {
   return null;
 }
 
-window.renameWaypoint = async function (id) {
+window.renameWaypoint = function (id) {
   const wp = findWaypointById(id);
   if (!wp) return;
 
- const naam = await Modal.prompt("Naam van de route", "Nieuwe route", {
-    placeholder: "Nieuwe naam?"});
+ /** const name = prompt('Nieuwe naam', wp.name); **/
+  const name = await Modal.prompt("Nieuwe naam?", "Nieuwe route", {
+    placeholder: "Nieuwe naam?", wp.name});
 
   if (!name) return;
 
