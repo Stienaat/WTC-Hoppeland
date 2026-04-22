@@ -915,7 +915,9 @@ window.renameWaypoint = function (id) {
   const wp = findWaypointById(id);
   if (!wp) return;
 
-  const name = prompt('Nieuwe naam', wp.name);
+ const naam = await Modal.prompt("Naam van de route", "Nieuwe route", {
+    placeholder: "Nieuwe naam?"});
+
   if (!name) return;
 
   wp.name = name;
