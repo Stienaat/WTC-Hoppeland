@@ -38,24 +38,34 @@ function getGpxBaseUrl(meta) {
 }
 
 function buildWaypointPopup(wp) {
-  return (
-    '<div>' +
-      '<strong>' + wp.name + '</strong><br/><br/>' +
+  return `
+    <div class="wp-popup">
 
-      '<button onclick="renameWaypoint(\'' + wp.id + '\')">Naam wijzigen</button><br/><br/>' +
+      <div class="wp-title">${wp.name}</div>
 
-      '<button onclick="setWaypointType(\'' + wp.id + '\',\'rest\')">Rust</button> ' +
-      '<button onclick="setWaypointType(\'' + wp.id + '\',\'food\')">Horeca</button> ' +
-      '<button onclick="setWaypointType(\'' + wp.id + '\',\'water\')">Water</button><br/>' +
+      <button class="wp-btn wp-btn-main"
+        onclick="renameWaypoint('${wp.id}')">
+        ✏️ Naam wijzigen
+      </button>
 
-      '<button onclick="setWaypointType(\'' + wp.id + '\',\'view\')">Zicht</button> ' +
-      '<button onclick="setWaypointType(\'' + wp.id + '\',\'climb\')">Klim</button> ' +
-      '<button onclick="setWaypointType(\'' + wp.id + '\',\'sprint\')">Sprint</button>' +
+      <div class="wp-section">Type</div>
 
-      '<br/><br/>' +
-      '<button onclick="deleteWaypoint(\'' + wp.id + '\')">Verwijder</button>' +
-    '</div>'
-  );
+      <div class="wp-grid">
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','rest')">🛑 Rust</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','food')">🍽️ Horeca</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','water')">💧 Water</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','view')">👁️ Zicht</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','climb')">⛰️ Klim</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','sprint')">⚡ Sprint</button>
+      </div>
+
+      <button class="wp-btn wp-btn-danger"
+        onclick="deleteWaypoint('${wp.id}')">
+        🗑️ Verwijder
+      </button>
+
+    </div>
+  `;
 }
 
 function populateGroepen() {
