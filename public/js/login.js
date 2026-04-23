@@ -193,22 +193,18 @@ btnChangeCode?.addEventListener("click", handlePinChange);
  /**** forgot paswoord  ****/
  
 document.getElementById("Forgotlink")?.addEventListener("click", async () => {
+  const email = await Modal.prompt("Geef je e-mailadres");
+  if (!email) return;
+
   try {
-    if (typeof supabase === "undefined") {
+    if (!window.sb?.auth?.resetPasswordForEmail) {
       await Modal.error("👎", "Supabase client ontbreekt.");
       return;
     }
 
-    const email = await Modal.prompt("Geef je e-mailadres");
-    if (!email) return;
-
-    const { error } = await window.sb.auth.updateUser({password: password
-});
+    const { error } = await window.sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + "/reset.html"
     });
-
-    console.log("forgot-password data:", data);
-    console.log("forgot-password error:", error);
 
     if (error) {
       await Modal.error("👎", error.message || "Reset mislukt. ❌");
@@ -217,8 +213,7 @@ document.getElementById("Forgotlink")?.addEventListener("click", async () => {
 
     await Modal.success("👌", "Als het e-mailadres bestaat, is er een resetmail verzonden.");
   } catch (err) {
-    console.error("forgot-password catch:", err);
-    await Modal.error("👎", err?.message || String(err));
+    await Modal.error("👎", err?.message || "Serverfout.");
   }
 });
  
