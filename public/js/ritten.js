@@ -178,6 +178,25 @@ map.on(L.Draw.Event.CREATED, function (e) {
   renderList();
 });
 
+map.on('draw:edited', function (e) {
+  e.layers.eachLayer(function (layer) {
+    if (layer instanceof L.Polyline) {
+
+      const km = calculateDistanceKmFromLayer(layer);
+
+      // zoek bijhorende route
+      const r = routes.find(r => r.layer === layer);
+      if (r) {
+        r.afstand_km = km;
+      }
+
+      console.log('Afstand geüpdatet:', km);
+    }
+  });
+
+  renderList(); // zodat UI update
+});
+
 /* ================= ACTIVE ================= */
 
 function setRouteActive(index) {
@@ -335,6 +354,9 @@ window.saveDrawnRoute = async function (i) {
   const url = isUpdate
     ? '/api/rides/admin/' + encodeURIComponent(r.catalogId)
     : '/api/rides/admin/drawn';
+
+  // force recalculation
+  r.afstand_km = calculateDistanceKmFromLayer(r.layer);
 
   const payload = {
     naam: formData.naam,
@@ -523,6 +545,7 @@ function renderList() {
   let html = '';
 
   html += '<div class="row"><em>Actief</em></div>';
+  html += (r.afstand_km ? (r.afstand_km + ' km') : '');
 
   routes.filter(function (r) { return r.type !== 'catalog'; }).forEach(function (r) {
     const i = routes.indexOf(r);
@@ -796,7 +819,7 @@ window.loadCatalogRouteById = async function (id) {
       naam: meta.naam,
       start: meta.start || '',
       einde: meta.einde || '',
-      afstand_km: meta.afstand_km || null,
+      afstand_km: calculateDistanceKmFromLayer(layer),
       layer: layer,
       waypoints: Array.isArray(meta.waypoints)
         ? meta.waypoints.map(function (w) {

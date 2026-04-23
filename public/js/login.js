@@ -1,10 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-const pinInput   = document.getElementById("pinInput");
-const btnOk      = document.getElementById("btnOk");
-const pinError   = document.getElementById("pinError");
-const adminLogo  = document.getElementById("adminLogo");
-
 const adminLogin = document.getElementById("adminLogin");
 const adminFase2 = document.getElementById("adminFase2");
 
@@ -34,38 +29,6 @@ function closeAdminUI() {
 /************************************************************
  * ADMIN LOGIN (PIN)
  ************************************************************/
-/*
-async function handleAdminLogin(pin) {
-  if (!pin || pin.length !== 6) {
-    await Modal.error("👎", "Pin moet 6 cijfers zijn. ❌");
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ pin })
-    });
-
-    const data = await res.json();
-
-    if (!data.ok) {
-      await Modal.error("👎", data.message || "Pin is onjuist. ❌");
-      return;
-    }
-
-    localStorage.setItem("is_admin", "true");
-    pinError.textContent = "";
-    pinInput.value = "";
-    openAdminPhase2();
-
-  } catch (err) {
-    await Modal.error("👎", "Login is mislukt. ❌");
-  }
-} */
-
 async function openAdminPrompt() {
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
@@ -210,9 +173,6 @@ async function handlePinChange() {
 /************************************************************
  * EVENTS
  ************************************************************/
-btnOk?.addEventListener("click", () => {
-  handleAdminLogin(pinInput.value.trim());
-});
 
 adminLogo?.addEventListener("dblclick", async e => {
   e.preventDefault();
