@@ -202,7 +202,8 @@ document.getElementById("Forgotlink")?.addEventListener("click", async () => {
     const email = await Modal.prompt("Geef je e-mailadres");
     if (!email) return;
 
-   window.sb.auth.resetPasswordForEmail(
+    const { error } = await window.sb.auth.updateUser({password: password
+});
       redirectTo: window.location.origin + "/reset.html"
     });
 
