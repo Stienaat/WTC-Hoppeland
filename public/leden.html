@@ -305,6 +305,16 @@
 <p id="loginStatus" style="color:red; position:absolute; left:20px; top:450px;"></p>
 
 <script src="/js/modal.js"></script>
+
+<!-- ✅ SUPABASE CLIENT -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabase = window.supabase.createClient(
+    "https://orvjhbtoxjqhedsgnxqp.supabase.co",
+    "JOUW_ANON_KEY"
+  );
+</script>
+
 <script src="/js/login.js"></script>
 <script src="/js/leden.js"></script>
 <link href="/css/leden.css" rel="stylesheet">
