@@ -190,7 +190,7 @@ btnChangeCode?.addEventListener("click", handlePinChange);
 
 });
 
- /**** forgot pswoord  ****/
+ /**** forgot paswoord  ****/
  
 document.getElementById("Forgotlink")?.addEventListener("click", async () => {
   try {
@@ -202,7 +202,7 @@ document.getElementById("Forgotlink")?.addEventListener("click", async () => {
     const email = await Modal.prompt("Geef je e-mailadres");
     if (!email) return;
 
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+   window.sb.auth.resetPasswordForEmail(
       redirectTo: window.location.origin + "/reset.html"
     });
 
