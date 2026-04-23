@@ -7,15 +7,14 @@
 <body>
   <input type="password" id="newPass" placeholder="Nieuw paswoord">
   <button id="btnReset">Opslaan</button>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const supabase = window.supabase.createClient(
+  <script>
+    const supabase = window.supabase.createClient(
     "https://orvjhbtoxjqhedsgnxqp.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
   );
-</script>
-  <script>
-    document.getElementById("btnReset").addEventListener("click", async () => {
+ document.getElementById("btnReset").addEventListener("click", async () => {
       const password = document.getElementById("newPass").value.trim();
 
       if (!password) {
@@ -28,14 +27,13 @@
       });
 
       if (error) {
-        alert("Reset mislukt.");
+        alert("Reset mislukt: " + error.message);
         return;
       }
 
-      alert("Paswoord gewijzigd.");
+      alert("Paswoord gewijzigd!");
       window.location.href = "/leden.html";
     });
   </script>
-
 </body>
 </html>
