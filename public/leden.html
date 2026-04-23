@@ -308,11 +308,33 @@
 
 <!-- ✅ SUPABASE CLIENT -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- 
 <script>
-  const supabase = window.supabase.createClient(
+  window.sb = window.supabase.createClient(
     "https://orvjhbtoxjqhedsgnxqp.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
-  );
+  );  
+  
+</script> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  console.log("window.supabase =", window.supabase);
+  console.log("createClient =", typeof window.supabase?.createClient);
+
+  try {
+    window.sb = window.supabase.createClient(
+      "https://orvjhbtoxjqhedsgnxqp.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
+    );
+
+    console.log("window.sb =", window.sb);
+    console.log("resetPasswordForEmail =", typeof window.sb?.auth?.resetPasswordForEmail);
+  } catch (e) {
+    console.error("Supabase init error:", e);
+  }
 </script>
 
 <script src="/js/login.js"></script>
