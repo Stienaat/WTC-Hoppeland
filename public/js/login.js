@@ -193,26 +193,31 @@ btnChangeCode?.addEventListener("click", handlePinChange);
  /**** forgot pswoord  ****/
  
 document.getElementById("Forgotlink")?.addEventListener("click", async () => {
-  const email = await Modal.prompt("Geef je e-mailadres");
-
-  if (!email) return;
-
   try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + "/reset.html"
-    });
-
-    if (error) {
-      await Modal.error("👎", "Reset mislukt. ❌");
+    if (typeof supabase === "undefined") {
+      await Modal.error("👎", "Supabase client ontbreekt.");
       return;
     }
 
-    await Modal.success(
-      "👌",
-      "Als het e-mailadres bestaat, is er een resetmail verzonden."
-    );
+    const email = await Modal.prompt("Geef je e-mailadres");
+    if (!email) return;
+
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset.html"
+    });
+
+    console.log("forgot-password data:", data);
+    console.log("forgot-password error:", error);
+
+    if (error) {
+      await Modal.error("👎", error.message || "Reset mislukt. ❌");
+      return;
+    }
+
+    await Modal.success("👌", "Als het e-mailadres bestaat, is er een resetmail verzonden.");
   } catch (err) {
-    await Modal.error("👎", "Serverfout.");
+    console.error("forgot-password catch:", err);
+    await Modal.error("👎", err?.message || String(err));
   }
 });
  
