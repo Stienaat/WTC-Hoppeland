@@ -145,7 +145,7 @@ async function loadNotice() {
 function startEditNotice() {
   if (!box) return;
 
-  box.innerHTML = getRaw().replace(/\n/g, '<br>');
+  box.textContent = getRaw();
   box.contentEditable = 'true';
   box.focus();
 }
@@ -153,12 +153,13 @@ function startEditNotice() {
 async function saveNotice() {
   if (!box || box.contentEditable !== 'true') return;
 
-  const raw = box.innerHTML
-    .replace(/<div>/gi, '\n')
-    .replace(/<\/div>/gi, '')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/&nbsp;/g, ' ')
-    .trim();
+  let raw = box.textContent || '';
+
+  // normaliseer line endings
+  raw = raw.replace(/\r\n?/g, '\n');
+
+  // verwijder alleen overtollige lege regels op het einde
+  raw = raw.replace(/\n+$/g, '');
 
   setRaw(raw);
   box.contentEditable = 'false';
@@ -180,10 +181,9 @@ async function saveNotice() {
       return;
     }
 
-   await Modal.success("👌", "Uw tekst werd opgeslagen!");
+    await Modal.success("👌", "Uw tekst werd opgeslagen!");
   } catch (err) {
     await Modal.error("👎", "Serverfout. ❌");
-
   }
 }
 
@@ -394,7 +394,3 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 50);
   }
 });
-
-  if (typeof loadNotice === "function") {
-    loadNotice();
-  }
