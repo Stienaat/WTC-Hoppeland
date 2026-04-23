@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
 const adminLogin = document.getElementById("adminLogin");
 const adminFase2 = document.getElementById("adminFase2");
 
+
+const supabase = window.supabaseClient;
+
 /************************************************************
  * ADMIN UI
  ************************************************************/
@@ -187,6 +190,33 @@ btnChangeCode?.addEventListener("click", handlePinChange);
 
 });
 
+ /**** forgot pswoord  ****/
+ 
+document.getElementById("Forgotlink")?.addEventListener("click", async () => {
+  const email = await Modal.prompt("Geef je e-mailadres");
+
+  if (!email) return;
+
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + "/reset.html"
+    });
+
+    if (error) {
+      await Modal.error("👎", "Reset mislukt. ❌");
+      return;
+    }
+
+    await Modal.success(
+      "👌",
+      "Als het e-mailadres bestaat, is er een resetmail verzonden."
+    );
+  } catch (err) {
+    await Modal.error("👎", "Serverfout.");
+  }
+});
+ 
+
 /************************************************************
  * 4) LOGIN / REGISTRATIE UI
  ************************************************************/
@@ -302,6 +332,3 @@ if (actie === "login") {
 
 });
 
-
-
- 
