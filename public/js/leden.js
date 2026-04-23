@@ -145,7 +145,7 @@ async function loadNotice() {
 function startEditNotice() {
   if (!box) return;
 
-  box.textContent = getRaw();
+  box.innerText = getRaw();
   box.contentEditable = 'true';
   box.focus();
 }
@@ -153,7 +153,7 @@ function startEditNotice() {
 async function saveNotice() {
   if (!box || box.contentEditable !== 'true') return;
 
-  let raw = box.textContent || '';
+  let raw = box.innerText || '';
 
   // normaliseer line endings
   raw = raw.replace(/\r\n?/g, '\n');
