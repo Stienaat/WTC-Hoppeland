@@ -4,8 +4,6 @@ const adminLogin = document.getElementById("adminLogin");
 const adminFase2 = document.getElementById("adminFase2");
 
 
-const supabase = window.supabaseClient;
-
 /************************************************************
  * ADMIN UI
  ************************************************************/
