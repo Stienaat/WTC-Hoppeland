@@ -12,45 +12,6 @@ const adminFase2 = document.getElementById("adminFase2");
  * ADMIN UI
  ************************************************************/
  
- const wrapper = document.createElement("div");
-
-wrapper.innerHTML = `
-  <input 
-    type="password" 
-    id="pinInput" 
-    class="wtc-input" 
-    style="font-size:1.2em"
-    maxlength="6"
-    autocomplete="off"
-    placeholder="PIN-code: ******"
-  >
-  <div id="pinError" class="wtc-status"></div>
-`;
-
-const result = await Modal.content("Beheerder", wrapper, [
-  {
-    text: "Ontgrendel",
-    value: "ok"
-  },
-  {
-    text: "Sluiten",
-    value: null
-  }
-]);
-
-if (result === "ok") {
-  const pin = wrapper.querySelector("#pinInput").value;
-
-  if (!pin) {
-    wrapper.querySelector("#pinError").textContent = "PIN is verplicht";
-    // hier zou je modal open moeten houden afhankelijk van je lib
-  } else {
-    console.log("PIN:", pin);
-  }
-}
- 
- 
- 
 function openAdminPhase1() {
   adminLogin && (adminLogin.style.display = "block");
   adminFase2 && adminFase2.classList.remove("open");
@@ -73,6 +34,7 @@ function closeAdminUI() {
 /************************************************************
  * ADMIN LOGIN (PIN)
  ************************************************************/
+/*
 async function handleAdminLogin(pin) {
   if (!pin || pin.length !== 6) {
     await Modal.error("👎", "Pin moet 6 cijfers zijn. ❌");
@@ -101,6 +63,73 @@ async function handleAdminLogin(pin) {
 
   } catch (err) {
     await Modal.error("👎", "Login is mislukt. ❌");
+  }
+} */
+
+async function openAdminPrompt() {
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = `
+    <input 
+      type="password" 
+      id="modal-pin-input" 
+      class="wtc-input" 
+      style="font-size:1.2em"
+      maxlength="6"
+      autocomplete="off"
+      placeholder="PIN-code: ******"
+    >
+    <div id="modal-pin-error" class="wtc-status"></div>
+  `;
+
+  const input = wrapper.querySelector("#modal-pin-input");
+  const error = wrapper.querySelector("#modal-pin-error");
+
+  while (true) {
+    const result = await Modal.content("Beheerder", wrapper, [
+      { text: "Ontgrendel", value: "ok" },
+      { text: "Sluiten", value: null }
+    ]);
+
+    if (result === null) {
+      return;
+    }
+
+    const pin = input.value.trim();
+
+    if (!pin || pin.length !== 6) {
+      error.textContent = "Pin moet 6 cijfers zijn.";
+      input.focus();
+      input.select();
+      continue;
+    }
+
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ pin })
+      });
+
+      const data = await res.json();
+
+      if (!data.ok) {
+        error.textContent = data.message || "Pin is onjuist.";
+        input.value = "";
+        input.focus();
+        continue;
+      }
+
+      localStorage.setItem("is_admin", "true");
+      error.textContent = "";
+      input.value = "";
+      openAdminPhase2();
+      return;
+
+    } catch (err) {
+      error.textContent = "Login is mislukt.";
+      input.focus();
+    }
   }
 }
 
@@ -185,10 +214,9 @@ btnOk?.addEventListener("click", () => {
   handleAdminLogin(pinInput.value.trim());
 });
 
-adminLogo?.addEventListener("dblclick", e => {
+adminLogo?.addEventListener("dblclick", async e => {
   e.preventDefault();
-  openAdminPhase1();
-  pinInput?.focus();
+  await openAdminPrompt();
 });
 
 const btnClosePinChange = document.getElementById("btnClosePinChange");
