@@ -545,7 +545,7 @@ function renderList() {
   let html = '';
 
   html += '<div class="row"><em>Actief</em></div>';
-  html += (r.afstand_km ? (r.afstand_km + ' km') : '');
+
 
   routes.filter(function (r) { return r.type !== 'catalog'; }).forEach(function (r) {
     const i = routes.indexOf(r);
