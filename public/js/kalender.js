@@ -207,7 +207,7 @@ function downloadConfirmation(event, signup) {
     `Event  : ${event.title}\n` +
     `Datum  : ${dateStr}\n` +
     `om     : ${timeStr}\n` +
-    `Prijs  : ${prijs} €\n` +
+    `Prijs  : ${price} €\n` +
     `Betaald: ${betaald}\n`;
 
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
@@ -224,7 +224,18 @@ function downloadConfirmation(event, signup) {
 function generateQR(e) {
   const qrDiv = document.getElementById("qrCode");
   if (!qrDiv) return;
+
   qrDiv.innerHTML = "";
+
+  const prijs = Number(
+    e.inschrijfprijs ??
+    e.inschrijfgeld ??
+    e.prijs ??
+    e.price ??
+    0
+  );
+
+  if (price <= 0) return;
   if (!e.qr_text || typeof QRCode === "undefined") return;
 
   new QRCode(qrDiv, {
@@ -556,11 +567,33 @@ function attachMemberEvents(e, status) {
     return;
   }
 
-  function showQR() {
-    if (qrWrap) qrWrap.style.display = "block";
-    if (qrText) qrText.style.display = "block";
-    generateQR(e);
+function hasInschrijfprijs(e) {
+  const price = Number(
+    e.inschrijfprijs ??
+    e.inschrijfgeld ??
+    e.prijs ??
+    e.price ??
+    0
+  );
+
+  return prijs > 0;
+}
+
+function showQR() {
+  if (!hasInschrijfprijs(e)) {
+    if (qrWrap) qrWrap.style.display = "none";
+    if (qrText) qrText.style.display = "none";
+
+    const qrDiv = document.getElementById("qrCode");
+    if (qrDiv) qrDiv.innerHTML = "";
+
+    return;
   }
+
+  if (qrWrap) qrWrap.style.display = "block";
+  if (qrText) qrText.style.display = "block";
+  generateQR(e);
+}
 
   function hideQR() {
     if (qrWrap) qrWrap.style.display = "none";
