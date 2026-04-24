@@ -127,7 +127,7 @@ async function loadLeden() {
 
       
     if (error) {
-        showModal("error", "👎", "Er ging iets mis bij laden");
+        await Modal.error("👎", "Laden is mislukt. ❌");
         return;
     }
 
@@ -164,15 +164,16 @@ async function loadLeden() {
                 .eq("id", lid.id);
 
             if (error) 
-				showModal("error", "👎", "fout bij update");
+				await Modal.error("👎", "Fout bij update! ❌");
             else 
-				showModal("success", "👌", "record is opgeslagen");
+				await Modal.success("👌", "De record is bijgewerkt! ✔");
         };
 
         // DELETE
 		tr.querySelector(".deleteBtn").onclick = () => {
 
-			showModal("confirm", "Bevestigen", "Weet je het zeker?", async function(result){
+			const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");
+		function(result){
 				
 				if (!result) {
 					// Gebruiker koos NEE → niets doen
@@ -186,10 +187,10 @@ async function loadLeden() {
 					.eq("id", lid.id);
 
 				if (error) {
-					showModal("error", "👎", "Er ging iets mis bij verwijderen");
+					await Modal.error("👎", "Vrwijderen is mislukt. ❌");
 				} else {
 					tr.remove();
-					showModal("success", "👌", "Record is verwijderd");
+					await Modal.success("👌", "De reord is verwijderd! ✔");
 				}
 			});
 		};
@@ -209,11 +210,12 @@ document.getElementById("exportBtn").onclick = async () => {
         .select("*");
 
     if (error) {
-        showModal("error", "👎", "Er ging iets mis bij export.");
+        await Modal.error("👎", "Export is mislukt. ❌");
         return;
     }else {
 		
-		showModal("success", "👌", "Bestand is aangemaakt.");
+		await Modal.success("👌", "het excell beestand is gemaakt! ✔");
+
 	}
 
     // JS-sortering op naam, met richting
