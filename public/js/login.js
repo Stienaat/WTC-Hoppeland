@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 const adminLogin = document.getElementById("adminLogin");
 const adminFase2 = document.getElementById("adminFase2");
-
+const adminLogo = document.getElementById("adminLogo");
 
 /************************************************************
  * ADMIN UI
@@ -187,6 +187,7 @@ btnPinChange?.addEventListener("click", openPinChangePopup);
 btnChangeCode?.addEventListener("click", handlePinChange);
 
 document.getElementById("Forgotlink")?.addEventListener("click", async () => {
+	console.log("Forgotlink clicked");
   const email = await Modal.prompt("Geef je e-mailadres");
   if (!email) return;
 
