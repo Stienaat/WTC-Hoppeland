@@ -186,8 +186,6 @@ btnClosePinChange?.addEventListener("click", closePinChangePopup);
 btnPinChange?.addEventListener("click", openPinChangePopup);
 btnChangeCode?.addEventListener("click", handlePinChange);
 
-});
-
 document.getElementById("Forgotlink")?.addEventListener("click", async () => {
   const email = await Modal.prompt("Geef je e-mailadres");
   if (!email) return;
@@ -213,6 +211,8 @@ document.getElementById("Forgotlink")?.addEventListener("click", async () => {
     console.error("Forgot error:", err);
     await Modal.error("👎", "Serverfout.");
   }
+});
+
 });
 
 /************************************************************
