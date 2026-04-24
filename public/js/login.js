@@ -215,57 +215,6 @@ document.getElementById("Forgotlink")?.addEventListener("click", async () => {
   }
 });
 
- /**** forgot paswoord  ****/
- 
-router.post("/reset-password", async (req, res) => {
-  const supabase = req.supabase;
-  const token = String(req.body?.token || "").trim();
-  const password = String(req.body?.password || "").trim();
-
-  if (!token || password.length < 6) {
-    return res.json({ ok: false, error: "Ongeldige aanvraag." });
-  }
-
-  try {
-    const tokenHash = hashToken(token);
-
-    const { data: reset, error } = await supabase
-      .from("password_resets")
-      .select("*")
-      .eq("token_hash", tokenHash)
-      .is("used_at", null)
-      .maybeSingle();
-
-    if (error || !reset) {
-      return res.json({ ok: false, error: "Link is ongeldig." });
-    }
-
-    if (new Date(reset.expires_at) < new Date()) {
-      return res.json({ ok: false, error: "Link is verlopen." });
-    }
-
-    const hash = await bcrypt.hash(password, 10);
-
-    const { error: updateError } = await supabase
-      .from("Leden")
-      .update({ wachtwoord: hash })
-      .eq("email", reset.email);
-
-    if (updateError) throw updateError;
-
-    await supabase
-      .from("password_resets")
-      .update({ used_at: new Date().toISOString() })
-      .eq("id", reset.id);
-
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error("RESET PASSWORD ERROR:", err);
-    return res.json({ ok: false, error: "Reset mislukt." });
-  }
-});
- 
-
 /************************************************************
  * 4) LOGIN / REGISTRATIE UI
  ************************************************************/
