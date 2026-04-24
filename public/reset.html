@@ -8,30 +8,35 @@
   <input type="password" id="newPass" placeholder="Nieuw paswoord">
   <button id="btnReset">Opslaan</button>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = window.supabase.createClient(
-    "https://orvjhbtoxjqhedsgnxqp.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
-  );
- document.getElementById("btnReset").addEventListener("click", async () => {
+    document.getElementById("btnReset").addEventListener("click", async () => {
+      const token = new URLSearchParams(window.location.search).get("token");
       const password = document.getElementById("newPass").value.trim();
 
-      if (!password) {
-        alert("Geef een nieuw paswoord in.");
+      if (!token) {
+        alert("Resetlink ontbreekt.");
         return;
       }
 
-      const { error } = await supabase.auth.updateUser({
-        password: password
+      if (password.length < 6) {
+        alert("Paswoord moet minstens 6 tekens zijn.");
+        return;
+      }
+
+      const res = await fetch("/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password })
       });
 
-      if (error) {
-        alert("Reset mislukt: " + error.message);
+      const j = await res.json();
+
+      if (!j.ok) {
+        alert(j.error || "Reset mislukt.");
         return;
       }
 
-      alert("Paswoord gewijzigd!");
+      alert("Paswoord gewijzigd.");
       window.location.href = "/leden.html";
     });
   </script>
