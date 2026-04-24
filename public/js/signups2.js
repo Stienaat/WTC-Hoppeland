@@ -33,8 +33,13 @@ async function loadPage() {
 
     exportBtn.disabled = false;
 
-    const data = await fetch(`/api/signups?event_id=${currentEvent}`).then(r => r.json());
-    renderTable(data.signups);
+		 const data = await fetch(`/api/signups?event_id=${currentEvent}`).then(r => r.json());
+
+		console.log("SIGNUPS RESPONSE:", data);
+
+		const signups = Array.isArray(data) ? data : (data.signups || []);
+
+		renderTable(signups);
 }
 
 function renderTable(signups) {
@@ -105,7 +110,7 @@ document.addEventListener("click", async e => {
             body: JSON.stringify(payload)
         });
 
-		showModal("success", "👌", "Inschrijving bijgewerkt ✔️");
+		await Modal.success("👌", "De inschrijving is bijgwerkt! ✔");
         loadPage();
     }
 
