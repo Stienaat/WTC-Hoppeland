@@ -388,9 +388,9 @@ body
   margin: 20px; 
   width: 350px;
   height: 200px;           
-  border:5px solid #cbd5e1;
+  border:3px solid #FF9800;
   inset: 100;
-  background:  rgba(229, 231, 235, 0.9); 	
+ 
   z-index: 9000;
 }
 .overlay.show {								/* paswoord vergeten zichtbaar*/
