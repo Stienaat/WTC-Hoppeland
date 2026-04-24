@@ -576,7 +576,7 @@ function hasInschrijfprijs(e) {
     0
   );
 
-  return prijs > 0;
+  return price > 0;
 }
 
 function showQR() {
