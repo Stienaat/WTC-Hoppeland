@@ -76,8 +76,8 @@ tr.innerHTML = `
   <td>${su.created_at ? new Date(su.created_at).toLocaleString() : ""}</td>
 
   <td>
-    <button class="updateBtn" data-id="${su.id}" data-name="${su.name || ""}">update</button>
-    <button class="deleteBtn" data-id="${su.id}" data-name="${su.name || ""}">delete</button>
+    <button class="wtc-button updateBtn" data-id="${su.id}" data-name="${su.name || ""}">Update</button>
+	<button class="wtc-button wtc-delete deleteBtn" data-id="${su.id}" data-name="${su.name || ""}">Delete</button>
   </td>
 `;
 
@@ -89,7 +89,7 @@ tr.innerHTML = `
 document.addEventListener("click", async e => {
     if (e.target.classList.contains("updateBtn")) {
         const name = e.target.dataset.name;
-        const ok = await showConfirm(`Inschrijving van '${name}' bijwerken ❓`);
+        const ok = await Modal.confirm("Bevestigen", `Inschrijving van '${name}' bijwerken?`);
         if (!ok) return;
 
         const tr = e.target.closest("tr");
@@ -110,14 +110,14 @@ document.addEventListener("click", async e => {
             body: JSON.stringify(payload)
         });
 
-		await Modal.success("👌", "De inschrijving is bijgwerkt! ✔");
+		await Modal.success("👌", "Inschrijving bijgewerkt ✔️");
         loadPage();
     }
 
     // DELETE
     if (e.target.classList.contains("deleteBtn")) {
         const name = e.target.dataset.name;
-        const ok = await showConfirm(`${name} verwijderen? ❓`);
+        const ok = await Modal.confirm("Bevestigen", `${name} verwijderen?`)
         if (!ok) return;
 
         await fetch("/api/signups", {
@@ -130,14 +130,14 @@ document.addEventListener("click", async e => {
             })
         });
 
-       showModal("success", "👌", "Inschrijving verwijderd ✔️");
+       await Modal.success("👌", "Inschrijving verwijderd ✔️");
         loadPage();
     }
 });
 
 // CLEANUP
 cleanupBtn.onclick = async () => {
-    const ok = await showConfirm("Oude events opruimen ❓");
+    const ok = await Modal.confirm("Oude events opruimen? ");
     if (!ok) return;
 
     await fetch("/api/signups", {
@@ -146,14 +146,14 @@ cleanupBtn.onclick = async () => {
         body: JSON.stringify({ action: "cleanup" })
     });
 
-	showModal("success", "👌", "Opruiming voltooid ✔️");
+	await Modal.success("👌", "0pruiming voltooid ✔️");
     loadPage();
 };
 
 // EXPORT
 exportBtn.onclick = () => {
     window.location = `/api/signups/export?event_id=${currentEvent}`;
-    setTimeout(() => showModal("success", "👌", "Bestand is aangemaakt ✔️"), 500);
+    setTimeout(() => await Modal.success("👌", "Excell bestand is aangemaakt! ✔️"), 500);
 };
 
 loadPage();
