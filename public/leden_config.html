@@ -173,8 +173,7 @@ async function loadLeden() {
 		tr.querySelector(".deleteBtn").onclick = () => {
 
 			const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");
-		function(result){
-				
+					
 				if (!result) {
 					// Gebruiker koos NEE → niets doen
 					return;
