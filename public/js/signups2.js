@@ -95,14 +95,14 @@ document.addEventListener("click", async e => {
         const tr = e.target.closest("tr");
         const signupId = e.target.dataset.id;
 
-        const payload = {
-            action: "update",
-            event_id: currentEvent,
-            signup_id: signupId,
-            paid: tr.querySelector('[data-field="paid"]')?.value,
-            payment_method: tr.querySelector('[data-field="payment_method"]')?.value,
-            payment_reference: tr.querySelector('[data-field="payment_reference"]')?.value
-        };
+		  const payload = {
+		  action: "update",
+		  event_id: currentEvent,
+		  signup_id: signupId,
+		  status: tr.querySelector('[data-field="paid"]')?.value,
+		  payment_method: tr.querySelector('[data-field="payment_method"]')?.value,
+		  payment_reference: tr.querySelector('[data-field="payment_reference"]')?.value
+		};
 
         await fetch("/api/signups", {
             method: "POST",
@@ -135,25 +135,16 @@ document.addEventListener("click", async e => {
     }
 });
 
-// CLEANUP
+	// CLEANUP
 cleanupBtn.onclick = async () => {
-    const ok = await Modal.confirm("Oude events opruimen? ");
-    if (!ok) return;
-
-    await fetch("/api/signups", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "cleanup" })
-    });
-
-	await Modal.success("👌", "0pruiming voltooid ✔️");
-    loadPage();
+  await loadPage();
+  await Modal.success("👌", "Gegevens vernieuwd.");
 };
 
-// EXPORT
-exportBtn.onclick = () => {
-    window.location = `/api/signups/export?event_id=${currentEvent}`;
-    setTimeout(() => await Modal.success("👌", "Excell bestand is aangemaakt! ✔️"), 500);
-};
+	// EXPORT
+	exportBtn.onclick = () => {
+		window.location = `/api/signups/export?event_id=${currentEvent}`;
+		setTimeout(() => await Modal.success("👌", "Excell bestand is aangemaakt! ✔️"), 500);
+	};
 
 loadPage();
