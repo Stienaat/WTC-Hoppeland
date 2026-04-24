@@ -187,11 +187,16 @@ btnPinChange?.addEventListener("click", openPinChangePopup);
 btnChangeCode?.addEventListener("click", handlePinChange);
 
 document.getElementById("Forgotlink")?.addEventListener("click", async () => {
-	console.log("Forgotlink clicked");
+  console.log("Forgotlink clicked");
+
   const email = await Modal.prompt("Geef je e-mailadres");
+  console.log("email prompt result:", email);
+
   if (!email) return;
 
   try {
+    console.log("calling /forgot-password");
+
     const res = await fetch("/forgot-password", {
       method: "POST",
       headers: {
@@ -200,7 +205,10 @@ document.getElementById("Forgotlink")?.addEventListener("click", async () => {
       body: JSON.stringify({ email })
     });
 
+    console.log("forgot response status:", res.status);
+
     const j = await res.json();
+    console.log("forgot response json:", j);
 
     if (!j.ok) {
       await Modal.error("👎", j.error || "Reset mislukt.");
