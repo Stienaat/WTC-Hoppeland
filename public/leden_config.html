@@ -168,31 +168,28 @@ async function loadLeden() {
             else 
 				await Modal.success("👌", "De record is bijgewerkt! ✔");
         };
+		
+    // DELETE
 
-        // DELETE
-		tr.querySelector(".deleteBtn").onclick = () => {
-			async () => {
-			const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");
-					
-				if (!result) {
-					// Gebruiker koos NEE → niets doen
-					return;
-				}
+tr.querySelector(".deleteBtn").onclick = async () => {
+  const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");
 
-				// Gebruiker koos JA → nu pas verwijderen
-				const { error } = await db
-					.from("Leden")
-					.delete()
-					.eq("id", lid.id);
+  if (!result) {
+    return;
+  }
 
-				if (error) {
-					await Modal.error("👎", "Vrwijderen is mislukt. ❌");
-				} else {
-					tr.remove();
-					await Modal.success("👌", "De reord is verwijderd! ✔");
-				}
-			});
-		};
+  const { error } = await db
+    .from("Leden")
+    .delete()
+    .eq("id", lid.id);
+
+  if (error) {
+    await Modal.error("👎", "Verwijderen is mislukt. ❌");
+  } else {
+    tr.remove();
+    await Modal.success("👌", "De record is verwijderd! ✔");
+  }
+};
 
         tbody.appendChild(tr);
     });
