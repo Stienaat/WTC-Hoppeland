@@ -148,9 +148,9 @@ cleanupBtn.onclick = async () => {
 };
 
 	// EXPORT
-	exportBtn.onclick = () => {
-		window.location = `/api/signups/export?event_id=${currentEvent}`;
-		setTimeout(() => await Modal.success("👌", "Excell bestand is aangemaakt! ✔️"), 500);
-	};
+
+exportBtn.onclick = () => {
+  window.location = `/api/signups/export?event_id=${currentEvent}`;
+};
 
 loadPage();
