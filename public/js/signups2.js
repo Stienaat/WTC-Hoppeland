@@ -89,7 +89,10 @@ tr.innerHTML = `
 document.addEventListener("click", async e => {
     if (e.target.classList.contains("updateBtn")) {
         const name = e.target.dataset.name;
-        const ok = await Modal.confirm("Bevestigen", `Inschrijving van '${name}' bijwerken?`);
+        const ok = await Modal.confirm(
+		"Bevestigen",
+		"Inschrijving van " + name + " bijwerken?"
+	);
         if (!ok) return;
 
         const tr = e.target.closest("tr");
@@ -117,7 +120,10 @@ document.addEventListener("click", async e => {
     // DELETE
     if (e.target.classList.contains("deleteBtn")) {
         const name = e.target.dataset.name;
-        const ok = await Modal.confirm("Bevestigen", `${name} verwijderen?`)
+       const ok = await Modal.confirm(
+		"Bevestigen",
+		name + " verwijderen?"
+);
         if (!ok) return;
 
         await fetch("/api/signups", {
