@@ -133,7 +133,17 @@ router.post("/forgot-password", async (req, res) => {
       from: `"WTC" <${process.env.SMTP_FROM}>`,
       to: email,
       subject: "Paswoord herstellen",
-      text: `Klik op deze link om je paswoord te herstellen:\n\n${link}\n\nDeze link blijft 1 uur geldig.`
+     text: `Hallo,
+
+		Je vroeg een nieuw paswoord aan.
+
+		Klik op deze link:
+		${link}
+
+		Deze link blijft 1 uur geldig.
+
+		Mvg,
+		WTC-Hoppeland.`
     });
 
     return res.json({ ok: true });
