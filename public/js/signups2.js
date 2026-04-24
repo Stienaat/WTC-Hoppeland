@@ -53,33 +53,33 @@ function renderTable(signups) {
     signups.forEach(su => {
         const tr = document.createElement("tr");
 
-        tr.innerHTML = `
-            <td>${su.Leden?.name || ""}</td>
-            <td>${su.Leden?.email || ""}</td>
+tr.innerHTML = `
+  <td>${su.name || ""}</td>
+  <td>${su.email || ""}</td>
 
-            <td>
-                <select data-field="paid">
-                    <option value="pending" ${su.paid === null ? "selected" : ""}>pending</option>
-                    <option value="true" ${su.paid === true ? "selected" : ""}>ja</option>
-                    <option value="false" ${su.paid === false ? "selected" : ""}>nee</option>
-                </select>
-            </td>
+  <td>
+    <select data-field="paid">
+      <option value="pending" ${su.status === "pending" ? "selected" : ""}>pending</option>
+      <option value="true" ${su.status === "paid" || su.paid === true ? "selected" : ""}>ja</option>
+      <option value="false" ${su.status === "unpaid" || su.paid === false ? "selected" : ""}>nee</option>
+    </select>
+  </td>
 
-            <td>
-                <input data-field="payment_method" type="text" value="${su.method || ""}">
-            </td>
+  <td>
+    <input data-field="payment_method" type="text" value="${su.payment_method || su.method || ""}">
+  </td>
 
-            <td>
-                <input data-field="payment_reference" type="text" value="${su.reference || ""}">
-            </td>
+  <td>
+    <input data-field="payment_reference" type="text" value="${su.payment_reference || su.reference || ""}">
+  </td>
 
-            <td>${new Date(su.created_at).toLocaleString()}</td>
+  <td>${su.created_at ? new Date(su.created_at).toLocaleString() : ""}</td>
 
-            <td>
-                <button class="updateBtn" data-id="${su.id}" data-name="${su.Leden?.name || ""}">update</button>
-                <button class="deleteBtn" data-id="${su.id}" data-name="${su.Leden?.name || ""}">delete</button>
-            </td>
-        `;
+  <td>
+    <button class="updateBtn" data-id="${su.id}" data-name="${su.name || ""}">update</button>
+    <button class="deleteBtn" data-id="${su.id}" data-name="${su.name || ""}">delete</button>
+  </td>
+`;
 
         tableBody.appendChild(tr);
     });
