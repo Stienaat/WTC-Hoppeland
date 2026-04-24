@@ -235,7 +235,7 @@ function generateQR(e) {
     0
   );
 
-  if (price <= 0) return;
+  if (prijs <= 0) return;
   if (!e.qr_text || typeof QRCode === "undefined") return;
 
   new QRCode(qrDiv, {
