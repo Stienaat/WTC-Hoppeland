@@ -682,7 +682,7 @@ function renderUserBadge() {
   const el = document.getElementById('routeUserBadge');
   if (!el) return;
 
-  const role = isAdminUser() ? 'Admin' : 'Lid';
+
   const name =
     localStorage.getItem('user_name') ||
     sessionStorage.getItem('user_name') ||
