@@ -170,9 +170,10 @@ body
     cursor: pointer;           /* handje bij hover */
 }
 
-/* Algemene statusmeldingen */
-/* basis */
-/* Algemene statusmeldingen */
+.wtc-select {
+	border-radius: 6px;
+}
+
 .wtc-status {
   margin-top: 6px;
   font-size: 0.9rem;
