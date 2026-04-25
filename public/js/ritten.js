@@ -115,7 +115,7 @@ const waypointIcons = {
   start: createWpIcon('🚩', '#FFF000'),
   water: createWpIcon('💧', '#00FFFF'),
   food: createWpIcon('🍽️', '#ff9800'),
-  climb: createWpIcon('⛰️', '#F5DEB3'),
+  climb: createWpIcon('🚵‍♂️', '#F5DEB3'),
   danger: createWpIcon('⚠️', '#e53935'),
   rest: createWpIcon('🛑', '#FFC0CB'),
   supply: createWpIcon('📦', '#9c27b0')
