@@ -120,8 +120,10 @@ body
 /* Algemene knopstijl voor de hele site */
 .wtc-button {	
     border-radius: 6px;
-    background-color: #404EC0;
+    background-color: #fff;
     background-image: none;
+	border-color:blue;
+	border-width:3px:
 	max-height: 22px;
 	min-width: 20px;
     color: #FFFFFF;
@@ -139,9 +141,9 @@ body
 
 /* Hover-effect */
 .wtc-button:hover {
-    background-color: #A5D8FF; /* iets donkerder blauw */
+    background-color: #fff; /* iets donkerder blauw */
 	color: #000000;
-    border-color: #A5D8FF;
+    border-color: yellow;
 }
 
 /* Focus (met toetsenbord) – toegankelijkheid */
