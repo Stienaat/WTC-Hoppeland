@@ -105,59 +105,52 @@ router.get("/status", async (req, res) => {
 // ============================
 router.post("/", async (req, res) => {
   const supabase = req.supabase;
-  const { email, event_id } = req.body;
 
-  if (!email || !event_id) {
-    return res.json({ ok: false, message: "email en event_id verplicht" });
+  const { action } = req.body;
+
+  // =====================
+  // UPDATE
+  // =====================
+  if (action === "update") {
+    const { signup_id, status, payment_method, payment_reference } = req.body;
+
+    const { error } = await supabase
+      .from("signups")
+      .update({
+        status,
+        payment_method,
+        payment_reference
+      })
+      .eq("id", signup_id);
+
+    if (error) {
+      return res.json({ ok: false, error: "Update mislukt" });
+    }
+
+    return res.json({ ok: true });
   }
 
-  try {
-    const { member, error } = await findMemberByEmail(supabase, email);
+  // =====================
+  // DELETE
+  // =====================
+  if (action === "delete") {
+    const { signup_id } = req.body;
 
-    if (error || !member) {
-      return res.json({ ok: false, message: "Lid niet gevonden." });
-    }
-
-    const { data: existing } = await supabase
+    const { error } = await supabase
       .from("signups")
-      .select("*")
-      .eq("member_id", member.id)
-      .eq("event_id", event_id)
-      .maybeSingle();
+      .delete()
+      .eq("id", signup_id);
 
-    if (existing) {
-      return res.json({
-        ok: true,
-        signup: {
-          event_id,
-          email: member.email,
-          name: member.naam,
-          status: existing.status || "pending"
-        }
-      });
+    if (error) {
+      return res.json({ ok: false, error: "Verwijderen mislukt" });
     }
 
-    const { error: insertError } = await supabase
-      .from("signups")
-      .insert([{ member_id: member.id, event_id, status: "pending" }]);
-
-    if (insertError) {
-      return res.json({ ok: false, message: "Inschrijving mislukt." });
-    }
-
-    return res.json({
-      ok: true,
-      signup: {
-        event_id,
-        email: member.email,
-        name: member.naam,
-        status: "pending"
-      }
-    });
-  } catch (err) {
-    return res.json({ ok: false, message: "Serverfout." });
+    return res.json({ ok: true });
   }
-});
+
+  // =====================
+  // CREATE (bestaande code)
+  // =====================
 
 // ============================
 // DELETE /api/signups
