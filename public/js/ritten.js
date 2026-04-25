@@ -55,7 +55,7 @@ function buildWaypointPopup(wp) {
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','food')">🍽️ Bevoorrading</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','water')">💧 Water</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','danger')">⚠️ Gevaar</button>
-        <button class="wp-chip" onclick="setWaypointType('${wp.id}','climb')">⛰️ Klim</button>
+        <button class="wp-chip" onclick="setWaypointType('${wp.id}','climb')">🚵‍♂️ Klim</button>
         <button class="wp-chip" onclick="setWaypointType('${wp.id}','start')">⚡ Start</button>
       </div>
 
