@@ -105,7 +105,6 @@ router.get("/status", async (req, res) => {
 // ============================
 router.post("/", async (req, res) => {
   const supabase = req.supabase;
-
   const { action } = req.body;
 
   // =====================
@@ -149,9 +148,61 @@ router.post("/", async (req, res) => {
   }
 
   // =====================
-  // CREATE (bestaande code)
+  // CREATE (jouw bestaande code)
   // =====================
+  const { email, event_id } = req.body;
 
+  if (!email || !event_id) {
+    return res.json({ ok: false, message: "email en event_id verplicht" });
+  }
+
+  try {
+    const { member, error } = await findMemberByEmail(supabase, email);
+
+    if (error || !member) {
+      return res.json({ ok: false, message: "Lid niet gevonden." });
+    }
+
+    const { data: existing } = await supabase
+      .from("signups")
+      .select("*")
+      .eq("member_id", member.id)
+      .eq("event_id", event_id)
+      .maybeSingle();
+
+    if (existing) {
+      return res.json({
+        ok: true,
+        signup: {
+          event_id,
+          email: member.email,
+          name: member.naam,
+          status: existing.status || "pending"
+        }
+      });
+    }
+
+    const { error: insertError } = await supabase
+      .from("signups")
+      .insert([{ member_id: member.id, event_id, status: "pending" }]);
+
+    if (insertError) {
+      return res.json({ ok: false, message: "Inschrijving mislukt." });
+    }
+
+    return res.json({
+      ok: true,
+      signup: {
+        event_id,
+        email: member.email,
+        name: member.naam,
+        status: "pending"
+      }
+    });
+  } catch (err) {
+    return res.json({ ok: false, message: "Serverfout." });
+  }
+});
 // ============================
 // DELETE /api/signups
 // ============================
