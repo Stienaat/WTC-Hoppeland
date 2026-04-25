@@ -124,7 +124,6 @@ body
     background-image: none;
 	border-color:blue;
 	border-width:3px:
-
 	min-width: 20px;
     color: #000000;
 	font-family: Arial, sans-serif;
@@ -155,7 +154,6 @@ body
 .wtc-input {
 	border: 1px solid #3599E4;
     border-radius: 8px;
-
 	min-width: 50px;
     background-image: none;
     color: #000;
@@ -172,6 +170,8 @@ body
 
 .wtc-select {
 	border-radius: 6px;
+	border-color:blue;
+	border-width:3px:
 }
 
 .wtc-status {
