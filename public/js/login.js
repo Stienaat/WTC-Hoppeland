@@ -61,7 +61,7 @@ async function openAdminPrompt() {
     const pin = input.value.trim();
 
     if (!pin || pin.length !== 6) {
-      error.textContent = "Pin moet 6 cijfers zijn.";
+      error.textContent = "Foute PIN-code!.";
       input.focus();
       input.select();
       continue;
@@ -78,7 +78,7 @@ async function openAdminPrompt() {
       const data = await res.json();
 
       if (!data.ok) {
-        error.textContent = data.message || "Pin is onjuist.";
+        error.textContent = data.message || "Foute PIN.";
         input.value = "";
         input.focus();
         continue;
@@ -88,6 +88,7 @@ async function openAdminPrompt() {
       error.textContent = "";
       input.value = "";
       openAdminPhase2();
+	   loginOverlay?.classList.add("hidden");
       return;
 
     } catch (err) {
@@ -302,7 +303,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
 	 await Modal.success("👌", "Welkom? Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
 
 	 setTimeout(() => {
-		window.location.href = "leden.html";
+		window.location.href = "index.html";
 	  }, 5000);
   }
 

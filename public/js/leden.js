@@ -364,6 +364,16 @@ function closeAdminUI() {
 function closeAdminPan() {
   if (adminFase2) {
     adminFase2.style.display = 'none';
+	
+	document.getElementById("btnLogout").addEventListener("click", async () => {
+  await fetch("/api/logout", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  window.location.href = "/";
+});
+
   }
 
   const url = new URL(window.location);
@@ -382,6 +392,7 @@ btnNoticeClose && btnNoticeClose.addEventListener('click', saveNotice);
 
 document.getElementById('btnCloseAdmin')?.addEventListener('click', closeAdminUI);
 document.getElementById('btnCloseAdmin2')?.addEventListener('click', closeAdminPan);
+
 
 document.addEventListener('DOMContentLoaded', function () {
   const params = new URLSearchParams(window.location.search);

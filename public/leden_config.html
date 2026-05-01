@@ -59,9 +59,12 @@ body {
     <div class="toolbar" style="margin-top:20px;">
         <button type="button" id="exportBtn" class="wtc-button">Export</button>
         <div class="spacer"></div>
-        <a href="/leden.html?overlay=1" class="wtc-button">⏪Terug</a>
-        <a href="/index.html" class="wtc-button">🏡Home</a>
-        <a href="/logout.html" class="wtc-button">Uitloggen</a>
+		<input type="submit" id="BtnBack" class="wtc-button" onclick="window.location.href='./index.html?overlay=1';return false;"
+		name="Form"  value="⏪Terug">
+		<input type="submit" id="BtnBack" class="wtc-button" onclick="window.location.href='./index.html';return false;"
+		name="Form"  value="🏡Home">
+		<button id="btnLogout" class="wtc-button">Uitloggen</button>
+
     </div>
 
     <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
@@ -194,6 +197,20 @@ tr.querySelector(".deleteBtn").onclick = async () => {
         tbody.appendChild(tr);
     });
 }
+
+// =====================================
+//  UITLOGGEN
+// =====================================
+
+document.getElementById("btnLogout").addEventListener("click", async () => {
+  await fetch("/api/logout", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  window.location.href = "/";
+});
+
 
 // =====================================
 //  EXCEL EXPORT

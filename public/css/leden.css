@@ -8,12 +8,8 @@ body
    line-height: 1.1875;
    margin: 0;
    padding: 0;
-   display: flex;
-   align-items: flex-start;
-   justify-content: center;
-   padding-top: 40px;
 }
-#Form1
+#Form1		 /* Login/reg card */
 {
    background-color: #F8F9FA;
    background-image: none;
@@ -21,8 +17,11 @@ body
    border-radius: 20px;
    transform: scale(0.8);
    transform-origin: top left;
-   width: 300px;   /* originele breedte uit Leden.html */
+   width: 400px;  
+   height:450px;
+   margin: 0;
 }
+
 
 /* Alle invoervelden op de registreerkaart */
 #Editbox1,
@@ -32,87 +31,35 @@ body
 #Editbox5,
 #Editbox6,
 #Editbox7 {
- border: 1px solid #3599E4;
+   border: 1px solid #3599E4;
    border-radius: 8px;
-   background-color: #F6F0D0;
+   background-color: #fff;
    background-image: none;
    color: #000000;
    font-family: Arial;
    font-weight: normal;
    font-style: normal;
-   font-size: 18px;
+   font-size: 14px;
    padding: 4px;
-   margin: 4px;
+   margin: 0px;
    text-align: left;
    box-sizing: border-box;
 }
 
-
-/* Titel "Beste leden" boven de mededeling */
-#Text3 {
-   position:absolute;
-   left:159px;
-   top:36px;
-   width:518px;
-   height:48px;
-   z-index:1;
-}
-
-
-/* De tekstbox waarin de mededeling zelf komt */
-#noticeBox {
+#noticeBox {				/* De tekstbox waarin de mededeling zelf komt */
+  width: 520px; 			/* vaste breedte */
+  height: 400px;      	    /* vaste hoogte */
+  padding: 15px;
   border-radius: 8px;
-   padding: 10px;
-   margin-top: 12px;
-   font-size: 14px;
-   line-height: 1.5;
-   min-height: 160px;
-
-   max-height: none;      /* <-- belangrijk */
-   overflow: visible;     /* <-- belangrijk */
-
-   background-color: #FFF;
-   border: 1px solid #CCC;
+  background: #fafafa;
+  overflow-y: scroll;       /* interne verticale scrollbar */
+  overflow-x: hidden;  		/* geen horizontale scrollbar */
+  white-space: pre-wrap;	/* behoudt line breaks, breekt lange lijnen */
+  box-sizing: border-box;
+  scrollbar-width: none;  	/* Firefox */
 }
-
-/* Kopjes en tekst in de mededeling */
-#noticeBox h1,
-#noticeBox h2,
-#noticeBox h3 {
-   margin: 0 0 8px 0;
-   font-family: Arial, sans-serif;
-}
-#noticeBox h1 {
-   font-size: 20px;
-}
-#noticeBox h2 {
-   font-size: 18px;
-}
-#noticeBox h3 {
-   font-size: 16px;
-}
-#noticeBox p {
-   margin: 0 0 8px 0;
-}
-#noticeBox ul {
-   margin: 0 0 8px 20px;
-   padding-left: 20px;
-}
-#noticeBox li {
-   margin: 2px 0;
-}
-
-/* Status-message (opslaan mededeling) */
-#status {
-   margin-top: 5px;
-   font-size: 12px;
-   font-style: italic;
-}
-
-/* Login/registratie blok */
-#Form1
-{
-   margin: 0;
+#noticeBox::-webkit-scrollbar {
+  display: none;            /* Chrome, Edge, Safari */
 }
 
 #Label8
@@ -142,7 +89,6 @@ body
    margin-top: 15px;
    font-size: 13px;
 }
-
 
 #adminOverlayContent {
    background: #ffffff;
@@ -176,7 +122,7 @@ body
 
 .overlay-input {
    width: 100%;
-   padding: 8px;
+   padding: 4px;
    margin-bottom: 5px;
    border-radius: 4px;
    border: 1px solid #ccc;
@@ -191,7 +137,7 @@ body
 
 .overlay-button.secondary {
    background-color: #cccccc;
-   border-color: #999999;
+   border-color: #o;
    color: #000000;
    margin-right: 8px;
 }
@@ -209,16 +155,6 @@ body
    margin-top: 0;
    margin-bottom: 6px;
    font-size: 14px;
-}
-
-
-/* FS-logo rechtsboven */
-#Image1 {
-   position: absolute;
-   right: 15px;
-   top: 10px;
-   cursor: pointer;
-   z-index: 10000;
 }
 
 #Image1 img {
@@ -282,18 +218,8 @@ body
   margin:2px 0;
 }
 
-						/* ===== Notice blok ===== */
+		/* ===== Notice blok ===== */
 
-.notice-box{
-  border:1px solid #cbd5e1;
-  border-radius:15px;
-  padding:12px 14px;
-  min-height:250px;
-  background:#f8fafc;
-  overflow:visible;
-  position: relative;
-  z-index: 10;
-} 
 .noticeBox.notice-editing{
   position: fixed;
   z-index: 10000;
@@ -304,29 +230,31 @@ body
   transform: translateX(-50%);
 }
 
-.notice-box[contenteditable="true"]{
-  outline:2px solid #2563eb;
-  background:#ffffff;
+.noticeBox[contenteditable="true"] {
+  outline: 2px solid #2563eb;
+  background: #ffffff;
+  position: relative;
+  z-index: 9999;
 }
+
 
 .text-kader{
 	border: 1px solid #3599E4;
     border-radius: 8px;
-	height: 20px;
+	height: 16px;
 	min-width: 50px;
 	align-items: center;
     background-image: none;
     font-family: Arial, sans-serif;
     font-weight: normal;
     font-style: normal;
-    font-size: 12px;
+    font-size: 10px;
     padding: 3px;
     text-align: left;
     -webkit-appearance: none;
     margin: 4px;
 }
-
-					/* ===== Admin panel fase 1 en 2 ===== */
+				/* ===== Admin panel fase 1 en 2 ===== */
 
 .adminCard{   						/* Fase  1 */					
   border: 1px solid #3599E4;
@@ -335,7 +263,7 @@ body
   padding:5px;
   display:flex;
   flex-direction: column;   
-  background: rgba(250,231,253,.9); 	
+  background: rgba(250,231,253,.3); 	
   width: 325px;
 }
 
@@ -351,19 +279,18 @@ body
   pointer-events: auto;
   display: none;
   border-radius:15px;
-  padding: 10px; 
- 
+  padding: 10px;  
   width: 350px;  
 }
 .adminFase2{   						/* Fase  2 hidden*/		
 	display:none;
 }
 .adminFase2.open{					/* Fase  2 zichtbaar*/		
-	position:absolute; left:40px; top 50px;
+	position:absolute; left:200px; top: 50px;
     width: 700px;            
     height: 700px;           
     border:1px solid #cbd5e1;
-	 box-shadow:0 6px 20px rgba(0,0,0,.5);
+	box-shadow:0 6px 20px rgba(0,0,0,.5);
     border-radius: 12px;
     padding: 12px;
     background: #fff;
@@ -375,24 +302,30 @@ body
     box-sizing: border-box;
   }
 
-.overlay {							
-  display: none;
- }
-
-.overlay-card {						
-  position:absolute; left:500px; top: 50px;
-  box-shadow:0 6px 20px rgba(0,0,0,.5);
-  pointer-events: auto;
-  border-radius:15px;
-  padding: 20px;
-  margin: 20px; 
-  width: 350px;
-  height: 200px;           
-  border:3px solid #FF9800;
-  inset: 100;
-  background:  #FFF; 	
-  z-index: 9000;
+.hidden {
+    display: none;
 }
+
+.overlay{
+    position: fixed;
+    inset: 0;   
+    display: flex;
+    justify-content: center;   /* horizontaal centreren */
+    align-items: flex-start;   /* bovenaan uitlijnen */
+    padding-top: 40px;         /* afstand van boven */
+    z-index: 2000;
+}
+
+.login-card {
+	position: relative; /* BELANGRIJK: zodat absolute inputs binnen de card blijven */
+    background:#ecf0f1; 
+	box-shadow:0 6px 20px rgba(0,0,0,.50);
+    padding: 30px;
+    border-radius: 10px;
+    width: 350px;
+    height: 400px; /* genoeg ruimte voor jouw absolute velden */
+}
+
 .overlay.show {								/* paswoord vergeten zichtbaar*/
   display: flex;
   align-items: center;
@@ -423,7 +356,13 @@ body
 .text-button{
 	border: 1px solid #3599E4;
     border-radius: 8px;
-	height: 15px;
+	height: 13px;
+}
+
+.cell {
+	border: 1px solid #3599E4;
+	border-radius: 8px;
+	padding: 5px;
 }
 
 #pinError{
@@ -440,66 +379,23 @@ body
   cursor:pointer;
 }
 
-				/* ===== Algemene popup meldingen ===== */
-
-.wtc-pop-overlay{
-  position:fixed;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:3000;
-  pointer-events:none;
-  background:transparent;
-}
-.wtc-pop-overlay.show{ display:flex; }
-.wtc-pop-card{
-  pointer-events:auto;
-  background: rgba(255,255,255,0.92);
-  border-radius:14px;
-  padding:14px 16px;
-  box-shadow:0 10px 30px rgba(15,23,42,0.35);
-  min-width:280px;
-  max-width:420px;
-}
-.cell{
-    border: 1px solid #3599E4;
-    border-radius: 10px;
-    padding: 8px;
-    background: #f3f4f6;
-    box-sizing: border-box;
-	margin:3px
-}
-
-.cell.N{
-    border: 1px solid #3599E4;
-    border-radius: 10px;
-    padding: 10px;
-   font-size: 14px;
-    background: #f3f4f6;
-    box-sizing: border-box;
-	margin:3px
-}
-.wtc-pop-title{ margin:0 0 8px; font-size:18px; }
-.wtc-pop-text{ margin:0 0 12px; font-size:14px; color:#334155; white-space:pre-wrap; }
-.wtc-pop-actions{ display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
 
 .reg-only{
 	position:absolute;
-	left:40px;
+	left:30px;
 	width:340px;
-	height:34px;
+	height:24px;
 	border: 1px solid #3599E4;
     border-radius: 8px;
 	z-index: 0;"
 }
 .log-only{
 	position:absolute;
-	left:40px;
+	left:30px;
 	width:340px;
 	border: 1px solid #3599E4;
     border-radius: 8px;
 	width:340px;
-	height:34px;
+	height:24px;
 	z-index: 0;
 }

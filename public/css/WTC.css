@@ -11,7 +11,6 @@ h1, .h1
    font-size: 32px;
    text-decoration: none;
    color: #000000;
-   --color: #000000;
    background-color: transparent;
    margin: 0 0 0 0;
    padding: 0 0 0 0;
@@ -123,8 +122,8 @@ body
     background-color: #fff;
     background-image: none;
 	border-color:blue;
-	border-width:3px:
-	min-width: 20px;
+	border-width:3px;
+	min-width: 50px;
     color: #000000;
 	font-family: Arial, sans-serif;
     font-weight: normal;

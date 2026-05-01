@@ -20,174 +20,195 @@ body
    margin: 0;
    padding: 0;
 }
-#Text1 
-{
-   background-color: transparent;
-   background-image: none;
-   border: 0px solid #000000;
-   border-radius: 0px;
-   padding: 0;
-   margin: 0;
-   text-align: left;
-}
-#Text1 div
-{
-   text-align: left;
-}
-#Image1
-{
-   vertical-align: top;
-}
-#Image1
-{
-   border: 0px solid #000000;
-   border-radius: 0px;
-   box-sizing: border-box;
-   padding: 0;
-   margin: 0;
-   left: 0;
-   top: 0;
-   width: 100%;
-   height: 100%;
-}
-#Text2 
-{
-   background-color: transparent;
-   background-image: none;
-   border: 0px solid #000000;
-   border-radius: 0px;
-   padding: 0;
-   margin: 0;
-   text-align: left;
-}
-#Text2 div
-{
-   text-align: left;
-}
-#Text3 
-{
-   background-color: transparent;
-   background-image: none;
-   border: 0px solid #000000;
-   border-radius: 0px;
-   padding: 0;
-   margin: 0;
-   text-align: left;
-}
-#Text3 div
-{
-   text-align: left;
+
+    .banner {
+      width: 100%;
+      overflow: hidden;
+      background: transparent;
+      padding: 10px 0;
+    }
+
+    .track {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: max-content;
+      animation: scroll 15s linear infinite;
+    }
+
+    .track img {
+      height: 150px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      border-radius: 10px;
+    }
+
+    @keyframes scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .intro {
+      display: flex;
+      gap: 80px;
+      align-items: center;
+	  justify-content: space-between;
+      margin-bottom: 60px;
+    }
+
+	 .intro-logo {
+	  display: flex;
+	  align-items: center;   /* centreert het logo verticaal binnen zijn eigen blok */
+	  justify-content: center;
 }
 
+    .intro-logo img {
+      max-width: 100%;
+      height: auto;
+    }
 
-/* ---------- ALGEMENE CARD-STIJLEN VOOR ALLE KAARTEN ---------- */
+    .intro-buttons {
+      display: flex;
+      justify-content: center;
+	  flex-direction: row;
+      gap: 30px;
+	  margin-left: 50px;
 
-.card {
-   margin: 0;
-   background-color: #F8F8F8 !important;
-   background-image: none;
-   border: 1px solid #DEE2E6;
-   border-radius: 8px;
-   text-align: center;
-   position: relative; /* nodig omdat de footer absoluut gepositioneerd wordt */
+    }
+
+    .intro-text {
+      flex: 1;
+      font-size: 16px;
+      line-height: 1.5;
+	  border: 1px solid #CCCCCC;
+	  border-radius: 12px;
+	  padding: 5px;
+    }
+
+    .intro-text h2 {
+      margin: 10px;
+    }
+
+    .cards {
+      display: grid;	 
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+	  padding: 5px;
+      margin-bottom: 60px;
+    }
+
+    .card {
+      min-height: 250px;
+	  background: rgba(255, 255, 255, 0.7); /* 40% transparant */
+      padding: 12px;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(0,0,0,.50);
+      border-radius: 10px;
+    }
+
+    .card-title {
+      font-weight: bold;
+      min-height: 45px;
+    }
+
+    .card-image {
+      width: 140px;
+      height: auto;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .card-footer {
+      margin-top: 10px;
+      font-weight: normal;
+    }
+
+    .clubfoto {
+      max-width: 830px;
+      margin: 0 auto;
+      box-shadow: 0 6px 20px rgba(0,0,0,.50);
+    }
+
+    .clubfoto img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    @media (max-width: 800px) {
+      .intro {
+        flex-direction: column;
+        text-align: center;
+      }
+
+    .intro-logo {
+        flex: none;
+      }
+    }
+
+    .faq {
+      display: flex;     
+      gap: 10px;
+	  justify-content: space-between;
+      margin-bottom: 60px;
+	  margin-top: 60px;
+    }
+
+    .faqtext {
+	  flex: 1;
+      min-height: 250px;	  
+      padding: 12px;
+	  background: white;
+      box-shadow: 0 6px 20px rgba(0,0,0,.50);
+      border-radius: 10px;
+	  box-sizing: border-box;
+    }
+	
+	.round {
+	border-radius: 50px;
+    background-color: lightyellow;
+    background-image: none;
+	border-color:green;
+	border-width:3px;
+	height: 100px; width:100px;
+    color: #000000;
+	font-family: Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 20px;
+    padding:2px;
+    text-align: center;
+    margin: 15px;
+  	box-shadow:0 6px 20px rgba(0,0,0,.50);
+  }
+
+	.fot {
+		display: flex;
+	  justify-content: center;   /* horizontaal centreren */
+	  align-items: center;       /* verticaal centreren */
+	  margin: 20px 0;
 }
-
-/* body van de kaart */
-.card-body {
-   padding: 0;
-   font-size: 0; /* zodat er geen rare witruimte komt rond de afbeelding */
-   background-color: #F8F8F8;
-}
-
-/* naam / titel bovenaan */
-.card-title {
-   box-sizing: border-box;
-   margin: 20px 20px 0 20px;
-   padding: 0;
-   color: #212529;
-   font-family: Arial, sans-serif;
-   font-weight: bold;
-   font-style: normal;
-   font-size: 16px; /* kies hier 14 of 16 – nu overal 16 */
-}
-
-/* scheidingslijn onder de naam */
-.card-separator {
-   box-sizing: border-box;
-   margin: 20px 20px 0 20px;
-   border-top: 1px #D2D2D2 solid;
-   border-width: 1px 0 0 0;
-   height: 0;
-   line-height: 0;
-}
-
-/* foto in de kaart */
-.card-image {
-   box-sizing: border-box;
-   margin: 0;
-   padding: 0;
-   border: 0;
-   border-radius: 0;
-   width: 100%;
-   height: auto;
-}
-
-/* footer (functie / rol) */
-.card-footer {
-   box-sizing: border-box;
-   position: absolute;
-   left: 0;
-   bottom: 0;
-   right: 0;
-   border-top: 1px solid #DEE2E6;
-   border-radius: 0 0 8px 8px !important;
-   margin: 0;
-   padding: 12px 20px;
-   background-color: #F8F8F8;
-   background-image: none;
-   color: #212529;
-   font-family: Arial, sans-serif;
-   font-weight: normal;
-   font-style: normal;
-   font-size: 13px;
-}
-
-.imgwrap{
-  overflow: visible; /* zodat hij niet afgesneden wordt buiten de foto */
-}
-
-.imgwrap::after{
-  content: attr(data-tooltip);
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-
-  background: #1E90FF;
-  color: #98FB98;
-  padding: 6px 10px;
-  border-radius: 6px;
-
-  width: 100%;                 /* neemt breedte van wrapper (= foto) */
-  max-width: 100%;
-  box-sizing: border-box;
-
-  white-space: normal !important;   /* MEERDERE LIJNEN */
-  overflow-wrap: anywhere;          /* breekt ook lange woorden */
-  word-break: break-word;
-  text-align: center;
-
-  overflow: visible !important;     /* voorkom afsnijden */
-  text-overflow: clip !important;   /* als je ergens ellipsis had */
-
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity .15s;
-  z-index: 999999;
-}
-
-.imgwrap:hover::after{
-  opacity: 1;
-  visibility: visible;
-}
+    .company {
+      display: flex;     
+      gap: 10px;
+	  justify-content: space-between;
+      margin-bottom: 60px;
+	  margin-top: 60px;
+    }
+	
+	.comptext {
+	  flex: 1;
+      min-height: 250px;	  
+      padding: 12px;
+	  background: white;
+      box-shadow: 0 6px 20px rgba(0,0,0,.50);
+      border-radius: 10px;
+	  box-sizing: border-box;
+    }

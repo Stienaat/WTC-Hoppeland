@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Clubleden</title>
+
+<style>
+  body {
+    margin: 0;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;   /* horizontaal centreren */
+    align-items: center;       /* verticaal centreren */
+    height: 100vh;             /* volledige hoogte */
+  }
+
+  .foto-container {
+    position: relative;
+    max-width: 90vw;           /* nooit breder dan 90% van het scherm */
+    border-radius: 18px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.7);
+    overflow: hidden;
+  }
+
+.foto-container img {
+  width: 100%;
+  height: auto;
+}
+
+  #BtnBack {
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    z-index: 10;
+  }
+
+  .lid {
+    position: absolute;
+    width: 25px;               /* hier stel je de GROOTTE van het vlak in */
+    height: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+ /*   background: rgba(255, 0, 0, 0.4);  half transparant rood om te testen */
+  
+  }
+
+  .lid::after {
+    content: attr(data-naam);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: yellow;
+    padding: 3px 6px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+
+  .lid:hover::after {
+    opacity: 1;
+  }
+</style>
+</head>
+
+<body>
+  <div class="foto-container">
+    <img src="images/clubleden.png" alt="Clubleden">
+
+    <input type="submit" id="BtnBack" class="wtc-button"
+      onclick="window.location.href='./index.html';return false;"
+      name="Form" value="⏪Terug">
+
+    <!-- dankzij transform(-50%, -50%) zijn deze coords nu het MIDDEN van het vlak -->
+	<div class="lid" style="top:49.52%; left:10.78%;" data-naam="Janneman"></div>
+    <div class="lid" style="top:64.25%; left:11.00%;" data-naam="Tante Liese"></div>
+    <div class="lid" style="top:49.70%; left:48.80%;" data-naam="Tommeke"></div>
+    <div class="lid" style="top:44.88%; left:66.51%;" data-naam="Wimmeke"></div>
+	<div class="lid" style="top:48.81%; left:59.91%;" data-naam="Juleke"></div>
+  </div>
+</body>
+</html>

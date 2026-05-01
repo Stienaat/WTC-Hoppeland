@@ -13,14 +13,14 @@ body {
 }
 
 .container {
-    max-width:1120px;
+    max-width:1320px;
     margin:30px auto;
     background:#fff;
-    padding:18px;
+    padding:8px;
     border-radius:14px;
 }
 
-#ledenRows input {
+#formsRows input {
     border: none;
     outline: none;
     background: transparent;
@@ -28,7 +28,7 @@ body {
     font-size: 14px;
 }
 
-#ledenRows input:focus {
+#formsRows input:focus {
     border-bottom: 1px solid #999;
 }
 
@@ -42,6 +42,39 @@ body {
     margin: 4px 0 12px;
 }
 .toolbar .spacer{ flex:1; }
+
+table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+th, td {
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  vertical-align: top;
+}
+
+th:nth-child(7),
+td:nth-child(7) {
+  width: 32%;
+}
+th:nth-child(1), td:nth-child(1) { width: 15%; }  /* name */
+th:nth-child(2), td:nth-child(2) { width: 13%; }  /* email */
+th:nth-child(3), td:nth-child(3) { width: 7%; }  /* phone */
+th:nth-child(4), td:nth-child(4) { width: 14%; }  /* street */
+th:nth-child(5), td:nth-child(5) { width: 3%; }   /* zip */
+th:nth-child(6), td:nth-child(6) { width: 11%; }  /* city */
+th:nth-child(7), td:nth-child(7) { width: 26%; }  /* msg */
+th:nth-child(8), td:nth-child(8) { width: 1%; }   /* consent */
+th:nth-child(9), td:nth-child(9) { width: 12%; }  /* acties */
+
+td, th {
+  font-size: 11px;
+  
+  padding: 3px;
+}
+
 </style>
 
 
@@ -56,30 +89,35 @@ body {
         <img src="images/Logo.png" width="40" height="40">
     </div>
 
-    <div class="toolbar" style="margin-top:20px;">
+      <div class="toolbar" style="margin-top:20px;">
         <button type="button" id="exportBtn" class="wtc-button">Export</button>
         <div class="spacer"></div>
-        <a href="/leden.html?overlay=1" class="wtc-button">⏪Terug</a>
-        <a href="/index.html" class="wtc-button">🏡Home</a>
-        <a href="/logout.html" class="wtc-button">Uitloggen</a>
+		<input type="submit" id="BtnBack" class="wtc-button" onclick="window.location.href='./index.html?overlay=1';return false;"
+		name="Form"  value="⏪Terug">
+		<input type="submit" id="BtnBack" class="wtc-button" onclick="window.location.href='./index.html';return false;"
+		name="Form"  value="🏡Home">
+		<button id="btnLogout" class="wtc-button">Uitloggen</button>
+
+
     </div>
 
     <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
         <thead>
-            <tr style="background:#e2e8f0;">
+            <tr style="background:#e2e8f0; font-size:10px;">
                 <th>
-					Naam 
-					<span id="sortNaam" style="cursor:pointer; font-size:12px; margin-left:4px;">▲▼</span>
+					Naam
+					<span id="sortNaam" style="cursor:pointer; font-size:8px; margin-left:4px;">▲▼</span>
 				</th>
                 <th>E-mail</th>
-                <th>Telefoon</th>
-                <th>Gemeente</th>
+                <th>Tel</th>
                 <th>Adres</th>
-				<th>Boodschap</th>
-                <th>Acties</th>
+                <th>Postc</th>
+				<th>Stad</th>
+                <th>msg</th>
+				<th>cons</th>
             </tr>
         </thead>
-        <tbody id="ledenRows"></tbody>
+        <tbody id="formsRows"></tbody>
     </table>
 
 </div>
@@ -112,47 +150,60 @@ const db = createClient(
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
 );
 
+function confirmModal(message) {
+  return new Promise(function (resolve) {
+    showModal('confirm', '❓', message, function (result) {
+      resolve(result);
+    });
+  });
+}
+
+
 // =====================================
 //  EXCELJS VIA ESM (NIET GEBLOKKEERD)
 // =====================================
 import ExcelJS from "https://esm.sh/exceljs";
 
 // =====================================
-//  LADEN VAN LEDEN
+//  LADEN VAN Contacten
 // =====================================
-async function loadLeden() {
-    const { data: Leden, error } = await db
+async function loadForms() {
+    const { data: forms, error } = await db
         .from("forms")
         .select("*")
 		.order("name", { ascending: sortDirection === "asc" });
-
       
     if (error) {
-        showModal("error", "👎", "Er ging iets mis bij laden");
+        await Modal.error("👎", "Foute bij laden! ❌");
         return;
     }
 
-    const tbody = document.getElementById("ledenRows");
+   const tbody = document.getElementById("formsRows");
     tbody.innerHTML = "";
 
-    Leden.forEach(lid => {
+    forms.forEach(lid => {
         const tr = document.createElement("tr");
 
-        tr.innerHTML = `
-            <td><input value="${lid.naam || ""}" data-field="naam"></td>
-            <td>${lid.email}</td>
-            <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
-            <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
-            <td><input value="${lid.adres || ""}" data-field="adres"></td>
-            <td>
-                <button class="wtc-button updateBtn">Update</button>
-                <button class="wtc-button wtc-delete deleteBtn">Delete</button>
-            </td>
-        `;
+     tr.innerHTML = `
+  <td><input value="${lid.name || ""}" data-field="name"></td>
+  <td>${lid.email || ""}</td>
+  <td><input value="${lid.phone || ""}" data-field="phone"></td>
+  <td><input value="${lid.street || ""}" data-field="street"></td>
+  <td><input value="${lid.zip || ""}" data-field="zip"></td>
+  <td><input value="${lid.city || ""}" data-field="city"></td>
+  <td>
+  <textarea data-field="msg" style="width:100%;min-height:60px;resize:vertical;">${lid.msg || ""}</textarea>
+  </td>
+  <td>${lid.consent ? "✔️" : "❌"}</td> 
+  <td>
+    <button class="wtc-button updateBtn">Update</button>
+    <button class="wtc-button wtc-delete deleteBtn">Delete</button>
+  </td>
+`;
 
         // UPDATE
         tr.querySelector(".updateBtn").onclick = async () => {
-            const inputs = tr.querySelectorAll("input");
+			const inputs = tr.querySelectorAll("input, textarea");
             const updates = {};
 
             inputs.forEach(inp => {
@@ -160,52 +211,65 @@ async function loadLeden() {
             });
 
             const { error } = await db
-                .from("Leden")
+                .from("forms")
                 .update(updates)
                 .eq("id", lid.id);
 
             if (error) 
-				showModal("error", "👎", "fout bij update");
+				await Modal.error("👎", "Fout bij laden! ❌");
             else 
-				showModal("success", "👌", "record is opgeslagen");
+				await Modal.success("👌", "Record is opgeslagen! ✔");
         };
 
         // DELETE
         tr.querySelector(".deleteBtn").onclick = async () => {
-            if (!confirm("Verwijderen?")) 
-			return;
+            const ok = await confirmModal('Record verwijderen, zeker?');
+			if (!ok) return;
 
             const { error } = await db
-                .from("Leden")
+                .from("forms")
                 .delete()
                 .eq("id", lid.id);
 
             if (error) 
-				showModal("error", "👎", "Er ging iets mis bij verwijderen");
+				await Modal.error("👎", "Verwijderen is mislukt. ❌");
             else tr.remove();
         };
 
         tbody.appendChild(tr);
     });
 }
+// =====================================
+//  UITLOGGEN
+// ====================================
+
+document.getElementById("btnLogout").addEventListener("click", async () => {
+  await fetch("/api/logout", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  window.location.href = "/";
+});
+
+
 
 // =====================================
 //  EXCEL EXPORT
-// =====================================
-
+// ====================================
 
 document.getElementById("exportBtn").onclick = async () => {
-    const { data: Leden, error } = await db
-        .from("Leden")
+    const { data: forms, error } = await db
+        .from("forms")
         .select("*");
 
     if (error) {
-        showModal("error", "👎", "Er ging iets mis bij export");
+        await Modal.error("👎", "Export is mislukt. ❌");
         return;
     }
 
     // JS-sortering op naam, met richting
-    Leden.sort((a, b) => {
+    forms.sort((a, b) => {
         const an = a.naam || "";
         const bn = b.naam || "";
         return sortDirection === "asc"
@@ -214,16 +278,19 @@ document.getElementById("exportBtn").onclick = async () => {
     });
 
     const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet("Leden");
+    const ws = wb.addWorksheet("Contacten");
 
     // Kolommen + breedtes
-    ws.columns = [
-        { header: "Naam", key: "naam", width: 20 },
-        { header: "Email", key: "email", width: 20 },
-        { header: "Telefoon", key: "telefoon", width: 20 },
-        { header: "Gemeente", key: "gemeente", width: 20 },
-        { header: "Adres", key: "adres", width: 20 }
-    ];
+ws.columns = [
+  { header: "Name", key: "name", width: 22 },
+  { header: "Email", key: "email", width: 28 },
+  { header: "Phone", key: "phone", width: 18 },
+  { header: "Street", key: "street", width: 24 },
+  { header: "Zip", key: "zip", width: 10 },
+  { header: "City", key: "city", width: 18 },
+  { header: "Message", key: "msg", width: 40 },
+  { header: "Consent", key: "consent", width: 12 }
+];
 
     // Header-stijl
     ws.getRow(1).eachCell(cell => {
@@ -242,16 +309,18 @@ document.getElementById("exportBtn").onclick = async () => {
     });
 
     // Data-rijen
-    Leden.forEach(lid => {
-        ws.addRow({
-            naam: lid.naam || "",
-            email: lid.email || "",
-            telefoon: lid.telefoon || "",
-            gemeente: lid.gemeente || "",
-            adres: lid.adres || ""
-        });
-    });
-
+forms.forEach(f => {
+  ws.addRow({
+    name: f.name || "",
+    email: f.email || "",
+    phone: f.phone || "",
+    street: f.street || "",
+    zip: f.zip || "",
+    city: f.city || "",
+    msg: f.msg || "",
+    consent: f.consent ? "✔️" : "❌"
+  });
+});
     // Borders voor alle cellen
     ws.eachRow(row => {
         row.eachCell(cell => {
@@ -277,17 +346,15 @@ document.getElementById("exportBtn").onclick = async () => {
 
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "Leden.xlsx";
+    a.download = "Contacten.xlsx";
     a.click();
 };
 
-
-
-loadLeden();
+loadForms();
 
 document.getElementById("sortNaam").onclick = () => {
     sortDirection = sortDirection === "asc" ? "desc" : "asc";
-    loadLeden();
+    LoadForms();
 };
 
 </script>

@@ -356,7 +356,6 @@ async function openAdminDialog(eventData) {
     btnDelete.onclick = () => handleDeleteEvent();
   }
   
-  eventDialog.showModal();
 }
 
 function overlaps(a,b){ return a.startM < b.endM && b.startM < a.endM; }
@@ -440,8 +439,6 @@ async function openMemberDialog(eventData) {
   memberActions.innerHTML = renderMemberRight(eventData, status);
 
   attachMemberEvents(eventData, status);
-  
-  eventDialog.showModal();
 
 }
 
@@ -664,7 +661,7 @@ function showQR() {
       const r = await doSignup(e.id);
 
       if (!r || !r.ok) {
-  		showModal("error", "❌", "Inschrijving mislukt: " + err.message);
+  		await Modal.error("👎", "Inschrijving mislukt. ❌");
         return;
       }
 	  	  
@@ -676,7 +673,7 @@ function showQR() {
       chk.disabled = true;
 
       downloadConfirmation(e, lastSignup);
-		showModal("success", "👌", "U bent ingeschreven! een bevsstiging is gedownload.");
+		await Modal.success("👌", "U bent ingeschreven! een bevsstiging is gedownload! ✔");
     };
   }
 }
@@ -888,7 +885,7 @@ async function handleSaveEvent() {
   };
 
   if (!payload.title) {
-    showModal("error", "⚠️", "Geef een titel op.");
+  await Modal.error("👎", "Geef een titel op! ❌");
     return;
   }
 
@@ -896,13 +893,13 @@ async function handleSaveEvent() {
   if (editingEvent.id) {
     result = await updateEventOnServer(editingEvent.id, payload);
     if (!result?.ok) {
-      showModal("error", "❌", "opslaan mislukt: " );
+     await Modal.error("👎", "Opslaan mislukt. ❌");
       return;
     }
   } else {
     result = await createEventOnServer(payload);
     if (!result?.id) {
-      showModal("error", "❌", "aanmaken mislukt: ");
+      await Modal.error("👎", "Aanmaken mislukt. ❌");
       return;
     }
   }
@@ -918,7 +915,7 @@ async function handleDeleteEvent() {
 
   const result = await deleteEventOnServer(editingEvent.id);
   if (!result?.ok) {
-    showModal("error", "❌", "verwijderen mislukt: ");
+    await Modal.error("👎", "Verwijderen mislukt. ❌");
     return;
   }
 

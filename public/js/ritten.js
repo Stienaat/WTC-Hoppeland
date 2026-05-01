@@ -217,7 +217,10 @@ function setRouteActive(index) {
 /* ================= LOAD ================= */
 
 function reloadCatalog() {
-  return fetch('/api/rides')
+ return fetch('/api/rides', {
+  credentials: "include"
+})
+
     .then(function (r) { return r.json(); })
     .then(function (data) {
       const active = routes.filter(function (r) { return r.type !== 'catalog'; });
@@ -682,7 +685,7 @@ function renderUserBadge() {
   const el = document.getElementById('routeUserBadge');
   if (!el) return;
 
-
+  const role = isAdminUser() ? 'Admin' : 'Lid';
   const name =
     localStorage.getItem('user_name') ||
     sessionStorage.getItem('user_name') ||

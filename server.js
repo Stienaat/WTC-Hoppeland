@@ -1,3 +1,6 @@
+import "dotenv/config";
+console.log("SUPABASE_URL =", process.env.SUPABASE_URL);
+
 import express from "express";
 import path from "path";
 import session from "express-session";
@@ -13,6 +16,7 @@ import authRoutes from "./routes/auth.js";
 import cycleRoutes from "./routes/cycleroutes.js";
 import ridesRouter from './routes/rides.js';
 import cors from 'cors';
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,9 +49,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-  secure: true,
-  sameSite: 'none'
-	}
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
+  }
 }));
 
 app.use('/api/rides', ridesRouter);
@@ -68,6 +72,14 @@ app.post("/admin-login", (req, res) => {
   req.url = "/api/admin/login";
   app.handle(req, res);
 });
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.json({ ok: true });
+  });
+});
+
+
 
 app.post("/admin-change-pin", (req, res) => {
   req.url = "/api/admin/change-pin";
