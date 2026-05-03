@@ -101,6 +101,7 @@ async function openAdminPrompt() {
 /************************************************************
  * PIN WIJZIGEN
  ************************************************************/
+ 
 const btnPinChange = document.getElementById('btnPinChange');
 const pinChangeOverlay = document.getElementById('pinChangeOverlay');
 const btnChangeCode = document.getElementById('btnChangeCode');

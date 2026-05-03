@@ -205,7 +205,7 @@ function initAdminConfigCard() {
       const j = await ajax('/api/admin/config');
 
       if (!j?.ok || !j.config) {
-         await Modal.error("👎", "Kan configuratie niet laden! ❌");
+        await Modal.error("👎", "Kan configuratie niet laden! ❌");
         return;
       }
 
@@ -279,7 +279,7 @@ if (btnUploadRoute) {
     const file = document.getElementById('routeFile')?.files?.[0];
 
     if (!naam || !groep || !afstand || !start || !file) {
-      setStatus(routeError, 'Naam, groep, afstand, start en bestand zijn verplicht.', 'error');
+	  await Modal.warn("⚠️", "Naam, groep, afstand, start en bestand zijn verplicht.");
       return;
     }
 
@@ -312,12 +312,12 @@ try {
   const j = await res.json();
 
   if (!res.ok || !j.ok) {
-    setStatus(routeError, j.error || 'Upload mislukt.', 'error');
+   await Modal.error("👎", "Upload is  mislukt. ❌");
     return;
   }
 
   closeRouteOverlay();
-  setStatus(routeError, '✔ Route toegevoegd.', 'ok');
+  await Modal.success("👌", "De route is toegevoegd! ✔");
 
   const naamEl = document.getElementById('routeNaam');
   const afstandEl = document.getElementById('routeAfstand');
@@ -334,7 +334,7 @@ try {
   }
 } catch (e) {
   console.error(e);
-  setStatus(routeError, 'Technische fout bij upload.', 'error');
+  await Modal.error("👎", "Technisch fout bij upload. ❌");
 }
   });
 }
@@ -405,3 +405,20 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 50);
   }
 });
+
+const btnChooseFile = document.getElementById('btnChooseFile');
+const routeFile = document.getElementById('routeFile');
+const fileName = document.getElementById('fileName');
+
+if (btnChooseFile && routeFile) {
+  btnChooseFile.addEventListener('click', () => {
+    routeFile.click();
+  });
+}
+
+if (routeFile && fileName) {
+  routeFile.addEventListener('change', () => {
+    const file = routeFile.files[0];
+    fileName.textContent = file ? file.name : '';
+  });
+}

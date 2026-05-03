@@ -207,7 +207,7 @@ function downloadConfirmation(event, signup) {
     `Event  : ${event.title}\n` +
     `Datum  : ${dateStr}\n` +
     `om     : ${timeStr}\n` +
-    `Prijs  : ${price} €\n` +
+    `Prijs  : ${prijs} €\n` +
     `Betaald: ${betaald}\n`;
 
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
@@ -219,6 +219,8 @@ function downloadConfirmation(event, signup) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  eventDialog.close();
+
 }
 
 function generateQR(e) {
@@ -250,6 +252,10 @@ async function openEventDialog(ev) {
     await openAdminDialog(ev);
   } else {
     await openMemberDialog(ev);
+  }
+
+  if (!eventDialog.open) {
+    eventDialog.showModal();
   }
 }
 window.openEventDialog = openEventDialog;
@@ -654,7 +660,7 @@ function showQR() {
       }
 
       if (!signupPrepared) {
-        console.warn("Geen voorlopige inschrijving geselecteerd.");
+		await Modal.warn("⚠️", "Geen voorlopige inschrijving geselecteerd.");  
         return;
       }
 
@@ -664,8 +670,6 @@ function showQR() {
   		await Modal.error("👎", "Inschrijving mislukt. ❌");
         return;
       }
-	  	  
-
       lastSignup = r.signup || r.data || null;
       signupDownloaded = true;
 
@@ -673,7 +677,7 @@ function showQR() {
       chk.disabled = true;
 
       downloadConfirmation(e, lastSignup);
-		await Modal.success("👌", "U bent ingeschreven! een bevsstiging is gedownload! ✔");
+		await Modal.success("👌", "U bent ingeschreven! een bevestiging is gedownload! ✔");
     };
   }
 }
@@ -909,9 +913,16 @@ async function handleSaveEvent() {
   eventDialog.close();
 }
 
+async function confirmModal(message) {
+  return await Modal.confirm("Bevestigen", message);
+}
+
 async function handleDeleteEvent() {
   if (!isAdminUser() || !editingEvent?.id) return;
-  if (!confirm("Verwijderen?")) return;
+  const ok = await confirmModal('Verwijderen?');
+  
+	if (!ok) return;
+
 
   const result = await deleteEventOnServer(editingEvent.id);
   if (!result?.ok) {
@@ -939,7 +950,7 @@ async function init() {
     render();
   } catch (err) {
     console.error("Init mislukt:", err);
-    window.location.href = "leden.html?msg=notknown";
+    window.location.href = "index.html?msg=notknown";
   }
 }
 
