@@ -60,7 +60,7 @@ body
       gap: 80px;
       align-items: center;
 	  justify-content: space-between;
-      margin-bottom: 60px;
+      margin-bottom: 20px;
     }
 
 	 .intro-logo {
@@ -154,8 +154,8 @@ body
     }
 
     .faq {
-      display: flex;     
-      gap: 10px;
+      display: flex;    
+	  gap: 10px;
 	  justify-content: space-between;
       margin-bottom: 60px;
 	  margin-top: 60px;
@@ -171,7 +171,7 @@ body
 	  box-sizing: border-box;
     }
 	
-	.round {
+.round {
 	border-radius: 50px;
     background-color: lightyellow;
     background-image: none;
@@ -189,21 +189,22 @@ body
   	box-shadow:0 6px 20px rgba(0,0,0,.50);
   }
 
-	.fot {
+.fot {
 		display: flex;
 	  justify-content: center;   /* horizontaal centreren */
 	  align-items: center;       /* verticaal centreren */
 	  margin: 20px 0;
 }
-    .company {
-      display: flex;     
+.company {
+      display: grid;     
+	  grid-template-columns: 2fr 1fr 1fr 1.5fr;
       gap: 10px;
 	  justify-content: space-between;
       margin-bottom: 60px;
 	  margin-top: 60px;
     }
 	
-	.comptext {
+.comptext {
 	  flex: 1;
       min-height: 250px;	  
       padding: 12px;
@@ -212,3 +213,21 @@ body
       border-radius: 10px;
 	  box-sizing: border-box;
     }
+	
+#pinChangeOverlay{
+	position:fixed; left:500px; top: 50px;
+	z-index: 9000;
+ }
+  
+.overlay-PINchange {					 
+  pointer-events: auto;
+  border-radius:15px;
+  padding: 20px;
+  margin: 20px; 
+  width: 350px;
+  height: 200px;           
+  border:5px solid orange;
+  inset: 100;
+  background: #fff;
+
+}
