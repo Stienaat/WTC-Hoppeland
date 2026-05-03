@@ -174,28 +174,24 @@ async function loadLeden() {
 		
     // DELETE
 
-tr.querySelector(".deleteBtn").onclick = async () => {
-  const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");
+		tr.querySelector(".deleteBtn").onclick = async () => {
+		  const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");
+		  if (!result) {
+			return;		  }
 
-  if (!result) {
-    return;
-  }
-
-  const { error } = await db
-    .from("Leden")
-    .delete()
-    .eq("id", lid.id);
-
-  if (error) {
-    await Modal.error("👎", "Verwijderen is mislukt. ❌");
-  } else {
-    tr.remove();
-    await Modal.success("👌", "De record is verwijderd! ✔");
-  }
-};
-
-        tbody.appendChild(tr);
-    });
+		  const { error } = await db
+			.from("Leden")
+			.delete()
+			.eq("id", lid.id);
+		  if (error) {
+			await Modal.error("👎", "Verwijderen is mislukt. ❌");
+		  } else {
+			tr.remove();
+			await Modal.success("👌", "De record is verwijderd! ✔");
+		  }
+		};
+		tbody.appendChild(tr);
+	});
 }
 
 // =====================================
@@ -307,8 +303,6 @@ document.getElementById("exportBtn").onclick = async () => {
     a.download = "Leden.xlsx";
     a.click();
 };
-
-
 
 loadLeden();
 

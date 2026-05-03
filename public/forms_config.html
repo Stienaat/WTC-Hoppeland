@@ -138,6 +138,7 @@ td, th {
     </div>
 </div>
 
+
 <script src="js/modal.js"></script>
 <script type="module">
 
@@ -149,15 +150,6 @@ const db = createClient(
     "https://orvjhbtoxjqhedsgnxqp.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ydmpoYnRveGpxaGVkc2dueHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1ODY3MzAsImV4cCI6MjA5MDE2MjczMH0.vj8rJ3vazRjdz6OvJ5cZuFCuQS--G3Z8PcRuQEkdZQU"
 );
-
-function confirmModal(message) {
-  return new Promise(function (resolve) {
-    showModal('confirm', '❓', message, function (result) {
-      resolve(result);
-    });
-  });
-}
-
 
 // =====================================
 //  EXCELJS VIA ESM (NIET GEBLOKKEERD)
@@ -219,25 +211,29 @@ async function loadForms() {
 				await Modal.error("👎", "Fout bij laden! ❌");
             else 
 				await Modal.success("👌", "Record is opgeslagen! ✔");
+	
         };
 
-        // DELETE
+// DELETE
+
         tr.querySelector(".deleteBtn").onclick = async () => {
-            const ok = await confirmModal('Record verwijderen, zeker?');
-			if (!ok) return;
-
-            const { error } = await db
-                .from("forms")
-                .delete()
-                .eq("id", lid.id);
-
-            if (error) 
-				await Modal.error("👎", "Verwijderen is mislukt. ❌");
-            else tr.remove();
-        };
-
-        tbody.appendChild(tr);
-    });
+            const result = await Modal.confirm("Bevestigen", "Weet je het zeker?");			
+			if (!result) {
+				return;
+		  }
+		  const { error } = await db
+			.from("forms")
+			.delete()
+			.eq("id", lid.id);
+		  if (error) {
+			await Modal.error("👎", "Verwijderen is mislukt. ❌");
+		  } else {
+			tr.remove();
+			await Modal.success("👌", "De record is verwijderd! ✔");
+		  }
+		};
+		tbody.appendChild(tr);
+	});
 }
 // =====================================
 //  UITLOGGEN
@@ -251,8 +247,6 @@ document.getElementById("btnLogout").addEventListener("click", async () => {
 
   window.location.href = "/";
 });
-
-
 
 // =====================================
 //  EXCEL EXPORT
@@ -354,7 +348,7 @@ loadForms();
 
 document.getElementById("sortNaam").onclick = () => {
     sortDirection = sortDirection === "asc" ? "desc" : "asc";
-    LoadForms();
+    loadForms();
 };
 
 </script>

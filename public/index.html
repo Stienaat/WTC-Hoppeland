@@ -39,6 +39,7 @@
 			</button>
 			</div>
 		</div>
+		<div id="noticeBox" class="noticeBox" contenteditable="false"></div> <!-- NOTICE “BESTE LEDEN”    Notice   ✅ -->
 	</section>
 	  
 	<div class="intro-text">
@@ -100,11 +101,11 @@
 	<div class ="fot" >
 		<a href="clubfoto.html">
 			<img src="images/clubled.png" alt="Clubfoto">
-		</a>
+		</a>	
+	<div id="Text1" style="position:absolute;left:520px;top: 1550px;width:288px;height:40px;z-index:1;">
+		<span style="color:#fff;font-family:Arial;font-size:13px;">Klik op deze foto voor een groter beeld</span>
 	</div>
-	
-<div id="Text1" style="position:absolute;left:520px;top: 1550px;width:288px;height:40px;z-index:1;">
-<span style="color:#fff;font-family:Arial;font-size:13px;">Klik op deze foto voor een groter beeld</span></div>
+	</div>
 	
     <div class="faq">
 		<div class="faqtext">
@@ -153,21 +154,24 @@
 			<h6>Ondernemingsnummeer: xxxxxx.</h6><br>
 			<h6>Banken: Belfius Poperinge.</h6>
 		</div>
-		<div class="comptext" style="background-color:"FFFBE2;">
+		<div class="comptext" style="background-color:"FFFBE2">
 			<h5>Volg ons.</h5><br><br>
-			<h6>Facebook.</h6><br>
-			<h6>Twitter.</h6><br>
-			<h6>Instagram.</h6>
+			  <img class="logoF" src="images/Facebook.png" alt="facebook"><br><br>
+			  <img class="twitterF" src="images/twitter.png" alt="twitter"><br><br>
+			  <img class="instagrF" src="images/instagram.png" alt="instag">
+			
+		</div>
+		<div class="comptext" style="background-color:#f5E5ED;">
+			<h6>Maatschappelijke zetel: Poperinge.</h6><br>
+			<h6>Ondernemingsnummeer: xxxxxx.</h6><br>
+			<h6>Banken: Belfius Poperinge.</h6>
+		</div>
+		 	<div class="comptext" style="background-color:#f5E5ED;">
+		
 		</div>
 	</div>
 
-  </main>
-
-<!-- NOTICE “BESTE LEDEN”    Notice   ✅ -->
-
-<div id="Noticetext" style="position:absolute;left:700px;top:200px;">
-	<div id="noticeBox" class="noticeBox" contenteditable="false"></div>
-</div>
+ </main>
 
 <!-- MEMBER LOGIN / REGISTRATIE CARD         ✅ --> 
 
@@ -184,7 +188,7 @@
 			
 	<!-- FASE 1 PIN  	dubbelklik		  ✅ -->	
             <div id="Image1" style="position:absolute; left: 350px; top:15px; z-index:10;">
-                <img src="images/Logo.png" id="adminLogo" width="40" height="40">
+                <img src="images/Logo.png" id="adminLogo">
             </div
 
 	<!-- ALLEEN BIJ REGISTRATIE 		  ✅ -->
@@ -449,7 +453,7 @@
 <!-- PINCODE WIJZIGEN POPUP 				✅-->
 	
 <div id="pinChangeOverlay" style="display:none;" aria-hidden="true">
-  <div class="overlay-card">
+  <div class="overlay-PINchange">
 	<div class="overlay-row" style="padding-bottom: 20px;"><h3>Pincode wijzigen</h3>
 		<button type="button" id="btnClosePinChange" class="wtc-button">Sluiten</button>
     </div>

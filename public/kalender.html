@@ -18,7 +18,7 @@
     const isAdmin = localStorage.getItem("is_admin") === "true";
 
     if (!email && !isAdmin) {
-        window.location.href = "leden.html?msg=notknown";
+        window.location.href = "index.html?msg=notknown";
     }
 </script>
 
@@ -31,14 +31,14 @@
       </p>
       <div class="spacer"></div>
       <div class="weekLabel" id="weekLabel"></div>
-      <input type="submit" id="BtnBack" class="wtc-button" onclick="window.location.href='./index.html';return false;"
-		name="Form"  value="⏪Terug">
+      <input type="submit" id="BtnBack" class="wtc-button" name="Form"  value="⏪Terug">
       <img src="images/Logo.png" width="50" height="50">
     </div>
     <div id="gridScroll" class="gridScroll">
       <div id="grid" class="grid" role="grid" aria-label="Weekkalender"></div>
     </div>
   </div>
+  
   <!-- EVENT DIALOG -->
   <dialog id="eventDialog">
     <form id="eventForm">
@@ -65,12 +65,27 @@
 <!-- alert -->
 
 <div id="app-modal" class="modal hidden">
-  <div class="modal-content">
-    <span id="modal-close" class="close">&times;</span>
-    <h2 id="modal-title"></h2>
-    <p id="modal-message"></p>
-  </div>
+    <div class="modal-content">
+        <h3 id="modal-title"></h3>
+        <div id="hoplog" style="position:absolute;left:270px;top:10px;width:45px;height:45px;z-index: 30001;">
+            <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        </div>
+        <p id="modal-message"></p>
+        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+            <!-- Knoppen worden dynamisch ingevuld -->
+        </div>
+    </div>
 </div>
+
+<script>  
+
+document.getElementById("BtnBack").onclick = () => {
+  localStorage.removeItem("user_email");
+  CURRENT_USER = null;
+
+  window.location.href = "index.html";
+};
+</script>
 
 	<script src="js/qrcode.min.js"></script>
 	<script src="js/kalender.js"></script>
