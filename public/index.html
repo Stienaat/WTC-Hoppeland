@@ -5,6 +5,26 @@
   <title>WTC-Hoppeland</title>
   <link href="./css/WTC.css" rel="stylesheet">
 
+<style>
+.square {
+	background-color: lightyellow;
+    background-image: none;
+	border-color:green;
+	border-width:3px;
+	height: 45px; width:105px;   
+	font-family: Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 15px;
+    padding:2px;
+    text-align: center;
+    margin: 0px;
+  	box-shadow:0 6px 20px rgba(0,0,0,.70);
+  }  
+.square:hover {
+	background-color: pink;
+}
+  </style>
 </head>
 
 <body>
@@ -31,10 +51,10 @@
 		<div class="intro-logo">       
 			<img src="images/Logo.png" alt="Logo WTC Hoppeland">
 			<div class="intro-buttons">
-			<button id="btnShowLogin" class="wtc-button" style=" height: 100px; width:100px;border-radius: 50px; font-size: 20px;">
+			<button id="btnShowLogin" class="wtc-button" style=" margin-top: 30px; height: 100px; width:100px;border-radius: 50px; font-size: 20px;">
 				Klik voor login!
 			</button>
-			<button id="btnShowInfo" class="wtc-button" style="height: 100px; width:100px;border-radius: 50px; font-size: 20px;">
+			<button id="btnShowInfo" class="wtc-button" style="margin-top: -30px; height: 100px; width:100px;border-radius: 50px; font-size: 20px;">
 				Kik voor info!
 			</button>
 			</div>
@@ -58,7 +78,7 @@
       <div class="card">
         <div class="card-title">Lieven<br>Danneel</div>
         <img class="card-image" src="images/LD.jpg" alt="Lieven">
-        <div class="card-footer">Voorzitter<br><br> Tel: 000 000000 <br>Email: Voorzitter@email.be </div>
+        <div class="card-footer">Voorzitter<br><br> Tel: 000 000000 <br><br>Email: Voorzitter@email.be </div>
       </div>
 
       <div class="card">
@@ -254,8 +274,9 @@
 			 });
 			</script>		
 			   			
-			<input type="submit"  id="Forgotlink"  class="wtc-button"  onclick="window.location.href='./paswoord_vergeten.php';return false;"
-				name="btn" value="Paswoord vergeten?" style="position:absolute;left:220px;top:420px;width:150px;z-index:11">
+			<input type="button" id="Forgotlink" class="wtc-button" onclick="openForgotModal(); return false;"
+				value="Paswoord vergeten?"
+				style="position:absolute;left:220px;top:420px;width:150px;z-index:11">			
 			<button type="button" id="btnCloseLogin" style="position:absolute;left:20px;top:60px">⏪Sluit</button>			
 		</form>
 	</div>
@@ -362,31 +383,31 @@
 					
 		</div>	
 		<div class="overlay-row" >
-			<button type="button" class="wtc-button" onclick= "window.location.href='./leden_config.html'">Leden-config</button>
-			<button type="button" class="wtc-button" onclick= "window.location.href='./signups_config.html'">Events-config</button>
-			<button type="button" class="wtc-button" onclick= "window.location.href='./forms_config.html'">Contacts-config</button>
+			<button type="button" class="square" onclick= "window.location.href='./leden_config.html'">Leden-config</button>
+			<button type="button" class="square" onclick= "window.location.href='./signups_config.html'">Events-config</button>
+			<button type="button" class="square" onclick= "window.location.href='./forms_config.html'">Contacts-config</button>
 		</div>		
-		<div class="overlay-row" >
-			<button type="button" class="wtc-button" onclick= "window.location.href='./leden-dashboard.html?overlay=1'">Leden pagina</button>
-			<button type="button" class="wtc-button" onclick= "window.location.href='./kalender.html'">Kalender</button>	
-			<button type="button" class="wtc-button" onclick= "window.location.href='./shop.html'">Shop Openen</button>	
+		<div class="overlay-row" >			
+			<button type="button" class="square" onclick= "window.location.href='./kalender.html'">Kalender</button>	
+			<button type="button" class="square" onclick= "window.location.href='./shop.html'">Store </button>	
+			<button type="button" class="square" onclick= "window.location.href='./movie.html'">Movie </button>	
 		</div>
 				
 		<div class="overlay-row" >
-			<button type="button" class="wtc-button"  onclick= "window.location.href='./Help.html'">Help</button>	
-			<button type="button" class="wtc-button" onclick= "window.location.href='./ritten.html'">Fietsroutes</button>
-		</div>
-		<!-- knop pincode wijzigen -->		
-		<div class="overlay-row" style="margin-top:3px;">
-			<button type="button" id="btnPinChange" class="wtc-button" >Pin-code wijzigen </button>
+			<button type="button" class="square" onclick= "window.location.href='./Help.html'">Help</button>	
+			<button type="button" class="square" onclick= "window.location.href='./ritten.html'">Fietsroutes</button>
+			<button type="button" id="btnPinChange" class="square" >Pin-code wijzigen </button>
+		</div>	
+		
+		<div class="overlay-row" style="margin-top:3px;">			
 		<div id="btnMedSave" class="wtc-status" ;></div>
 		</div>	
 	</div>
 			
 	<div class="cell" id="not-format"> <h5> Notice formatteren! </h5>
-		<div style=" font-size: 14px; line-height: 0.4";>
-			<pre># --------        <h5> Opmaak</h5></pre>
-			<pre>## -------         <h6>Notice<h6></pre>
+		<div style=" font-size: 14px; color: blue; padding-left: 30px; line-height: 0.5";>
+			<pre># --------         <h5 style="color:blue;"> Opmaak</h5></pre>
+			<pre>## -------         <h6 style="color:blue;"> Notice<h6></pre>
 			<pre>- --------         <a>- Lijsten</a></pre>
 			<pre>**------**         <strong>Vet</strong></pre>
 			<pre>*--------*         <em>cursief</em></pre>
@@ -482,6 +503,8 @@
   </div>
 </div>
 
+
+
 <script>
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -517,6 +540,37 @@ document.addEventListener("DOMContentLoaded", () => {
   contactOverlay?.addEventListener("click", e => {
     if (e.target === contactOverlay) contactOverlay.classList.add("hidden");
   });
+});
+</script>
+
+<script>
+function openForgotModal() {
+    document.getElementById("forgot-modal").classList.remove("hidden");
+}
+
+function closeForgotModal() {
+    document.getElementById("forgot-modal").classList.add("hidden");
+}
+</script>
+
+<script>
+document.getElementById("btnForgotSend").addEventListener("click", async () => {
+    const email = document.getElementById("forgotEmail").value.trim();
+
+    const res = await fetch("/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+        alert("Als het emailadres bestaat, werd een herstelmail verzonden.");
+        closeForgotModal();
+    } else {
+        alert("Fout: " + data.error);
+    }
 });
 </script>
 

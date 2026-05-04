@@ -14,22 +14,18 @@ body {
 }
 .menu {
 	display: grid;     
-	grid-template-columns: 1.5fr 1fr  5fr;
-	left:10px;
-	top:10px;
-	margin:10px ;
+	grid-template-columns: 1.5fr 2fr  3fr;   
+	margin:10px;
 	padding:10px;
 	border-radius:15px;
 }
-
 .round {
 	border-radius: 50px;
     background-color: lightyellow;
     background-image: none;
 	border-color:green;
 	border-width:5px;
-	height: 100px; width:100px;
-    color: #000000;
+	height: 100px; width:100px;   
 	font-family: Arial, sans-serif;
     font-weight: normal;
     font-style: normal;
@@ -37,8 +33,12 @@ body {
     padding:2px;
     text-align: center;
     margin: 5px;
-  	box-shadow:0 6px 20px rgba(0,0,0,.50);
-  }
+  	box-shadow:0 6px 20px rgba(0,0,0,.70);
+  }  
+.round:hover {
+	background-color: pink;
+}
+
 
 </style>
 
@@ -77,16 +77,16 @@ loadLid();
 
 <div class="menu" >
 	<!-- LINKER BLOK -->
-	<div style=" width:150px;">		
+	<div style="width:100%;">
 		<input type="submit" id="BtnBack2" class="round" style= "width:100px" onclick="window.location.href='./kalender.html';return false;" name="Form1"  value="Activiteiten">
 		<input type="submit" id="BtnBack3" class="round" style= "width:100px" onclick="window.location.href='./ritten.html';return false;" name="Form2"  value="Fietsroutes">
-		<input type="submit" id="BtnBack4" class="round" style= "width:100px" onclick="window.location.href='./shop.html';return false;" name="Form3"  value="Shop">
+		<input type="submit" id="BtnBack4" class="round" style= "width:100px ; margin-left:20px;" onclick="window.location.href='./shop.html';return false;" name="Form3"  value="Shop">
 		<input type="submit" id="BtnBack5" class="round" style= "width:100px" onclick="window.location.href='./movies.html';return false;" name="Form4"  value="Movies">
-		<input type="submit" id="btnLogout" class="round" style= "width:100px"  name="Form0"  value="Uitloggen">
+		<input type="submit" id="btnLogout" class="round" style= "width:100px ; margin-left:80px;"  name="Form0"  value="Uitloggen">
 	</div>
 
 	<!-- MIDDEN BLOK -->
-	<div style=" width:400px;" >
+	<div style=" padding: 5px; background: #d6f6d9" >
 	  <p>Welkom beste, <strong id="naam"></strong></p>
 		  <img ID="lid" src="images/dummy.png" alt="dummy"><br><br>
 	  <h6>Je gegevens</h6>
@@ -101,7 +101,7 @@ loadLid();
 
 	<!-- RECHTERKOLOM — REGLEMENT -->
 	
-	  <div >
+	  <div style=" background: #f1fdf2 ; padding: 10px;" >
 		<h5>HUISHOUDELIJK REGLEMENT</h5>
 		
 			<p>Artikel 1:<Br>
