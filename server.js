@@ -17,8 +17,6 @@ import cycleRoutes from "./routes/cycleroutes.js";
 import ridesRouter from './routes/rides.js';
 import cors from 'cors';
 
-
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
