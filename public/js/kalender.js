@@ -33,10 +33,20 @@ function goToday() {
 }
 
 async function apiJson(url, options = {}) {
-  const res = await fetch(url, {
-    credentials: "include",
-    ...options
-  });
+  let res;
+
+  try {
+    res = await fetch(url, {
+      credentials: "include",
+      ...options
+    });
+  } catch (err) {
+    console.error("Fetch mislukt:", err);
+    return {
+      ok: false,
+      error: "Geen verbinding met de server. Controleer of de backend draait."
+    };
+  }
 
   let json = null;
   try {
@@ -46,7 +56,11 @@ async function apiJson(url, options = {}) {
   }
 
   if (!res.ok) {
-    return { ok: false, error: json?.error || json?.message || `HTTP ${res.status}`, status: res.status };
+    return {
+      ok: false,
+      error: json?.error || json?.message || `HTTP ${res.status}`,
+      status: res.status
+    };
   }
 
   return json ?? {};
@@ -194,6 +208,9 @@ async function doCommit(eventId) {
 }
 
 function downloadConfirmation(event, signup) {
+	eventDialog.close();   
+	Modal.close();    
+	
   const start = new Date(event.start);
   const dateStr = start.toLocaleDateString("nl-BE");
   const timeStr = start.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" });
@@ -727,9 +744,12 @@ function render() {
   eventLayer.className = "eventLayer";
   gridEl.appendChild(eventLayer);
   
-if (isAdminUser() && !gridEl.dataset.ctxBound) {
-  gridEl.dataset.ctxBound = "1";
-  gridEl.addEventListener("contextmenu", (ev) => {
+if (!gridEl.dataset.ctxBound) {						// R muis klik
+	gridEl.dataset.ctxBound = "1";
+	
+	gridEl.addEventListener("contextmenu", (ev) => {
+	if (!isAdminUser()) return;   // 👈 TOEVOEGEN
+	
     if (ev.ctrlKey) return;
 
     const eventEl = ev.target.closest(".event");
@@ -773,22 +793,23 @@ if (isAdminUser() && !gridEl.dataset.ctxBound) {
       endIso = cell.dataset.slotEnd;
     }
 
-    openAdminDialog(
-      {
-        id: null,
-        title: "",
-        start: startIso,
-        end: endIso,
-        info: "",
-        requires_signup: false,
-        mandatory: false,
-        paid: false,
-        price: 0,
-        startD: new Date(startIso),
-        endD: new Date(endIso)
-      },
-      { isNew: true }
-    );
+	openAdminDialog({
+	  id: null,
+	  title: "",
+	  start: startIso,
+	  end: endIso,
+	  info: "",
+	  requires_signup: false,
+	  mandatory: false,
+	  paid: false,
+	  price: 0,
+	  startD: new Date(startIso),
+	  endD: new Date(endIso)
+	});
+
+if (!eventDialog.open) {
+  eventDialog.showModal();
+}
   });
 }
 
@@ -901,12 +922,13 @@ async function handleSaveEvent() {
       return;
     }
   } else {
-    result = await createEventOnServer(payload);
-    if (!result?.id) {
-      await Modal.error("👎", "Aanmaken mislukt. ❌");
-      return;
-    }
-  }
+	result = await createEventOnServer(payload);
+
+	if (!result || result.ok === false) {
+	  await Modal.error("👎", result?.error || "Aanmaken mislukt. ❌");
+	  return;
+	}
+}
 
   await loadEvents();
   render();
