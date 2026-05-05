@@ -98,7 +98,6 @@ td, th {
 		name="Form"  value="🏡Home">
 		<button id="btnLogout" class="wtc-button">Uitloggen</button>
 
-
     </div>
 
     <table border="1" cellspacing="0" cellpadding="2" style="width:100%;border-collapse:collapse;">
@@ -114,7 +113,7 @@ td, th {
                 <th>Postc</th>
 				<th>Stad</th>
                 <th>msg</th>
-				<th>cons</th>
+				<th>c</th>
             </tr>
         </thead>
         <tbody id="formsRows"></tbody>
@@ -126,13 +125,13 @@ td, th {
     <div class="modal-content">
         <h3 id="modal-title"></h3>
 
-        <div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+        <div id="hoplog" style="position:relative;left:270px;top:11px;width:45px;height:45px;z-index:2;">
             <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
         </div>
 
         <p id="modal-message"></p>
 
-        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <div id="modal-buttons" style="margin:20px; display:flex; gap:10px; justify-content:center;">
             <!-- Knoppen worden dynamisch ingevuld -->
         </div>
     </div>
@@ -193,7 +192,7 @@ async function loadForms() {
   </td>
 `;
 
-        // UPDATE
+  // UPDATE
         tr.querySelector(".updateBtn").onclick = async () => {
 			const inputs = tr.querySelectorAll("input, textarea");
             const updates = {};
@@ -260,7 +259,11 @@ document.getElementById("exportBtn").onclick = async () => {
     if (error) {
         await Modal.error("👎", "Export is mislukt. ❌");
         return;
-    }
+    }else {
+		
+		await Modal.success("👌", "het excell bestand is gemaakt! ✔");
+
+	}
 
     // JS-sortering op naam, met richting
     forms.sort((a, b) => {

@@ -11,7 +11,6 @@ body {
     font-family: Arial;
     background:#C2D5F3;
 }
-
 .container {
     max-width:1120px;
     margin:30px auto;
@@ -32,7 +31,6 @@ body {
     border-bottom: 1px solid #999;
 }
 
-
 .toolbar{
     display:flex;
     justify-content:space-between;
@@ -42,6 +40,47 @@ body {
     margin: 4px 0 12px;
 }
 .toolbar .spacer{ flex:1; }
+
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+table th:nth-child(1),
+table td:nth-child(1) {
+    width: 150px; /* Naam */
+}
+
+table th:nth-child(2),
+table td:nth-child(2) {
+    width: 220px; /* E-mail */
+}
+
+table th:nth-child(3),
+table td:nth-child(3) {
+    width: 100px; /* Telefoon */
+}
+
+table th:nth-child(4),
+table td:nth-child(4) {
+    width: 140px; /* Gemeente */
+}
+
+table th:nth-child(5),
+table td:nth-child(5) {
+    width: 200px; /* Adres */
+}
+
+table th:nth-child(6),
+table td:nth-child(6) {
+    width: 80px; /* type */
+}
+
+table th:nth-child(7),
+table td:nth-child(7) {
+    width: 120px; /* Acties */
+}
+
 </style>
 
 
@@ -59,6 +98,7 @@ body {
     <div class="toolbar" style="margin-top:20px;">
         <button type="button" id="exportBtn" class="wtc-button">Export</button>
         <div class="spacer"></div>
+		<button id="btnAdd" class="wtc-button">➕Add</button>
 		<input type="submit" id="BtnBack" class="wtc-button" onclick="window.location.href='./index.html?overlay=1';return false;"
 		name="Form"  value="⏪Terug">
 		<input type="submit" id="BtnBack" class="wtc-button" onclick="window.location.href='./index.html';return false;"
@@ -78,6 +118,7 @@ body {
                 <th>Telefoon</th>
                 <th>Gemeente</th>
                 <th>Adres</th>
+				<th>type</th>
                 <th>Acties</th>
             </tr>
         </thead>
@@ -90,13 +131,13 @@ body {
     <div class="modal-content">
         <h3 id="modal-title"></h3>
 
-        <div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
+        <div id="hoplog" style="position:relative;left:270px;top:11px;width:45px;height:45px;z-index:2;">
             <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
         </div>
 
         <p id="modal-message"></p>
 
-        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <div id="modal-buttons" >
             <!-- Knoppen worden dynamisch ingevuld -->
         </div>
     </div>
@@ -146,13 +187,14 @@ async function loadLeden() {
             <td><input value="${lid.telefoon || ""}" data-field="telefoon"></td>
             <td><input value="${lid.gemeente || ""}" data-field="gemeente"></td>
             <td><input value="${lid.adres || ""}" data-field="adres"></td>
-            <td>
+            <td><input value="${lid.type || ""}" data-field="type"></td>
+			<td>
                 <button class="wtc-button updateBtn">Update</button>
-                <button class="wtc-button wtc-delete deleteBtn">Delete</button>
+                <button class="wtc-button deleteBtn">Delete</button>
             </td>
         `;
 
-        // UPDATE
+    // UPDATE
         tr.querySelector(".updateBtn").onclick = async () => {
             const inputs = tr.querySelectorAll("input");
             const updates = {};
@@ -245,7 +287,8 @@ document.getElementById("exportBtn").onclick = async () => {
         { header: "Email", key: "email", width: 20 },
         { header: "Telefoon", key: "telefoon", width: 20 },
         { header: "Gemeente", key: "gemeente", width: 20 },
-        { header: "Adres", key: "adres", width: 20 }
+        { header: "Adres", key: "adres", width: 20 },
+		{ header: "Type", key: "type", width: 20 }
     ];
 
     // Header-stijl
@@ -271,7 +314,8 @@ document.getElementById("exportBtn").onclick = async () => {
             email: lid.email || "",
             telefoon: lid.telefoon || "",
             gemeente: lid.gemeente || "",
-            adres: lid.adres || ""
+            adres: lid.adres || "",
+			type: lid.type || ""
         });
     });
 
@@ -290,7 +334,7 @@ document.getElementById("exportBtn").onclick = async () => {
     // 🔽 Sorteer-/filterpijltjes in Excel-header
     ws.autoFilter = {
         from: 'A1',
-        to: 'E1'
+        to: 'F1'
     };
 
     const buffer = await wb.xlsx.writeBuffer();

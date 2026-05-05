@@ -21,10 +21,10 @@ body {
 }
 .round {
 	border-radius: 50px;
-    background-color: lightyellow;
+    background-color: #D1FED5;
     background-image: none;
 	border-color:green;
-	border-width:5px;
+	border-width: 0px;
 	height: 100px; width:100px;   
 	font-family: Arial, sans-serif;
     font-weight: normal;
@@ -33,10 +33,11 @@ body {
     padding:2px;
     text-align: center;
     margin: 5px;
-  	box-shadow:0 6px 20px rgba(0,0,0,.70);
+  	box-shadow:0 6px 20px rgba(0,0,0,.90);
   }  
 .round:hover {
-	background-color: pink;
+	background-color: #D1FED5;
+	box-shadow:0 6px 20px rgba(0,0,0,.10);
 }
 
 
@@ -68,7 +69,8 @@ async function loadLid() {
 	document.getElementById("adres").textContent = lid.adres;
 	document.getElementById("gemeente").textContent = lid.gemeente;
 	document.getElementById("telefoon").textContent = lid.telefoon;
-
+	document.getElementById("created_at").textContent = lid.created_at;
+	document.getElementById("type").textContent = lid.type;
 }
 
 loadLid();
@@ -80,9 +82,9 @@ loadLid();
 	<div style="width:100%;">
 		<input type="submit" id="BtnBack2" class="round" style= "width:100px" onclick="window.location.href='./kalender.html';return false;" name="Form1"  value="Activiteiten">
 		<input type="submit" id="BtnBack3" class="round" style= "width:100px" onclick="window.location.href='./ritten.html';return false;" name="Form2"  value="Fietsroutes">
-		<input type="submit" id="BtnBack4" class="round" style= "width:100px ; margin-left:20px;" onclick="window.location.href='./shop.html';return false;" name="Form3"  value="Shop">
-		<input type="submit" id="BtnBack5" class="round" style= "width:100px" onclick="window.location.href='./movies.html';return false;" name="Form4"  value="Movies">
-		<input type="submit" id="btnLogout" class="round" style= "width:100px ; margin-left:80px;"  name="Form0"  value="Uitloggen">
+		<input type="submit" id="BtnBack4" class="round" style= "width:100px ; margin-left:-10px;" onclick="window.location.href='./shop.html';return false;" name="Form3"  value="Shop">
+		<input type="submit" id="BtnBack5" class="round" style= "width:100px ; margin-left: 60px; onclick="window.location.href='./movies.html';return false;" name="Form4"  value="Movies">
+		<input type="submit" id="btnLogout" class="round" style= "width:100px ; margin-left:80px; margin-top:-30px"  name="Form0"  value="Uitloggen">
 	</div>
 
 	<!-- MIDDEN BLOK -->
@@ -95,6 +97,8 @@ loadLid();
 		<li><strong>Adres:</strong> <span id="adres"></span></li>
 		<li><strong>Gemeente:</strong> <span id="gemeente"></span></li>
 		<li><strong>Telefoon:</strong> <span id="telefoon"></span></li>
+		<Li><strong>Lid sedert:</strong> <span id="created_at"></span></li>
+		<Li><strong>Lid type:</strong> <span id="type"></span></li>
 	  </ul>
 	  <p><i><small>Zijn je gegevens gewijzigd? Geef ons een seintje! 🙏</small></i></p>
 	</div>

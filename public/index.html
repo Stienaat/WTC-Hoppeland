@@ -277,7 +277,7 @@
 			<input type="button" id="Forgotlink" class="wtc-button" onclick="openForgotModal(); return false;"
 				value="Paswoord vergeten?"
 				style="position:absolute;left:220px;top:420px;width:150px;z-index:11">			
-			<button type="button" id="btnCloseLogin" style="position:absolute;left:20px;top:60px">⏪Sluit</button>			
+			<button type="button" id="btnCloseLogin" class="wtc-button" style="position:absolute;left:20px;top:60px">⏪Sluit</button>			
 		</form>
 	</div>
 </div>
@@ -328,7 +328,7 @@
 				<input type="checkbox" id="consent" required>
 				Akkoord voor het bewaren van deze gegevens.				
 				<button type="submit" class="wtc-button" style="width:100px; margin-top:10px">Versturen</button>
-				<button type="button" id="btnCloseContact" >⏪Sluit</button>
+				<button type="button" class="wtc-button" id="btnCloseContact" >⏪Sluit</button>
 			</label>
         </form>
     </div>
@@ -461,7 +461,7 @@
 			<button type="button" id="btnChooseFile" style="border: 1px solid #3599E4; border-radius: 8px; font-size: 13px; padding:3px">Kies GPX‑bestand ►►►</button>
 			<span id="fileName" style="margin-left:10px; font-size:13px;"></span>
 
-			<button type="submit" id="btnUploadRoute" class="wtc-button">Uploaden</button>
+			<button type="button" id="btnUploadRoute" class="wtc-button">Uploaden</button>
 		</div>
 
 			<div id="routeError" class="wtc-status"></div>		
@@ -543,16 +543,15 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+
 <script>
 function openForgotModal() {
-    document.getElementById("forgot-modal").classList.remove("hidden");
+
 }
 
-function closeForgotModal() {
-    document.getElementById("forgot-modal").classList.add("hidden");
-}
 </script>
 
+<!--
 <script>
 document.getElementById("btnForgotSend").addEventListener("click", async () => {
     const email = document.getElementById("forgotEmail").value.trim();
@@ -574,7 +573,7 @@ document.getElementById("btnForgotSend").addEventListener("click", async () => {
 });
 </script>
 
-  <script src="cookiebanner.js"></script>
+ <script src="cookiebanner.js"></script>	-->
   <link href="./css/WTC.css" rel="stylesheet">
   <link href="./css/leden.css" rel="stylesheet">
   <link href="./css/index.css" rel="stylesheet">
