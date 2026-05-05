@@ -3,7 +3,6 @@ a {
     text-decoration: none;
 }
 
-
 h1, .h1
 {
    font-family: Arial;
@@ -23,7 +22,6 @@ h2, .h2
    font-size: 27px;
    text-decoration: none;
    color: #000000;
-   --color: #000000;
    background-color: transparent;
    margin: 0 0 0 0;
    padding: 0 0 0 0;
@@ -36,7 +34,6 @@ h3, .h3
    font-size: 24px;
    text-decoration: none;
    color: #000000;
-   --color: #000000;
    background-color: transparent;
    margin: 0 0 0 0;
    padding: 0 0 0 0;
@@ -50,7 +47,6 @@ h4, .h4
    font-style: italic;
    text-decoration: none;
    color: #000000;
-   --color: #000000;
    background-color: transparent;
    margin: 0 0 0 0;
    padding: 0 0 0 0;
@@ -63,7 +59,6 @@ h5, .h5
    font-size: 19px;
    text-decoration: none;
    color: #000000;
-   --color: #000000;
    background-color: transparent;
    margin: 0 0 0 0;
    padding: 0 0 0 0;
@@ -76,7 +71,6 @@ h6, .h6
    font-size: 16px;
    text-decoration: none;
    color: #000000;
-   --color: #000000;
    background-color: transparent;
    margin: 0 0 0 0;
    padding: 0 0 0 0;
@@ -90,7 +84,6 @@ h7, .h7
    font-size: 6px;
    text-decoration: none;
    color: #000000;
-   --color: #000000;
    background-color: transparent;
    margin: 0 0 0 0;
    padding: 0 0 0 0;
@@ -111,7 +104,6 @@ h7, .h7
    font-size: 16px;
    text-decoration: none;
    color: #2E74B5;
-   --color: #2E74B5;
    background-color: transparent;
 }
 body
@@ -119,29 +111,31 @@ body
 /* Algemene knopstijl voor de hele site */
 .wtc-button {	
     border-radius: 6px;
-    background-color: #fff;
+    background-color: transparent;
     background-image: none;
 	border-color:blue;
-	border-width:3px;
+	border-width:0px;
 	min-width: 50px;
     color: #000000;
 	font-family: Arial, sans-serif;
     font-weight: normal;
     font-style: normal;
     font-size: 12px;
-    padding:2px 3px;
+    padding:2px 2px;
     text-align: center;
 	-webkit-appearance: none;
-    margin: 3px;
+    margin: 6px;
     cursor: pointer;           /* handje bij hover */
-	box-shadow:0 6px 20px rgba(0,0,0,.70);
+	box-shadow:0 6px 20px rgba(0,0,0,.90);
 }
 
 /* Hover-effect */
 .wtc-button:hover {
-    background-color: #fff; /* iets donkerder blauw */
+    background-color: transparent;
+	border-color: #3599E4;
+	border-width:1px;
 	color: #000000;
-    border-color: orange;
+    box-shadow:0 6px 20px rgba(0,0,0,.10);
 }
 
 /* Focus (met toetsenbord) – toegankelijkheid */
@@ -170,7 +164,7 @@ body
 .wtc-select {
 	border-radius: 6px;
 	border-color:blue;
-	border-width:3px;
+	border-width:1px;
 }
 
 .wtc-status {
