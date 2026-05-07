@@ -31,7 +31,8 @@
       </p>
       <div class="spacer"></div>
       <div class="weekLabel" id="weekLabel"></div>
-      <input type="submit" id="BtnBack" class="wtc-button" name="Form"  value="⏪Terug">
+      <input type="submit" id="BtnBackMember" class="wtc-button" name="Form" value="⏪Terug">
+      <input type="submit" id="BtnBackAdmin" class="wtc-button" name="Form" value="⏪Back">
       <img src="images/Logo.png" width="50" height="50">
     </div>
     <div id="gridScroll" class="gridScroll">
@@ -79,11 +80,24 @@
 
 <script>  
 
-document.getElementById("BtnBack").onclick = () => {
-  localStorage.removeItem("user_email");
-  CURRENT_USER = null;
+const btnBackMember = document.getElementById("BtnBackMember");
+const btnBackAdmin = document.getElementById("BtnBackAdmin");
 
-  window.location.href = "index.html";
+// Toon slechts één terugknop, afhankelijk van de login
+if (isAdmin) {
+  btnBackMember.style.display = "none";
+  btnBackAdmin.style.display = "inline-block";
+} else {
+  btnBackMember.style.display = "inline-block";
+  btnBackAdmin.style.display = "none";
+}
+
+btnBackMember.onclick = () => {
+  window.location.href = "leden-dashboard.html";
+};
+
+btnBackAdmin.onclick = () => {
+  window.location.href = "index.html?overlay=1";
 };
 </script>
 

@@ -81,8 +81,62 @@ table td:nth-child(7) {
     width: 120px; /* Acties */
 }
 
-</style>
 
+/* Popup voor nieuw lid */
+#addMemberModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+#addMemberModal.hidden {
+    display: none;
+}
+
+.add-member-content {
+    width: min(320px, calc(100% - 32px));
+    background: #fff;
+	border: 3px solid #FF9800;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.add-member-content h3 {
+    margin: 0 0 14px;
+}
+
+.add-member-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    align-items: center;
+}
+
+.add-member-grid input,
+.add-member-grid select {
+    padding: 7px 8px;
+    font-size: 14px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+}
+
+.add-member-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.required {
+    color: #b00020;
+}
+
+</style>
 
 </head>
 
@@ -129,16 +183,30 @@ table td:nth-child(7) {
 
 <div id="app-modal" class="modal hidden">
     <div class="modal-content">
-        <h3 id="modal-title"></h3>
-
-        <div id="hoplog" style="position:relative;left:270px;top:11px;width:45px;height:45px;z-index:2;">
-            <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        <div id="hoplog" style="display:flex; justify-content:space-between;">
+            <h3 id="modal-title"></h3>			
+			<img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
         </div>
-
         <p id="modal-message"></p>
-
         <div id="modal-buttons" >
             <!-- Knoppen worden dynamisch ingevuld -->
+        </div>
+    </div>
+</div>
+
+<div id="addMemberModal" class="hidden">
+    <div class="add-member-content"> 
+		<div id="hoplog" style="display:flex; justify-content:space-between;">
+		       <h3>Nieuw lid.</h3>
+			<img src="images/Logo.png" id="hoplogo" alt="width="40" height="40">
+		</div>
+			<div class="add-member-grid">
+			<input type="text" id="newNaam" placeholder="Naam">
+			<input type="email" id="newEmail" placeholder="E-mail">
+        </div>
+        <div class="add-member-actions">
+            <button type="button" id="cancelAddMember" class="wtc-button">Annuleer</button>
+            <button type="button" id="saveAddMember" class="wtc-button">Opslaan</button>
         </div>
     </div>
 </div>
@@ -235,6 +303,89 @@ async function loadLeden() {
 		tbody.appendChild(tr);
 	});
 }
+
+
+// =====================================
+//  NIEUW LID TOEVOEGEN VIA POPUP
+// =====================================
+
+const addMemberModal = document.getElementById("addMemberModal");
+const addMemberFields = [
+    "newNaam",
+    "newEmail"
+];
+
+function maakDummyWachtwoord() {
+    const bytes = new Uint32Array(4);
+    crypto.getRandomValues(bytes);
+    return "TEMP-" + Array.from(bytes, n => n.toString(36)).join("-");
+}
+
+function clearAddMemberForm() {
+    addMemberFields.forEach(id => {
+        document.getElementById(id).value = "";
+    });
+}
+
+function closeAddMemberModal() {
+    addMemberModal.classList.add("hidden");
+}
+
+function openAddMemberModal() {
+    clearAddMemberForm();
+    addMemberModal.classList.remove("hidden");
+    document.getElementById("newNaam").focus();
+}
+
+document.getElementById("btnAdd").addEventListener("click", openAddMemberModal);
+document.getElementById("cancelAddMember").addEventListener("click", closeAddMemberModal);
+
+addMemberModal.addEventListener("click", (event) => {
+    if (event.target === addMemberModal) {
+        closeAddMemberModal();
+    }
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !addMemberModal.classList.contains("hidden")) {
+        closeAddMemberModal();
+    }
+});
+
+document.getElementById("saveAddMember").addEventListener("click", async () => {
+    const nieuwLid = {
+        naam: document.getElementById("newNaam").value.trim(),
+        email: document.getElementById("newEmail").value.trim(),
+
+        // Deze velden zijn verplicht in Supabase, maar worden later door de admin aangevuld via Update.
+        telefoon: "",
+        gemeente: "",
+        adres: "",
+        type: "",
+
+        // Dummy-wachtwoord: het lid stelt later zelf een wachtwoord in via 'paswoord vergeten'.
+        wachtwoord: maakDummyWachtwoord(),
+        created_at: new Date().toISOString()
+    };
+
+    if (!nieuwLid.naam || !nieuwLid.email) {
+        await Modal.error("👎", "Naam en e-mail zijn verplicht. ❌");
+        return;
+    }
+
+    const { error } = await db
+        .from("Leden")
+        .insert([nieuwLid]);
+
+    if (error) {
+        await Modal.error("👎", `Toevoegen is mislukt. ❌ ${error.message || ""} code: ${error.code || ""}`);
+        return;
+    }
+
+    closeAddMemberModal();
+    await Modal.success("👌", "Nieuw lid is toegevoegd! ✔");
+    loadLeden();
+});
 
 // =====================================
 //  UITLOGGEN

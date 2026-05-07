@@ -24,6 +24,12 @@
 .square:hover {
 	background-color: pink;
 }
+
+body.reloading {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
   </style>
 </head>
 
@@ -338,16 +344,17 @@
 
 <div id="app-modal" class="modal hidden">
     <div class="modal-content">
-        <h3 id="modal-title"></h3>
-        <div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index: 3000;">
-            <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        <div id="hoplog" style="display:flex; justify-content:space-between;">
+            <h3 id="modal-title"></h3>			
+			<img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
         </div>
         <p id="modal-message"></p>
-        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <div id="modal-buttons" >
             <!-- Knoppen worden dynamisch ingevuld -->
         </div>
     </div>
 </div>
+
 	
 <!-- ADMIN LOGIN 						✅-->
 
@@ -357,9 +364,8 @@
 			<button type="button" id="btnCloseAdmin" class="wtc-button">Sluiten</button>
 		</div>
 		<div class="overlay-row">
-			<input type="password" id="pinInput" class="wtc-input" style="font-size:1.2em;
-			" name="admin_pin" ;maxlength="6" autocomplete="off";  placeholder="PIN-code:  ******"></input>
-			<button type="button" class="wtc-button" id="btnOk">Ontgrendel</button>
+			<input type="password" id="pinInput" class="wtc-input" style="font-size:1.2em; " name="admin_pin" ;maxlength="6" autocomplete="off";  placeholder="PIN-code:  ******"></input>
+			<button type="button" class="wtc-button" id="">Ontgrendel</button>
 		</div>
 		<div id="pinError" class="wtc-status;"></div>
 </div>
@@ -551,29 +557,6 @@ function openForgotModal() {
 
 </script>
 
-<!--
-<script>
-document.getElementById("btnForgotSend").addEventListener("click", async () => {
-    const email = document.getElementById("forgotEmail").value.trim();
-
-    const res = await fetch("/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
-    });
-
-    const data = await res.json();
-
-    if (data.ok) {
-        alert("Als het emailadres bestaat, werd een herstelmail verzonden.");
-        closeForgotModal();
-    } else {
-        alert("Fout: " + data.error);
-    }
-});
-</script>
-
- <script src="cookiebanner.js"></script>	-->
   <link href="./css/WTC.css" rel="stylesheet">
   <link href="./css/leden.css" rel="stylesheet">
   <link href="./css/index.css" rel="stylesheet">
