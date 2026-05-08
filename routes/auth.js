@@ -8,10 +8,15 @@ const mailer = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT || 587),
   secure: false,
-  auth: {
+   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS
-  }
+},
+
+});
+
+mailer.verify((err, ok) => {
+  console.log("SMTP TEST:", err || ok);
 });
 
 function hashToken(token) {
@@ -33,13 +38,15 @@ router.post("/register", async (req, res) => {
         gemeente,
         telefoon,
         email,
-        wachtwoord: hash
+        wachtwoord: hash,
+        created_at: new Date().toISOString()
       });
 
     if (error) throw error;
 
     return res.json({ ok: true });
   } catch (err) {
+    console.error("REGISTER ERROR:", err);
     return res.json({ ok: false, error: err.message });
   }
 });
@@ -92,8 +99,6 @@ router.get("/api/me", async (req, res) => {
 
   return res.json({ ok: true, user });
 });
-
-export default router;
 
 router.post("/forgot-password", async (req, res) => {
   const supabase = req.supabase;
@@ -200,3 +205,5 @@ router.post("/reset-password", async (req, res) => {
     return res.json({ ok: false, error: "Reset mislukt." });
   }
 });
+
+export default router;
