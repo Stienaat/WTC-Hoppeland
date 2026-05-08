@@ -88,7 +88,7 @@ loadLid();
 	</div>
 
 	<!-- MIDDEN BLOK -->
-	<div style=" padding: 5px; background: #d6f6d9" >
+	<div style=" padding: 5px; border-radius: 15px; background: #d6f6d9" >
 	  <p>Welkom beste, <strong id="naam"></strong></p>
 		  <img ID="lid" src="images/dummy.png" alt="dummy"><br><br>
 	  <h6>Je gegevens</h6>
@@ -105,7 +105,7 @@ loadLid();
 
 	<!-- RECHTERKOLOM — REGLEMENT -->
 	
-	  <div style=" background: #f1fdf2 ; padding: 10px;" >
+	  <div style=" border-radius: 15px; background: #f1fdf2 ; padding: 10px;" >
 		<h5>HUISHOUDELIJK REGLEMENT</h5>
 		
 			<p>Artikel 1:<Br>
@@ -300,12 +300,12 @@ document.getElementById("btnLogout").onclick = () => {
 
 <div id="app-modal" class="modal hidden">
     <div class="modal-content">
-        <h3 id="modal-title"></h3>
-        <div id="hoplog" style="position:absolute;left:270px;top:11px;width:45px;height:45px;z-index:2;">
-            <img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        <div id="hoplog" style="display:flex; justify-content:space-between;">
+            <h3 id="modal-title"></h3>			
+			<img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
         </div>
         <p id="modal-message"></p>
-        <div id="modal-buttons" style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <div id="modal-buttons" >
             <!-- Knoppen worden dynamisch ingevuld -->
         </div>
     </div>
