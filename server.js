@@ -77,8 +77,6 @@ app.post("/api/logout", (req, res) => {
   });
 });
 
-
-
 app.post("/admin-change-pin", (req, res) => {
   req.url = "/api/admin/change-pin";
   app.handle(req, res);
@@ -166,3 +164,4 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log("Server draait op poort " + PORT);
 });
+
