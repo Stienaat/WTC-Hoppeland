@@ -168,17 +168,28 @@ async function getSignupStatus(eventId, email) {
 }
 
 async function doSignup(eventId) {
-  const email =
-    typeof memberEmail !== "undefined"
-      ? memberEmail
-      : CURRENT_USER?.email;
+  const email = CURRENT_USER?.email;
+
+  console.log("INSCHRIJVING TEST:", {
+    eventId,
+    email,
+    currentUser: CURRENT_USER
+  });
+
+  if (!eventId) {
+    return { ok: false, error: "Geen event_id gevonden" };
+  }
+
+  if (!email) {
+    return { ok: false, error: "Geen email gevonden" };
+  }
 
   return await apiJson("/api/signups", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       event_id: eventId,
-      email
+      email: email
     })
   });
 }
@@ -500,11 +511,11 @@ function renderMemberRight(eventData, status) {
         margin: 20px;
         color:#6450E1;
       ">
-        Scan deze code met Uw 'bankapp', druk download bevestiging en U bent ingeschreven!
+        Scan deze code met Uw 'bankapp'. Druk "download bevestiging" en U bent ingeschreven!
       </div>
     </div>
 
-    <button id="btnDownload" class="wtc-button" style="display:none; margin:20px;">
+    <button type="button" id="btnDownload" class="wtc-button" style="display:none; margin:20px;">
       Download bevestiging
     </button>
   `;
@@ -683,10 +694,12 @@ function showQR() {
 
       const r = await doSignup(e.id);
 
-      if (!r || !r.ok) {
-  		await Modal.error("👎", "Inschrijving mislukt. ❌");
-        return;
-      }
+console.log("SIGNUP RESULT:", r);
+
+     if (!r || r.ok === false) {
+    await Modal.error("👎", `Inschrijving mislukt. ❌ ${r?.error || r?.message || ""}`);
+    return;
+}
       lastSignup = r.signup || r.data || null;
       signupDownloaded = true;
 

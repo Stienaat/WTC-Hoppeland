@@ -351,8 +351,25 @@ function openAdminPhase1() {
 }
 
 function openAdminPhase2() {
-  adminLogin && (adminLogin.style.display = 'none');
-  adminFase2 && adminFase2.classList.add('open');
+  console.log("openAdminPhase2 gestart", { adminLogin, adminFase2 });
+
+  if (adminLogin) {
+    adminLogin.style.display = "none";
+  }
+
+  if (adminFase2) {
+    adminFase2.style.display = "block";
+    adminFase2.classList.add("open");
+
+    console.log("adminFase2 na openen:", {
+      display: adminFase2.style.display,
+      className: adminFase2.className,
+      computedDisplay: getComputedStyle(adminFase2).display,
+      computedVisibility: getComputedStyle(adminFase2).visibility,
+      computedOpacity: getComputedStyle(adminFase2).opacity
+    });
+  }
+
   initAdminConfigCard();
 }
 
@@ -361,24 +378,34 @@ function closeAdminUI() {
   adminFase2 && adminFase2.classList.remove('open');
 }
 
-function closeAdminPan() {
+async function closeAdminPan() {
   if (adminFase2) {
-    adminFase2.style.display = 'none';
-	
-	document.getElementById("btnLogout").addEventListener("click", async () => {
+    adminFase2.classList.remove("open");
+    adminFase2.style.display = "none";
+  }
+
+  if (adminLogin) {
+    adminLogin.style.display = "none";
+  }
+
+  localStorage.removeItem("is_admin");
+  localStorage.removeItem("user_email");
+  localStorage.removeItem("member");
+
   await fetch("/api/logout", {
     method: "POST",
     credentials: "include"
-  });
-
-  window.location.href = "/";
-});
-
-  }
+  }).catch(console.error);
 
   const url = new URL(window.location);
-  url.searchParams.delete('overlay');
-  window.history.replaceState({}, '', url);
+  url.searchParams.delete("overlay");
+  window.history.replaceState({}, "", url);
+
+document.body.classList.add("reloading");
+
+setTimeout(() => {
+  window.location.replace(window.location.pathname);
+}, 150);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -400,6 +427,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (params.get('overlay') === '1') {
     setTimeout(() => {
       if (typeof openAdminPhase2 === 'function') {
+        console.log("PIN login OK, openAdminPhase2 wordt aangeroepen");
         openAdminPhase2();
       }
     }, 50);

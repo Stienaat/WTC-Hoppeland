@@ -185,7 +185,9 @@ document.getElementById("btnLogout").addEventListener("click", async () => {
 });
 
 
-	// EXPORT
+// =====================================
+//  EXCEL EXPORT
+// =====================================
 
 if (exportBtn) {
   exportBtn.onclick = () => {
@@ -195,4 +197,4 @@ if (exportBtn) {
 
 loadPage();
 
-});
+});        

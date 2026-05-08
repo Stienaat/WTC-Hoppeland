@@ -1,37 +1,39 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-const adminLogin = document.getElementById("adminLogin");
-const adminFase2 = document.getElementById("adminFase2");
-const adminLogo = document.getElementById("adminLogo");
+  const adminLogin = document.getElementById("adminLogin");
+  const adminFase2 = document.getElementById("adminFase2");
+  const adminLogo = document.getElementById("adminLogo");
 
-/************************************************************
- * ADMIN UI
- ************************************************************/
- 
-function openAdminPhase1() {
-  adminLogin && (adminLogin.style.display = "block");
-  adminFase2 && adminFase2.classList.remove("open");
-}
+  /************************************************************
+   * ADMIN UI
+   ************************************************************/
 
-function openAdminPhase2() {
-  adminLogin && (adminLogin.style.display = "none");
-  adminFase2 && adminFase2.classList.add("open");
-
-  if (typeof initAdminConfigCard === "function") {
-    initAdminConfigCard();
+  function openAdminPhase1() {
+    adminLogin && (adminLogin.style.display = "block");
+    adminFase2 && adminFase2.classList.remove("open");
   }
-}
 
-function closeAdminUI() {
-  adminLogin && (adminLogin.style.display = "none");
-  adminFase2 && adminFase2.classList.remove("open");
-}
+  function openAdminPhase2() {
+    adminLogin && (adminLogin.style.display = "none");
+    adminFase2 && adminFase2.classList.add("open");
 
-/************************************************************
- * ADMIN LOGIN (PIN)
- ************************************************************/
+    if (typeof initAdminConfigCard === "function") {
+      initAdminConfigCard();
+    }
+  }
+
+  function closeAdminUI() {
+    adminLogin && (adminLogin.style.display = "none");
+    adminFase2 && adminFase2.classList.remove("open");
+  }
+
+  /************************************************************
+   * ADMIN LOGIN (PIN)
+   ************************************************************/
 async function openAdminPrompt() {
+
   const wrapper = document.createElement("div");
+
   wrapper.innerHTML = `
     <input 
       type="password" 
@@ -49,6 +51,7 @@ async function openAdminPrompt() {
   const error = wrapper.querySelector("#modal-pin-error");
 
   while (true) {
+
     const result = await Modal.content("Beheerder", wrapper, [
       { text: "Ontgrendel", value: "ok" },
       { text: "Sluiten", value: null }
@@ -68,6 +71,7 @@ async function openAdminPrompt() {
     }
 
     try {
+
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,215 +89,221 @@ async function openAdminPrompt() {
       }
 
       localStorage.setItem("is_admin", "true");
+      localStorage.removeItem("user_email");
+
       error.textContent = "";
       input.value = "";
+
       openAdminPhase2();
-	   loginOverlay?.classList.add("hidden");
+
+      loginOverlay?.classList.add("hidden");
+
       return;
 
     } catch (err) {
+
       error.textContent = "Login is mislukt.";
       input.focus();
+
     }
   }
 }
 
-/************************************************************
- * PIN WIJZIGEN
- ************************************************************/
- 
-const btnPinChange = document.getElementById('btnPinChange');
-const pinChangeOverlay = document.getElementById('pinChangeOverlay');
-const btnChangeCode = document.getElementById('btnChangeCode');
-const oldPinInput = document.getElementById('oldPinInput');
-const newPinInput = document.getElementById('newPinInput');
-const newPinInput2 = document.getElementById('newPinInput2');
-const pinError2 = document.getElementById('pinError2');
+    /************************************************************
+     * PIN WIJZIGEN
+     ************************************************************/
 
-function openPinChangePopup() {
-  if (!pinChangeOverlay) return;
+    const btnPinChange = document.getElementById('btnPinChange');
+    const pinChangeOverlay = document.getElementById('pinChangeOverlay');
+    const btnChangeCode = document.getElementById('btnChangeCode');
+    const oldPinInput = document.getElementById('oldPinInput');
+    const newPinInput = document.getElementById('newPinInput');
+    const newPinInput2 = document.getElementById('newPinInput2');
+    const pinError2 = document.getElementById('pinError2');
 
-  pinChangeOverlay.classList.add('show');
-  pinChangeOverlay.style.display = 'flex';
+    function openPinChangePopup() {
+      if (!pinChangeOverlay) return;
 
-  if (oldPinInput) oldPinInput.value = '';
-  if (newPinInput) newPinInput.value = '';
-  if (newPinInput2) newPinInput2.value = '';
+      pinChangeOverlay.classList.add('show');
+      pinChangeOverlay.style.display = 'flex';
 
-  setStatus(pinError2, '', 'info');
-  oldPinInput && oldPinInput.focus();
-}
+      if (oldPinInput) oldPinInput.value = '';
+      if (newPinInput) newPinInput.value = '';
+      if (newPinInput2) newPinInput2.value = '';
 
-function closePinChangePopup() {
-  if (!pinChangeOverlay) return;
+      setStatus(pinError2, '', 'info');
+      oldPinInput && oldPinInput.focus();
+    }
 
-  pinChangeOverlay.classList.remove('show');
-  pinChangeOverlay.style.display = 'none';
-}
-async function handlePinChange() {
-  const oldPin = oldPinInput?.value.trim() || "";
-  const newPin = newPinInput?.value.trim() || "";
-  const newPin2 = newPinInput2?.value.trim() || "";
+    function closePinChangePopup() {
+      if (!pinChangeOverlay) return;
 
-  if (!oldPin || !newPin || newPin !== newPin2) {
-    await Modal.error("👎", "PIN ongeldig. ❌");
+      pinChangeOverlay.classList.remove('show');
+      pinChangeOverlay.style.display = 'none';
+    }
+    async function handlePinChange() {
+      const oldPin = oldPinInput?.value.trim() || "";
+      const newPin = newPinInput?.value.trim() || "";
+      const newPin2 = newPinInput2?.value.trim() || "";
+
+      if (!oldPin || !newPin || newPin !== newPin2) {
+        await Modal.error("👎", "PIN ongeldig. ❌");
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/admin/change-pin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ oldPin, newPin })
+        });
+
+        const text = await res.text();
+
+
+        let j;
+        try {
+          j = JSON.parse(text);
+        } catch {
+          await Modal.error("👎", "Server gaf geen geldige JSON terug.");
+          return;
+        }
+
+        if (!res.ok || !j.ok) {
+          await Modal.error("👎", j.message || j.error || "Wijzigen mislukt. ❌");
+          return;
+        }
+
+        await Modal.success("👌", "PIN gewijzigd! ✔");
+        setTimeout(closePinChangePopup, 800);
+
+      } catch (err) {
+
+        await Modal.error("👎", "Serverfout.");
+      }
+    }
+
+    /************************************************************
+     * EVENTS
+     ************************************************************/
+
+    adminLogo?.addEventListener("dblclick", async e => {
+      e.preventDefault();
+      await openAdminPrompt();
+    });
+
+    const btnClosePinChange = document.getElementById("btnClosePinChange");
+    btnClosePinChange?.addEventListener("click", closePinChangePopup);
+
+    btnPinChange?.addEventListener("click", openPinChangePopup);
+    btnChangeCode?.addEventListener("click", handlePinChange);
+
+    document.getElementById("Forgotlink")?.addEventListener("click", async () => {
+      console.log("Forgotlink clicked");
+
+      const email = await Modal.prompt("Geef je e-mailadres");
+      console.log("email prompt result:", email);
+
+      if (!email) return;
+
+      try {
+        console.log("calling /forgot-password");
+
+        const res = await fetch("/forgot-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email })
+        });
+
+        console.log("forgot response status:", res.status);
+
+        const j = await res.json();
+        console.log("forgot response json:", j);
+
+        if (!j.ok) {
+          await Modal.error("👎", j.error || "Reset mislukt.");
+          return;
+        }
+
+        await Modal.success("👌", "Als het e-mailadres bestaat, is er een mail verzonden.");
+      } catch (err) {
+        console.error("Forgot error:", err);
+        await Modal.error("👎", "Serverfout.");
+      }
+    });
+
+  });
+
+  /************************************************************
+   * 4) LOGIN / REGISTRATIE UI
+   ************************************************************/
+  (function initLoginRegister() {
+    const regOnlyFields = document.querySelectorAll(".reg-only");
+    const loginBtn = document.getElementById("Button1");
+    const regBtn = document.getElementById("Button2");
+    const goReg = document.getElementById("GoRegister");
+    const goLogin = document.getElementById("GoLogin");
+
+    function setMode(mode) {
+      const isLogin = mode === "login";
+
+      regOnlyFields.forEach(el => el.style.display = isLogin ? "none" : "block");
+      loginBtn.style.display = isLogin ? "inline-block" : "none";
+      regBtn.style.display = isLogin ? "none" : "inline-block";
+      goReg.style.display = isLogin ? "inline" : "none";
+      goLogin.style.display = isLogin ? "none" : "inline";
+    }
+
+    setMode("login");
+
+    goReg?.addEventListener("click", e => {
+      e.preventDefault();
+      setMode("registreer");
+    });
+
+    goLogin?.addEventListener("click", e => {
+      e.preventDefault();
+      setMode("login");
+    });
+
+
+  })();
+
+  /************************************************************
+   * 5) MEMBER LOGIN & REGISTRATIE
+   ************************************************************/
+
+  document.getElementById("loginForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+
+    // Welke knop werd ingedrukt? (login of registreer)
+    const actie = document.activeElement.value;
+
+    // LOGIN velden
+    const email = document.getElementById("Editbox4").value.trim();
+    const password = document.getElementById("Editbox6").value.trim();
+
+    // REGISTRATIE velden
+    const naam = document.getElementById("Editbox1").value.trim();
+    const adres = document.getElementById("Editbox2").value.trim();
+    const gemeente = document.getElementById("Editbox3").value.trim();
+    const telefoon = document.getElementById("Editbox5").value.trim();
+    const codeRepeat = document.getElementById("Editbox7").value.trim();
+
+    /***********************
+     * REGISTRATIE
+     ***********************/
+if (actie === "registreer") {
+
+  if (password !== codeRepeat) {
+    await Modal.error("👎", "Paswoorden komen niet overeen! ❌");
     return;
   }
 
   try {
-    const res = await fetch("/api/admin/change-pin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ oldPin, newPin })
-    });
-
-    const text = await res.text();
- 
-
-    let j;
-    try {
-      j = JSON.parse(text);
-    } catch {
-      await Modal.error("👎", "Server gaf geen geldige JSON terug.");
-      return;
-    }
-
-    if (!res.ok || !j.ok) {
-      await Modal.error("👎", j.message || j.error || "Wijzigen mislukt. ❌");
-      return;
-    }
-
-    await Modal.success("👌", "PIN gewijzigd! ✔");
-    setTimeout(closePinChangePopup, 800);
-
-  } catch (err) {
-   
-    await Modal.error("👎", "Serverfout.");
-  }
-}
-
-/************************************************************
- * EVENTS
- ************************************************************/
-
-adminLogo?.addEventListener("dblclick", async e => {
-  e.preventDefault();
-  await openAdminPrompt();
-});
-
-const btnClosePinChange = document.getElementById("btnClosePinChange");
-btnClosePinChange?.addEventListener("click", closePinChangePopup);
-
-btnPinChange?.addEventListener("click", openPinChangePopup);
-btnChangeCode?.addEventListener("click", handlePinChange);
-
-document.getElementById("Forgotlink")?.addEventListener("click", async () => {
-  console.log("Forgotlink clicked");
-
-  const email = await Modal.prompt("Geef je e-mailadres");
-  console.log("email prompt result:", email);
-
-  if (!email) return;
-
-  try {
-    console.log("calling /forgot-password");
-
-    const res = await fetch("/forgot-password", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email })
-    });
-
-    console.log("forgot response status:", res.status);
-
-    const j = await res.json();
-    console.log("forgot response json:", j);
-
-    if (!j.ok) {
-      await Modal.error("👎", j.error || "Reset mislukt.");
-      return;
-    }
-
-    await Modal.success("👌", "Als het e-mailadres bestaat, is er een mail verzonden.");
-  } catch (err) {
-    console.error("Forgot error:", err);
-    await Modal.error("👎", "Serverfout.");
-  }
-});
-
-});
-
-/************************************************************
- * 4) LOGIN / REGISTRATIE UI
- ************************************************************/
-(function initLoginRegister() {
-  const regOnlyFields = document.querySelectorAll(".reg-only");
-  const loginBtn = document.getElementById("Button1");
-  const regBtn   = document.getElementById("Button2");
-  const goReg    = document.getElementById("GoRegister");
-  const goLogin  = document.getElementById("GoLogin");
-
-  function setMode(mode) {
-    const isLogin = mode === "login";
-
-    regOnlyFields.forEach(el => el.style.display = isLogin ? "none" : "block");
-    loginBtn.style.display = isLogin ? "inline-block" : "none";
-    regBtn.style.display   = isLogin ? "none" : "inline-block";
-    goReg.style.display    = isLogin ? "inline" : "none";
-    goLogin.style.display  = isLogin ? "none" : "inline";
-  }
-
-  setMode("login");
-
-  goReg?.addEventListener("click", e => {
-    e.preventDefault();
-    setMode("registreer");
-  });
-
-  goLogin?.addEventListener("click", e => {
-    e.preventDefault();
-    setMode("login");
-  });
-
-
-})();
-
-/************************************************************
- * 5) MEMBER LOGIN & REGISTRATIE
- ************************************************************/
-
-document.getElementById("loginForm")?.addEventListener("submit", async e => {
-  e.preventDefault();
-
-  // Welke knop werd ingedrukt? (login of registreer)
-  const actie = document.activeElement.value;
-
-  // LOGIN velden
-  const email    = document.getElementById("Editbox4").value.trim();
-  const password = document.getElementById("Editbox6").value.trim();
-
-  // REGISTRATIE velden
-  const naam      = document.getElementById("Editbox1").value.trim();
-  const adres     = document.getElementById("Editbox2").value.trim();
-  const gemeente  = document.getElementById("Editbox3").value.trim();
-  const telefoon  = document.getElementById("Editbox5").value.trim();
-  const codeRepeat = document.getElementById("Editbox7").value.trim();
-
-  /***********************
-   * REGISTRATIE
-   ***********************/
-  if (actie === "registreer") {
-
-    if (password !== codeRepeat) {
- 
-	  await Modal.error("👎", "Paswoorden komen niet overeen! ❌");
-
-      return;
-    }
-
     const res = await fetch("/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -301,43 +311,55 @@ document.getElementById("loginForm")?.addEventListener("submit", async e => {
     });
 
     const data = await res.json();
-	 await Modal.success("👌", "Welkom? Je bent geregistreerd. ✔️ Je kunt nu inloggen !");
 
-	 setTimeout(() => {
-		window.location.href = "index.html";
-	  }, 5000);
+    console.log("REGISTER RESULT:", data);
+
+    if (!res.ok || !data.ok) {
+      await Modal.error("👎", data.error || data.message || "Registratie mislukt.");
+      return;
+    }
+
+    await Modal.success("👌", "Welkom! Je bent geregistreerd. ✔️ Je kunt nu inloggen!");
+
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1500);
+
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+    await Modal.error("👎", "Serverfout bij registratie.");
   }
-
-/***********************
- * LOGIN
- ***********************/
-if (actie === "login") {
-
-  const res = await fetch("/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-
-  const data = await res.json();
-
-	if (data.ok) {
-	  // BEWAAR VOLLEDIGE MEMBER INFO + ADMIN-FLAG
-	  localStorage.setItem("user_email", data.user.email);
-	  localStorage.setItem("member", JSON.stringify(data.user));
-	  localStorage.setItem("is_admin", data.user.is_admin ? "true" : "false");
-	 
-	  await Modal.success("👌", "Welkom, Je bent ingelogd. ✔️");
-	  setTimeout(() => {
-		window.location.href = "leden-dashboard.html";
-	  }, 1500);
-	}
-	else {
-		await Modal.error("👎", "Foute email of pincode! ❌");
-
-	  }
 }
 
+    /***********************
+     * LOGIN
+     ***********************/
+    if (actie === "login") {
 
-});
+      const res = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
 
+      const data = await res.json();
+
+      if (data.ok) {
+        // BEWAAR VOLLEDIGE MEMBER INFO + ADMIN-FLAG
+        localStorage.setItem("user_email", data.user.email);
+        localStorage.setItem("member", JSON.stringify(data.user));
+        localStorage.setItem("is_admin", data.user.is_admin ? "true" : "false");
+
+        await Modal.success("👌", "Welkom, Je bent ingelogd. ✔️");
+        setTimeout(() => {
+          window.location.href = "leden-dashboard.html";
+        }, 1500);
+      }
+      else {
+        await Modal.error("👎", "Foute email of pincode! ❌");
+
+      }
+    }
+
+
+  });
