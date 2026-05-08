@@ -5,37 +5,11 @@
   <title>WTC-Hoppeland</title>
   <link href="./css/WTC.css" rel="stylesheet">
 
-<style>
-.square {
-	background-color: lightyellow;
-    background-image: none;
-	border-color:green;
-	border-width:3px;
-	height: 45px; width:105px;   
-	font-family: Arial, sans-serif;
-    font-weight: normal;
-    font-style: normal;
-    font-size: 15px;
-    padding:2px;
-    text-align: center;
-    margin: 0px;
-  	box-shadow:0 6px 20px rgba(0,0,0,.70);
-  }  
-.square:hover {
-	background-color: pink;
-}
-
-body.reloading {
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-  </style>
 </head>
 
 <body>
 
-<!--  SPONSOR BANNER      ✅  -->
+<!--  SPONSOR BANNER    				  ✅  -->
 
 <div class="banner">
 	<div class="track">
@@ -51,8 +25,9 @@ body.reloading {
 	</div>
 </div>
 
-<main class="page">
+<!--  LOGO / KNOPPEN / WTC tekst /    				  ✅  -->
 
+<main class="page">
 	<section class="intro">		
 		<div class="intro-logo">       
 			<img src="images/Logo.png" alt="Logo WTC Hoppeland">
@@ -79,6 +54,8 @@ body.reloading {
         <p>Wil je ook met WTC Hoppeland meefietsen, neem dan contact op via hoppelandwtc@gmail.com en je komt te weten hoe je bij onze club kunt aansluiten.</p>
         <p>Alvorens definitief in te schrijven mag je 1 à 2 maal met ons meefietsen.</p>
 	</div>
+	
+<!--  bestuur    						  		✅  -->
 
     <section class="cards">
       <div class="card">
@@ -123,6 +100,8 @@ body.reloading {
         <div class="card-footer">Bestuurslid</div>
       </div>
     </section>
+	
+<!--  FOTO CLUBLEDEN	    				  ✅  -->
     
 	<div class ="fot" >
 		<a href="clubfoto.html">
@@ -132,6 +111,8 @@ body.reloading {
 		<span style="color:#fff;font-family:Arial;font-size:13px;">Klik op deze foto voor een groter beeld</span>
 	</div>
 	</div>
+	
+<!--  CARDS    								  ✅  -->	
 	
     <div class="faq">
 		<div class="faqtext">
@@ -199,7 +180,7 @@ body.reloading {
 
  </main>
 
-<!-- MEMBER LOGIN / REGISTRATIE CARD         ✅ --> 
+<!-- MEMBER LOGIN / REGISTRATIE CARD  		       ✅ --> 
 
 <div id="loginOverlay" class="overlay hidden">
     <div class="login-card">
@@ -211,13 +192,8 @@ body.reloading {
                 <h3>Login / </h3>
                 <h3>Registratie</h3>
             </label>
-			
-	<!-- FASE 1 PIN  	dubbelklik		  ✅ -->	
-            <div id="Image1" style="position:absolute; left: 350px; top:15px; z-index:10;">
-                <img src="images/Logo.png" id="adminLogo">
-            </div
-
-	<!-- ALLEEN BIJ REGISTRATIE 		  ✅ -->
+	
+<!-- ALLEEN BIJ REGISTRATIE 					  ✅ -->
 	
 		<input type="text" id="Editbox1" class="reg-only" style="top:100px;"
 			   name="name" value=""  placeholder="Naam en Voornaam" spellcheck="false">
@@ -243,7 +219,7 @@ body.reloading {
 			   name="code_repeat; " value=""  placeholder="Herhaal paswoord * * * * * * 6 tekens" spellcheck="false">	   
 		
 
-	<!-- KNOPPEN => LOGIN					✅  -->
+<!-- KNOPPEN => LOGIN							✅  -->
 	   
 		<input type="submit" id="Button1" class="wtc-button"
 			   name="actie"
@@ -255,7 +231,7 @@ body.reloading {
 			   value="registreer"
 			   style="position:absolute;left:220px;top:350px;width:150px; z-index:10;">
 
-	<!-- KNOPPEN ONDERAAN - LOG/REG ?   	✅ -->
+<!-- KNOPPEN ONDERAAN - LOG/REG ?   			 ✅ -->
 		
 		<input type="button" id="GoRegister" class="wtc-button" value="Geen lid?"
 			   style="position:absolute;left:30px;top:390px;color:#000;width:150px;z-index:11;">
@@ -288,7 +264,9 @@ body.reloading {
 	</div>
 </div>
 
-<!--  CONTACT FORMULIER    				✅ -->
+         </div
+
+<!--  CONTACT FORMULIER    							✅ -->
 
 <div id="contactOverlay" class="page-overlay hidden">
     <div class="contact-wrap">
@@ -335,25 +313,14 @@ body.reloading {
 		  </div>			
         </form>
     </div>
-</div>
-		
-<!-- MODAL								✅	-->
+</div>		
+			
+<!-- ADMIN LOGIN FASE 1 PIN / DUBBELKLIK OP LOGO    ✅ -->	
 
-<div id="app-modal" class="modal hidden">
-    <div class="modal-content">
-        <div id="hoplog" style="display:flex; justify-content:space-between;">
-            <h3 id="modal-title"></h3>			
-			<img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
-        </div>
-        <p id="modal-message"></p>
-        <div id="modal-buttons" >
-            <!-- Knoppen worden dynamisch ingevuld -->
-        </div>
-    </div>
-</div>
-
+            <div id="Image1" style="position:absolute; left: 350px; top:15px; z-index:10;">
+                <img src="images/Logo.png" id="adminLogo">  
 	
-<!-- ADMIN LOGIN 						✅-->
+<!-- ADMIN LOGIN 								✅-->
 
 <div id="adminLogin" class="adminCardF1">    	
 		<div class="overlay-row">
@@ -367,9 +334,7 @@ body.reloading {
 		<div id="pinError" class="wtc-status;"></div>
 </div>
 
-<!-- ADMIN CONFIG OVERLAY -->
-
-<!-- 2 kolommen x 3 rijen (6 vakken) -->
+<!-- ADMIN CONFIG OVERLAY 					 	✅-->
 
 <div id="adminFase2" class="adminFase2" style="z-index:29">
 	<div class="cell" id="BEHEER">
@@ -474,7 +439,7 @@ body.reloading {
 
 </div>	
 
-<!-- PINCODE WIJZIGEN POPUP 				✅-->
+<!-- PINCODE WIJZIGEN POPUP 					✅-->
 	
 <div id="pinChangeOverlay" style="display:none;" aria-hidden="true">
   <div class="overlay-PINchange">
@@ -506,6 +471,20 @@ body.reloading {
   </div>
 </div>
 
+<!-- 	MODAL									✅	-->
+
+<div id="app-modal" class="modal hidden">
+    <div class="modal-content">
+        <div id="hoplog" style="display:flex; justify-content:space-between;">
+            <h3 id="modal-title"></h3>			
+			<img src="images/Logo.png" id="hoplogo" alt="" width="45" height="45">
+        </div>
+        <p id="modal-message"></p>
+        <div id="modal-buttons" >
+            <!-- Knoppen worden dynamisch ingevuld -->
+        </div>
+    </div>
+</div>
 
 
 <script>
