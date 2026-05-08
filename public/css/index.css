@@ -144,7 +144,7 @@ body
     }
 
     @media (max-width: 800px) {
-      .intro {
+    .intro {
         flex-direction: column;
         text-align: center;
       }
@@ -191,7 +191,7 @@ body
   }
 
 .fot {
-		display: flex;
+	  display: flex;
 	  justify-content: center;   /* horizontaal centreren */
 	  align-items: center;       /* verticaal centreren */
 	  margin: 20px 0;

@@ -11,20 +11,6 @@
     padding-top: 40px;
     z-index: 2500; /* TUSSEN login en confirmmodal */
 }
-
-.contact-wrap {
-    position: relative; /* BELANGRIJK */
- 	background:#ecf0f1; 
-    border-radius: 12px;
-	border: 1px solid #3599E4;
-	box-shadow:0 6px 20px rgba(0,0,0,.50);
-    width: 475px;
-	height: 380px;
-	margin: 5px auto 60px; 
-	padding: 20px;  
-    overflow-y: auto; /* interne scroll */
-} 
-
 .overlay-close {
   right: 12px;
   top: 10px;
@@ -35,39 +21,33 @@
   cursor: pointer;
 }
 
-.contact-grid {
-    display: grid;
-	align-items: center;
-	gap: 10px;
-	margin-top: 50px;
-	width: 460px;
-    grid-template-columns: 2fr 1fr 1.5fr;
-}
+.contact-wrap {
+    position: relative; /* BELANGRIJK */
+ 	background:#ecf0f1; 
+    border-radius: 12px;
+	border: 1px solid #3599E4;
+	box-shadow:0 6px 20px rgba(0,0,0,.50);
+    width:475px;
+	height: 380px;
+	margin: 5px auto 20px; 
+	padding: 20px;  
+    overflow-y: auto; /* interne scroll */
+} 
+
+
 
 .contact-grid .full {
-    grid-column: span 3; /* volle breedte */
-	
+    grid-column: span 3; /* volle breedte */	
 }
 
-  .contact-wrap h2{
+.contact-wrap h2{
 	  margin:0 0 10px 0;
 	  font: 100 22px/1.2 Arial, sans-serif;
 	  color:#1f2937;
 }
 	  
-  .contact-wrap label{
-	  position:absolute;
-	  left:20px;
-	  top:15px;
-	  line-height:38px;
-	  font: 600 13px/1.4 Arial, sans-serif; 
-	  color:#111827; 
-	  display:block; 
-	  margin-bottom:4px;
-}
-	  
-  .contact-wrap textarea{
-	  width:100%; 
+.contact-grid textarea{
+	  width:95%; 
 	  padding:5px; 
 	  border: 1px solid #3599E4;
 	  border-radius:10px; 
@@ -77,12 +57,36 @@
 }
 	  
 .contact-grid input {
-    width: 100%;
+    width: 95%;
 	height: 25px;
 	padding: 2px;
+	margin: 5px;
     box-sizing: border-box;
 	border: 1px solid #3599E4;
 	border-radius:8px; 
 }
+.address-row{
+    display:flex;
+    gap:2px;
+    width:97%;
+}
 
+#street{
+    flex:2;
+}
 
+#zip{
+    flex:0.5;
+}
+
+#city{
+    flex:2;
+}
+.checkb {
+	display: grid;
+	grid-template-columns: 0.5fr 4.5fr 1.5fr 1.5fr;
+	width: 450px;
+	margin-top: 10px;
+	gap: 10px;
+	font-size: 12px;
+}
