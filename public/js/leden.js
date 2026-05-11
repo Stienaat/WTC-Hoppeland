@@ -351,7 +351,7 @@ function openAdminPhase1() {
 }
 
 function openAdminPhase2() {
-  console.log("openAdminPhase2 gestart", { adminLogin, adminFase2 });
+ 
 
   if (adminLogin) {
     adminLogin.style.display = "none";
@@ -361,13 +361,7 @@ function openAdminPhase2() {
     adminFase2.style.display = "block";
     adminFase2.classList.add("open");
 
-    console.log("adminFase2 na openen:", {
-      display: adminFase2.style.display,
-      className: adminFase2.className,
-      computedDisplay: getComputedStyle(adminFase2).display,
-      computedVisibility: getComputedStyle(adminFase2).visibility,
-      computedOpacity: getComputedStyle(adminFase2).opacity
-    });
+
   }
 
   initAdminConfigCard();
@@ -427,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (params.get('overlay') === '1') {
     setTimeout(() => {
       if (typeof openAdminPhase2 === 'function') {
-        console.log("PIN login OK, openAdminPhase2 wordt aangeroepen");
+      
         openAdminPhase2();
       }
     }, 50);
