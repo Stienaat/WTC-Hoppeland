@@ -126,7 +126,7 @@ body
 	-webkit-appearance: none;
     margin: 6px;
     cursor: pointer;           /* handje bij hover */
-	box-shadow:0 6px 20px rgba(0,0,0,.90);
+	box-shadow:6px 6px 20px rgba(0,0,0,.90);
 }
 
 /* Hover-effect */
@@ -236,4 +236,23 @@ body
 .wtc-delete:hover {
    
     border-color: orange;
+}
+.square {
+	background-color: lightyellow;
+    background-image: none;
+	border-color:green;
+	border-width:1px;
+	height: 30px; width:100px;   
+	font-family: Arial, sans-serif;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 15px;
+    padding:8px;
+    text-align: center;
+    margin: 8px;
+  	box-shadow:0 6px 20px rgba(0,0,0,.90);
+  }  
+.square:hover {
+	box-shadow:0 6px 20px rgba(0,0,0,.10);
+	background-color: WHITE;
 }
