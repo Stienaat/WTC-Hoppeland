@@ -35,7 +35,7 @@
 			<button id="btnShowLogin" class="wtc-button" style=" margin-top: 30px; height: 100px; width:100px;border-radius: 50px; font-size: 20px;">
 				Klik voor login!
 			</button>
-			<button id="btnShowInfo" class="wtc-button" style="margin-top: -30px; height: 100px; width:100px;border-radius: 50px; font-size: 20px;">
+			<button id="btnShowInfo" class="wtc-button" style=" margin-top: -30px; height: 100px; width:100px;border-radius: 50px; font-size: 20px;">
 				Kik voor info!
 			</button>
 			</div>
@@ -55,7 +55,7 @@
         <p>Alvorens definitief in te schrijven mag je 1 à 2 maal met ons meefietsen.</p>
 	</div>
 	
-<!--  bestuur    						  		✅  -->
+<!--  BESTUUR    						  		✅  -->
 
     <section class="cards">
       <div class="card">
@@ -192,7 +192,13 @@
                 <h3>Login / </h3>
                 <h3>Registratie</h3>
             </label>
-	
+			
+			<!-- ADMIN LOGIN FASE 1 PIN / DUBBELKLIK OP LOGO    ✅ -->	
+
+            <div id="Image1" style="position: absolute; left: 340px; top:15px; z-index:10;">
+                <img src="images/Logo.png" id="adminLogo">  
+			</div>
+				
 <!-- ALLEEN BIJ REGISTRATIE 					  ✅ -->
 	
 		<input type="text" id="Editbox1" class="reg-only" style="top:100px;"
@@ -261,7 +267,7 @@
 				style="position:absolute;left:220px;top:390px;width:150px;z-index:11">			
 			<button type="button" id="btnCloseLogin" class="wtc-button" style="position:absolute;left:20px;top:60px">⏪Sluit</button>			
 		</form>
-	</div>
+
 </div>
 
          </div
@@ -314,12 +320,7 @@
         </form>
     </div>
 </div>		
-			
-<!-- ADMIN LOGIN FASE 1 PIN / DUBBELKLIK OP LOGO    ✅ -->	
-
-            <div id="Image1" style="position:absolute; left: 350px; top:15px; z-index:10;">
-                <img src="images/Logo.png" id="adminLogo">  
-	
+				
 <!-- ADMIN LOGIN 								✅-->
 
 <div id="adminLogin" class="adminCardF1">    	
@@ -329,7 +330,7 @@
 		</div>
 		<div class="overlay-row">
 			<input type="password" id="pinInput" class="wtc-input" style="font-size:1.2em; " name="admin_pin" ;maxlength="6" autocomplete="off";  placeholder="PIN-code:  ******"></input>
-			<button type="button" class="wtc-button" id="">Ontgrendel</button>
+			<button type="button" class="wtc-button" id="Ontgrendel" </button>
 		</div>
 		<div id="pinError" class="wtc-status;"></div>
 </div>
@@ -351,9 +352,9 @@
 					
 		</div>	
 		<div class="overlay-row" >
-			<button type="button" class="square" onclick= "window.location.href='./leden_config.html'">Leden-config</button>
-			<button type="button" class="square" onclick= "window.location.href='./signups_config.html'">Events-config</button>
-			<button type="button" class="square" onclick= "window.location.href='./forms_config.html'">Contacts-config</button>
+			<button type="button" class="square" onclick= "window.location.href='./leden_config.html'">Leden</button>
+			<button type="button" class="square" onclick= "window.location.href='./signups_config.html'">Events</button>
+			<button type="button" class="square" onclick= "window.location.href='./forms_config.html'">Contacten</button>
 		</div>		
 		<div class="overlay-row" >			
 			<button type="button" class="square" onclick= "window.location.href='./kalender.html'">Kalender</button>	
@@ -364,7 +365,7 @@
 		<div class="overlay-row" >
 			<button type="button" class="square" onclick= "window.location.href='./Help.html'">Help</button>	
 			<button type="button" class="square" onclick= "window.location.href='./ritten.html'">Fietsroutes</button>
-			<button type="button" id="btnPinChange" class="square" >Pin-code wijzigen </button>
+			<button type="button" id="btnPinChange" class="square" >Pin-code. </button>
 		</div>	
 		
 		<div class="overlay-row" style="margin-top:3px;">			
