@@ -356,14 +356,10 @@ function openAdminPhase2() {
   if (adminLogin) {
     adminLogin.style.display = "none";
   }
-
   if (adminFase2) {
-    adminFase2.style.display = "block";
+    adminFase2.style.display = "";
     adminFase2.classList.add("open");
-
-
   }
-
   initAdminConfigCard();
 }
 
@@ -444,3 +440,16 @@ if (routeFile && fileName) {
     fileName.textContent = file ? file.name : '';
   });
 }
+window.addEventListener("DOMContentLoaded", () => {
+
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get("overlay") === "1") {
+
+    openAdminPhase2();
+
+    // haalt ?overlay=1 terug weg uit de URL
+    history.replaceState(null, "", window.location.pathname);
+  }
+
+});

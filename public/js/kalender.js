@@ -227,7 +227,7 @@ function downloadConfirmation(event, signup) {
   const timeStr = start.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" });
   const prijs = Number(event.price || 0).toFixed(2).replace(".", ",");
   const naam = signup?.name || getUser()?.name || "lid";
-  const betaald = signup?.paid ? "ja" : "onder voorbehoud";
+  const betaald = signup?.paid ? "ja" : "onder voorbehoud van betaal bevestiging!";
 
   const text =
     `Beste ${naam}\n\n` +
@@ -694,7 +694,6 @@ function showQR() {
 
       const r = await doSignup(e.id);
 
-console.log("SIGNUP RESULT:", r);
 
      if (!r || r.ok === false) {
     await Modal.error("👎", `Inschrijving mislukt. ❌ ${r?.error || r?.message || ""}`);
@@ -940,7 +939,9 @@ async function handleSaveEvent() {
 	if (!result || result.ok === false) {
 	  await Modal.error("👎", result?.error || "Aanmaken mislukt. ❌");
 	  return;
-	}
+	}else {
+		await Modal.success("👌", "Aanmaken is gelukt! ✔");
+    };
 }
 
   await loadEvents();
