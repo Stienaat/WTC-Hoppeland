@@ -296,7 +296,7 @@ body
     background: #fff;
 	display:grid;	
     grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
-    grid-template-rows: repeat(3, minmax(0, 1fr));
+ 
     gap: 12px;        
 	overflow: hidden;	
     box-sizing: border-box;
